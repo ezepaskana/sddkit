@@ -1,0 +1,92 @@
+{
+  "scannedAt": "2026-06-15",
+  "filesScanned": 76,
+  "patterns": [
+    {
+      "topic": "http-endpoints",
+      "question": "¿Cuál es la forma canónica de definir endpoints HTTP?",
+      "variants": [
+        {
+          "id": "spring-mapping",
+          "label": "Spring (@GetMapping/@PostMapping...)",
+          "count": 1,
+          "examples": [
+            "src/lib/patterns.js"
+          ]
+        },
+        {
+          "id": "jaxrs",
+          "label": "JAX-RS (@GET/@POST + @Path)",
+          "count": 1,
+          "examples": [
+            "src/lib/patterns.js"
+          ]
+        }
+      ],
+      "multipleStyles": true
+    },
+    {
+      "topic": "module-system",
+      "question": "¿ESM o CommonJS como sistema de módulos?",
+      "variants": [
+        {
+          "id": "esm",
+          "label": "ES Modules (import/export)",
+          "count": 51,
+          "examples": [
+            "src/templates.js",
+            "src/version.js",
+            "src/version.test.js"
+          ]
+        },
+        {
+          "id": "cjs",
+          "label": "CommonJS (require/module.exports)",
+          "count": 1,
+          "examples": [
+            "src/lib/patterns.js"
+          ]
+        }
+      ],
+      "multipleStyles": true
+    },
+    {
+      "topic": "test-naming",
+      "question": "¿Cómo se nombran los archivos de test?",
+      "variants": [
+        {
+          "id": "dot-test",
+          "label": "archivo.test.*",
+          "count": 19,
+          "examples": [
+            "src/version.test.js",
+            "src/lib/agentsmd.test.js",
+            "src/lib/c4.test.js"
+          ]
+        }
+      ],
+      "multipleStyles": false
+    }
+  ],
+  "capabilities": {
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/ruta",
+        "file": "src/lib/patterns.js"
+      }
+    ],
+    "consumptions": [
+      {
+        "method": null,
+        "target": "(dynamic)",
+        "file": "src/lib/patterns.js"
+      },
+      {
+        "method": "GET",
+        "target": "(dynamic)",
+        "file": "src/lib/patterns.js"
+      }
+    ]
+  }
+}

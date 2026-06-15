@@ -1,0 +1,101 @@
+{
+  "nextId": 13,
+  "tasks": [
+    {
+      "id": "001",
+      "dir": "001-fase-1-del-grafo-de-impacto",
+      "title": "Fase 1 del grafo de impacto cross-sistema (ver REQUISITO-gra…",
+      "status": "done",
+      "createdAt": "2026-06-12",
+      "updatedAt": "2026-06-12"
+    },
+    {
+      "id": "002",
+      "dir": "002-fase-2-del-grafo-de-impacto",
+      "title": "Fase 2 del grafo de impacto cross-sistema (ver REQUISITO-gra…",
+      "status": "done",
+      "createdAt": "2026-06-12",
+      "updatedAt": "2026-06-13"
+    },
+    {
+      "id": "003",
+      "dir": "003-fase-3-scanner-de-terraform-aristas",
+      "title": "Fase 3: Scanner de Terraform (aristas de infraestructura)",
+      "status": "done",
+      "createdAt": "2026-06-13",
+      "updatedAt": "2026-06-13"
+    },
+    {
+      "id": "004",
+      "dir": "004-ajustar-el-comportamiento-de-sdd-publish",
+      "title": "Ajustar el comportamiento de `sdd publish` según el driver d…",
+      "status": "done",
+      "createdAt": "2026-06-13",
+      "updatedAt": "2026-06-14"
+    },
+    {
+      "id": "005",
+      "dir": "005-necesito-una-funcionalidad-para-actualizar-los",
+      "title": "Necesito una funcionalidad para actualizar los skills en un …",
+      "status": "done",
+      "createdAt": "2026-06-14",
+      "updatedAt": "2026-06-14"
+    },
+    {
+      "id": "006",
+      "dir": "006-en-el-setup-es-importante-que",
+      "title": "En el setup es importante que me pregunte la ubicación del a…",
+      "status": "done",
+      "createdAt": "2026-06-14",
+      "updatedAt": "2026-06-15"
+    },
+    {
+      "id": "007",
+      "dir": "007-agregar-una-regla-al-bloque-gestionado",
+      "title": "Agregar una regla al bloque gestionado de AGENTS.md (generad…",
+      "status": "done",
+      "createdAt": "2026-06-15",
+      "updatedAt": "2026-06-15"
+    },
+    {
+      "id": "008",
+      "dir": "008-arreglar-sdd-scan-gendomain-preservemanual-sobrescriben",
+      "title": "Arreglar sdd scan: genDomain/preserveManual sobrescriben y b…",
+      "status": "done",
+      "createdAt": "2026-06-15",
+      "updatedAt": "2026-06-15"
+    },
+    {
+      "id": "009",
+      "dir": "009-en-la-fase-de-analisis-del",
+      "title": "en la fase de analisis del flujo sdd es importante que quede…",
+      "status": "done",
+      "createdAt": "2026-06-15",
+      "updatedAt": "2026-06-15"
+    },
+    {
+      "id": "010",
+      "dir": "010-branching-model",
+      "title": "Branching Modeling para proyectos que usan sddkit",
+      "status": "done",
+      "createdAt": "2026-06-15",
+      "updatedAt": "2026-06-15"
+    },
+    {
+      "id": "011",
+      "dir": "011-endurecimiento-de-seguridad-pre-opensource-agregar",
+      "title": "Endurecimiento de seguridad pre-opensource: agregar nota de …",
+      "status": "done",
+      "createdAt": "2026-06-15",
+      "updatedAt": "2026-06-15"
+    },
+    {
+      "id": "012",
+      "dir": "012-cerrar-los-gaps-de-buenas-practicas",
+      "title": "Cerrar los gaps de buenas prácticas OSS detectados en la rev…",
+      "status": "done",
+      "createdAt": "2026-06-15",
+      "updatedAt": "2026-06-15"
+    }
+  ]
+}

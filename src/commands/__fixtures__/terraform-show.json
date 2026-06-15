@@ -1,0 +1,171 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.7.5",
+  "values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "aws_s3_bucket.uploads",
+          "mode": "managed",
+          "type": "aws_s3_bucket",
+          "name": "uploads",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "values": { "bucket": "uploads-bucket", "arn": "arn:aws:s3:::uploads-bucket" }
+        },
+        {
+          "address": "aws_sqs_queue.jobs",
+          "mode": "managed",
+          "type": "aws_sqs_queue",
+          "name": "jobs",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "values": { "name": "jobs-queue", "arn": "arn:aws:sqs:us-east-1:123456789012:jobs-queue" }
+        },
+        {
+          "address": "aws_sns_topic.notifications",
+          "mode": "managed",
+          "type": "aws_sns_topic",
+          "name": "notifications",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "values": { "name": "notifications-topic", "arn": "arn:aws:sns:us-east-1:123456789012:notifications-topic" }
+        },
+        {
+          "address": "aws_cloudwatch_event_rule.nightly",
+          "mode": "managed",
+          "type": "aws_cloudwatch_event_rule",
+          "name": "nightly",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "values": { "name": "nightly-rule", "arn": "arn:aws:events:us-east-1:123456789012:rule/nightly-rule" }
+        },
+        {
+          "address": "aws_lambda_function.process_upload",
+          "mode": "managed",
+          "type": "aws_lambda_function",
+          "name": "process_upload",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "values": {
+            "function_name": "process-upload",
+            "arn": "arn:aws:lambda:us-east-1:123456789012:function:process-upload",
+            "role": "arn:aws:iam::123456789012:role/process-upload-role",
+            "environment": {
+              "variables": {
+                "BUCKET_NAME": "uploads-bucket",
+                "DB_PASSWORD": "p4ssw0rd-do-not-extract"
+              }
+            }
+          }
+        },
+        {
+          "address": "aws_lambda_function.consume_jobs",
+          "mode": "managed",
+          "type": "aws_lambda_function",
+          "name": "consume_jobs",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "values": {
+            "function_name": "consume-jobs",
+            "arn": "arn:aws:lambda:us-east-1:123456789012:function:consume-jobs",
+            "role": "arn:aws:iam::123456789012:role/consume-jobs-role"
+          }
+        },
+        {
+          "address": "aws_lambda_function.nightly_job",
+          "mode": "managed",
+          "type": "aws_lambda_function",
+          "name": "nightly_job",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "values": {
+            "function_name": "nightly-job",
+            "arn": "arn:aws:lambda:us-east-1:123456789012:function:nightly-job",
+            "role": "arn:aws:iam::123456789012:role/nightly-job-role"
+          }
+        },
+        {
+          "address": "aws_s3_bucket_notification.uploads_notify",
+          "mode": "managed",
+          "type": "aws_s3_bucket_notification",
+          "name": "uploads_notify",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "values": {
+            "bucket": "uploads-bucket",
+            "lambda_function": [
+              { "lambda_function_arn": "arn:aws:lambda:us-east-1:123456789012:function:process-upload", "events": ["s3:ObjectCreated:*"] }
+            ]
+          }
+        },
+        {
+          "address": "aws_lambda_event_source_mapping.jobs_to_consumer",
+          "mode": "managed",
+          "type": "aws_lambda_event_source_mapping",
+          "name": "jobs_to_consumer",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "values": {
+            "event_source_arn": "arn:aws:sqs:us-east-1:123456789012:jobs-queue",
+            "function_name": "arn:aws:lambda:us-east-1:123456789012:function:consume-jobs"
+          }
+        },
+        {
+          "address": "aws_cloudwatch_event_target.nightly_to_lambda",
+          "mode": "managed",
+          "type": "aws_cloudwatch_event_target",
+          "name": "nightly_to_lambda",
+          "provider_name": "registry.terraform.io/hashicorp/aws",
+          "values": {
+            "rule": "nightly-rule",
+            "arn": "arn:aws:lambda:us-east-1:123456789012:function:nightly-job"
+          }
+        }
+      ],
+      "child_modules": [
+        {
+          "address": "module.database",
+          "resources": [
+            {
+              "address": "module.database.aws_dynamodb_table.sessions",
+              "mode": "managed",
+              "type": "aws_dynamodb_table",
+              "name": "sessions",
+              "provider_name": "registry.terraform.io/hashicorp/aws",
+              "values": { "name": "sessions-table", "arn": "arn:aws:dynamodb:us-east-1:123456789012:table/sessions-table" }
+            },
+            {
+              "address": "module.database.aws_db_instance.shared",
+              "mode": "managed",
+              "type": "aws_db_instance",
+              "name": "shared",
+              "provider_name": "registry.terraform.io/hashicorp/aws",
+              "values": { "identifier": "shared-db", "arn": "arn:aws:rds:us-east-1:123456789012:db:shared-db" }
+            }
+          ]
+        },
+        {
+          "address": "module.api",
+          "resources": [
+            {
+              "address": "module.api.aws_ecs_task_definition.api",
+              "mode": "managed",
+              "type": "aws_ecs_task_definition",
+              "name": "api",
+              "provider_name": "registry.terraform.io/hashicorp/aws",
+              "values": {
+                "family": "api-task",
+                "task_role_arn": "arn:aws:iam::123456789012:role/api-task-role",
+                "container_definitions": "[{\"name\":\"api\",\"image\":\"123456789012.dkr.ecr.us-east-1.amazonaws.com/api:latest\",\"environment\":[{\"name\":\"SESSIONS_TABLE\",\"value\":\"sessions-table\"},{\"name\":\"API_TOKEN\",\"value\":\"shh-do-not-extract\"}]}]"
+              }
+            },
+            {
+              "address": "module.api.aws_iam_role_policy.api_task_role_policy",
+              "mode": "managed",
+              "type": "aws_iam_role_policy",
+              "name": "api_task_role_policy",
+              "provider_name": "registry.terraform.io/hashicorp/aws",
+              "values": {
+                "name": "api-task-policy",
+                "role": "api-task-role",
+                "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"dynamodb:GetItem\",\"dynamodb:PutItem\"],\"Resource\":\"arn:aws:dynamodb:us-east-1:123456789012:table/sessions-table\"},{\"Effect\":\"Allow\",\"Action\":\"rds-db:connect\",\"Resource\":\"arn:aws:rds:us-east-1:123456789012:db:shared-db\"}]}"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

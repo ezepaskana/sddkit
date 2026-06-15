@@ -1,0 +1,5 @@
+# Requisito original — tarea 002
+
+> Capturado verbatim el 2026-06-12. **No editar este archivo**: el refinamiento va en spec.md.
+
+Fase 2 del grafo de impacto cross-sistema (ver REQUISITO-grafo-impacto.md, sección 3 Fase 2): Storage enchufable del grafo central (SQLite default local / MySQL equipo) detrás de una interfaz única (publishSystem, querySystem, queryImpact, queryCapability), comando sdd publish (snapshot del repo: identidad, C1, endpoints, consumos, hash de commit + timestamp, gate de calidad sobre placeholders del C1, pensado para correr en CI sobre main), comando sdd impact <ruta|sistema|recurso> (consulta el grafo, reporta consumidores con archivo y repo de origen, advertencia no gate), matching de endpoints↔consumos por método+ruta normalizada y sistemas por nombre canónico, integración con sdd-analyze (paso '¿a quién impacto?') y sdd context (estado de publicación). Decisiones ya tomadas en sección 5 (ADRs 0001-0007 de la Fase 1) no se re-discuten. Cuestión abierta a resolver en la spec (sección 8): node:sqlite (Node >=22) vs better-sqlite3 como dependencia opcional — primera dependencia npm potencial del proyecto, merece ADR propio.

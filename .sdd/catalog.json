@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "decisions": [
+    {
+      "topic": "module-system",
+      "chosen": "esm",
+      "why": "Convención real del proyecto: package.json declara type=module y 25/26 archivos son ESM. El único archivo CJS detectado (src/lib/patterns.js) son strings de los propios detectores de patrones (require/module.exports como regex), no código CJS de producción.",
+      "date": "2026-06-12",
+      "legacy": {
+        "cjs": 1
+      }
+    },
+    {
+      "topic": "http-endpoints",
+      "chosen": "jaxrs",
+      "why": "No aplica: sddkit es un CLI Node sin servidor HTTP propio. Ambas variantes detectadas (spring-mapping y jaxrs) son strings literales dentro de los regex de ENDPOINT_STYLES en src/lib/patterns.js (detectores para OTROS repos), no endpoints reales de este proyecto. Se elige jaxrs arbitrariamente solo para resolver el PENDIENTE; no se espera que este topic vuelva a aparecer.",
+      "date": "2026-06-12",
+      "legacy": {
+        "spring-mapping": 1
+      }
+    }
+  ]
+}

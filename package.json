@@ -1,0 +1,37 @@
+{
+  "name": "sddkit",
+  "version": "0.0.1",
+  "description": "Spec-driven development para agentes de IA: documentación C4 viva, catálogo de convenciones validadas y flujo SDD auto-disparado. Multi-agente (Claude Code, Cursor, cualquier lector de AGENTS.md).",
+  "type": "module",
+  "bin": {
+    "sdd": "bin/sdd.js"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "sdd",
+    "spec-driven",
+    "c4-model",
+    "ai-agents",
+    "agents-md",
+    "claude-code",
+    "cursor"
+  ],
+  "license": "MIT",
+  "author": "Eze Paskana <eze.paskana@gmail.com>",
+  "optionalDependencies": {
+    "better-sqlite3": "^11.0.0",
+    "mysql2": "^3.9.0"
+  },
+  "files": [
+    "bin",
+    "src",
+    "skills",
+    "README.md",
+    "SECURITY.md"
+  ]
+}

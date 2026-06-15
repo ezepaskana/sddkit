@@ -1,0 +1,26 @@
+{
+  "scannedAt": "2026-06-12",
+  "filesScanned": 2,
+  "patterns": [],
+  "capabilities": {
+    "endpoints": [
+      {
+        "method": "GET",
+        "path": "/api/plants",
+        "file": "src/routes/plants.js"
+      },
+      {
+        "method": "POST",
+        "path": "/api/plants/:id",
+        "file": "src/routes/plants.js"
+      }
+    ],
+    "consumptions": [
+      {
+        "method": "POST",
+        "target": "https://api.example.com/v4/new-api/queryDeviceList",
+        "file": "src/clients/DeviceClient.java"
+      }
+    ]
+  }
+}

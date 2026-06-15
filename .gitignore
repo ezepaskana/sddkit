@@ -1,0 +1,22 @@
+# Dependencias
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Artefactos de runtime de sddkit
+*.sqlite
+*.db
+.sddkit/
+
+# Sistema operativo / editores
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Temporales
+*.tmp
+/tmp/

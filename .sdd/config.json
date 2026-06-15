@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "createdAt": "2026-06-12",
+  "detectedAgents": [],
+  "hooks": {
+    "preCommit": true,
+    "autoPublish": true
+  },
+  "models": {
+    "rapido": "haiku",
+    "medio": "sonnet",
+    "fuerte": "opus",
+    "_nota": "Aliases de Claude Code para delegar pasos del plan via subagentes (Task tool). El agente debe verificar en su primer arranque que estos modelos existan en su runtime y ajustarlos si no."
+  },
+  "skills": "local",
+  "graph": {
+    "driver": "sqlite"
+  }
+}

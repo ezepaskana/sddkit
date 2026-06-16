@@ -3,8 +3,11 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, writeFileSync, mkdirSync, rmSync, readFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { scan } from './scan.js';
 import { MANUAL_MARK } from '../lib/c4.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /** Crea un repo temporal con los archivos dados ({ ruta: contenido }) y devuelve { root, cleanup }. */
 function fixture(files) {
@@ -45,7 +48,7 @@ test('sdd scan --terraform=<path>: persiste infra.resources/infra.edges en patte
     'package.json': JSON.stringify({ name: 'demo-app', version: '1.0.0' }, null, 2),
   });
   try {
-    const tfPath = join(import.meta.dirname, '__fixtures__', 'terraform-show.json');
+    const tfPath = join(__dirname, '__fixtures__', 'terraform-show.json');
     await scan(root, { quiet: true, terraform: tfPath });
 
     const patterns = JSON.parse(readFileSync(join(root, '.sdd', 'patterns.json'), 'utf8'));

@@ -35,7 +35,7 @@
     "url": "https://github.com/ezepaskana/sddkit/issues"
   },
   "optionalDependencies": {
-    "better-sqlite3": "^11.0.0",
+    "better-sqlite3": "^12.11.1",
     "mysql2": "^3.9.0"
   },
   "devDependencies": {

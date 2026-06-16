@@ -1,4 +1,13 @@
 {
-  "nextId": 1,
-  "tasks": []
+  "nextId": 2,
+  "tasks": [
+    {
+      "id": "001",
+      "dir": "001-ci-falla-porque-los-tests-importan",
+      "title": "CI falla porque los tests importan better-sqlite3 (optionalD…",
+      "status": "done",
+      "createdAt": "2026-06-16",
+      "updatedAt": "2026-06-16"
+    }
+  ]
 }

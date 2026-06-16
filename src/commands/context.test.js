@@ -58,6 +58,7 @@ test('sdd context: sistema publicado → muestra "Publicado:" con hash corto', a
   fs.writeFileSync(path.join(root, '.sdd', 'config.json'), JSON.stringify(cfg));
 
   const store = await createGraphStore(cfg);
+  if (!store.ok) { t.skip(`graphstore no disponible: ${store.reason}`); return; }
   store.publishSystem({
     canonicalName: 'test-system',
     repoPath: '/tmp/x',
@@ -76,7 +77,7 @@ test('sdd context: sistema publicado → muestra "Publicado:" con hash corto', a
   assert.ok(full.includes('abc1234'), `Se esperaba el hash corto "abc1234", salida: ${full}`);
 });
 
-test('sdd context: sistema nunca publicado → "Sin publicar"', async () => {
+test('sdd context: sistema nunca publicado → "Sin publicar"', async (t) => {
   const root = tmpRepo();
   const c4dir = path.join(root, '.sdd', 'c4');
   fs.mkdirSync(c4dir, { recursive: true });
@@ -85,6 +86,10 @@ test('sdd context: sistema nunca publicado → "Sin publicar"', async () => {
   const dbPath = path.join(root, 'graph.db');
   const cfg = { graph: { driver: 'sqlite', sqlite: { path: dbPath } } };
   fs.writeFileSync(path.join(root, '.sdd', 'config.json'), JSON.stringify(cfg));
+
+  const store = await createGraphStore(cfg);
+  if (!store.ok) { t.skip(`graphstore no disponible: ${store.reason}`); return; }
+  store.close();
 
   const { logs } = await withCapturedLogs(() => context(root));
   const full = logs.join('\n');

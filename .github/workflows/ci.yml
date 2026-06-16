@@ -17,4 +17,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
+      - name: Build native optional deps (fail loudly)
+        run: npm rebuild better-sqlite3 mysql2 --foreground-scripts
+      - name: Verify native deps loaded
+        run: node -e "require('better-sqlite3'); require('mysql2'); console.log('native deps OK')"
       - run: npm test

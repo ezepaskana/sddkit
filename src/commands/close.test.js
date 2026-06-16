@@ -218,12 +218,26 @@ test('buildPRCommand: pasa metacaracteres de shell como argumentos literales', (
 
 // --- Paso 21: manual pr creation ---------------------------------------------
 
-test('isPRToolAvailable: tool "gh"/"az"/"gl" no instalados en este entorno → false', () => {
+// Determinista en cualquier entorno: NO asumimos ausencia de las CLIs (los
+// runners de GitHub Actions traen `gh`/`az` preinstalados), sino que detectamos
+// su disponibilidad real con el mismo mecanismo y verificamos que
+// isPRToolAvailable la refleje (valida el mapeo plataforma→bin y el contrato
+// booleano sin depender de qué tools haya instaladas).
+function cliInstalled(bin, cwd) {
+  try {
+    execSync(`${bin} --version`, { cwd, stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+test('isPRToolAvailable: refleja la disponibilidad real de la CLI (gh/az/gl) en el entorno', () => {
   const { root, cleanup } = tmpGitRepo();
   try {
-    assert.equal(isPRToolAvailable('github', root), false);
-    assert.equal(isPRToolAvailable('azure', root), false);
-    assert.equal(isPRToolAvailable('gitlab', root), false);
+    assert.equal(isPRToolAvailable('github', root), cliInstalled('gh', root));
+    assert.equal(isPRToolAvailable('azure', root), cliInstalled('az', root));
+    assert.equal(isPRToolAvailable('gitlab', root), cliInstalled('gl', root));
   } finally { cleanup(); }
 });
 

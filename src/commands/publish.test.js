@@ -7,6 +7,9 @@ import { execSync } from 'node:child_process';
 import { publish } from './publish.js';
 import { createGraphStore } from '../lib/graphstore/index.js';
 
+let nativeReady = false;
+try { await import('better-sqlite3'); nativeReady = true; } catch { /* opcional ausente */ }
+
 function tmpRepo() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'sddkit-publish-'));
 }
@@ -37,6 +40,7 @@ test('publish: gate rechaza si hay checkboxes pendientes en C4', async () => {
 });
 
 test('publish: publica OK y querySystem devuelve la fila publicada', async (t) => {
+  if (!nativeReady) return t.skip('better-sqlite3 no instalado');
   const root = tmpRepo();
   const c4dir = path.join(root, '.sdd', 'c4');
   fs.mkdirSync(c4dir, { recursive: true });
@@ -93,6 +97,7 @@ test('publish: grafo no configurado → advertencia, sin throw', async () => {
 });
 
 test('publish: repo CON infra en patterns.json → publica infraResources e infraEdges', async (t) => {
+  if (!nativeReady) return t.skip('better-sqlite3 no instalado');
   const root = tmpRepo();
   const c4dir = path.join(root, '.sdd', 'c4');
   fs.mkdirSync(c4dir, { recursive: true });
@@ -145,6 +150,7 @@ test('publish: repo CON infra en patterns.json → publica infraResources e infr
 });
 
 test('publish: repo SIN clave infra en patterns.json → infraResources e infraEdges vacíos', async (t) => {
+  if (!nativeReady) return t.skip('better-sqlite3 no instalado');
   const root = tmpRepo();
   const c4dir = path.join(root, '.sdd', 'c4');
   fs.mkdirSync(c4dir, { recursive: true });

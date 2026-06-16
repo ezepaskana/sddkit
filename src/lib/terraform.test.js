@@ -1,10 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { walkResources, extractResources, extractEnvVarResources, extractIamBindings, extractEventWiring, lastPathSegment, extractInfra } from './terraform.js';
 
-const fixturePath = join(import.meta.dirname, '..', 'commands', '__fixtures__', 'terraform-show.json');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const fixturePath = join(__dirname, '..', 'commands', '__fixtures__', 'terraform-show.json');
 const data = JSON.parse(readFileSync(fixturePath, 'utf8'));
 const rootModule = data.values.root_module;
 

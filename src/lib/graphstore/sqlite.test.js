@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import os from 'node:os';
 import fs from 'node:fs';
 import path from 'node:path';
-import Database from 'better-sqlite3';
 import { createGraphStore } from './index.js';
+
+let Database = null;
+try { ({ default: Database } = await import('better-sqlite3')); } catch { /* opcional ausente */ }
 import { createSqliteStore, resolveDbPath } from './sqlite.js';
 
 function tmpDbPath() {
@@ -40,6 +42,7 @@ test('mysql sin config.mysql.urlEnv → {ok:false, reason:missing-env, envVar:un
 });
 
 test('upsert real: segundo publish con mismo canonicalName actualiza (no duplica)', async (t) => {
+  if (!Database) return t.skip('better-sqlite3 no instalado');
   const store = await createSqliteStore({ driver: 'sqlite', sqlite: { path: tmpDbPath() } });
   t.after(() => store.close());
 
@@ -65,12 +68,14 @@ test('upsert real: segundo publish con mismo canonicalName actualiza (no duplica
 });
 
 test('querySystem inexistente → null', async (t) => {
+  if (!Database) return t.skip('better-sqlite3 no instalado');
   const store = await createSqliteStore({ driver: 'sqlite', sqlite: { path: tmpDbPath() } });
   t.after(() => store.close());
   assert.equal(store.querySystem('no-existe'), null);
 });
 
 test('queryImpact end-to-end (P6) sobre graphstore real: frontend-app posible', async (t) => {
+  if (!Database) return t.skip('better-sqlite3 no instalado');
   const wrapped = await createGraphStore({ graph: { driver: 'sqlite', sqlite: { path: tmpDbPath() } } });
   assert.equal(wrapped.ok, true);
   t.after(() => wrapped.close());
@@ -95,6 +100,7 @@ test('queryImpact end-to-end (P6) sobre graphstore real: frontend-app posible', 
 });
 
 test('queryCapability directo (path ya normalizado) sobre graphstore real', async (t) => {
+  if (!Database) return t.skip('better-sqlite3 no instalado');
   const wrapped = await createGraphStore({ graph: { driver: 'sqlite', sqlite: { path: tmpDbPath() } } });
   assert.equal(wrapped.ok, true);
   t.after(() => wrapped.close());
@@ -118,6 +124,7 @@ test('queryCapability directo (path ya normalizado) sobre graphstore real', asyn
 });
 
 test('infra (P9): DB nueva, roundtrip de infraResources/infraEdges', async (t) => {
+  if (!Database) return t.skip('better-sqlite3 no instalado');
   const store = await createSqliteStore({ driver: 'sqlite', sqlite: { path: tmpDbPath() } });
   t.after(() => store.close());
 
@@ -136,6 +143,7 @@ test('infra (P9): DB nueva, roundtrip de infraResources/infraEdges', async (t) =
 });
 
 test('infra (P9): migración de DB vieja (tarea 002, sin columnas de infra) no rompe y aplica default []', async (t) => {
+  if (!Database) return t.skip('better-sqlite3 no instalado');
   const dbPath = tmpDbPath();
 
   // CREATE_TABLE viejo de tarea 002, textual, sin infra_resources/infra_edges.
@@ -173,6 +181,7 @@ test('infra (P9): migración de DB vieja (tarea 002, sin columnas de infra) no r
 });
 
 test('infra (P9): migración idempotente — abrir la misma DB dos veces no tira "duplicate column name"', async (t) => {
+  if (!Database) return t.skip('better-sqlite3 no instalado');
   const dbPath = tmpDbPath();
 
   const store1 = await createSqliteStore({ driver: 'sqlite', sqlite: { path: dbPath } });

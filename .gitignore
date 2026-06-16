@@ -10,6 +10,9 @@ npm-debug.log*
 *.db
 .sddkit/
 
+# Config local de Claude Code (rutas/preferencias de la máquina del dev)
+.claude/settings.local.json
+
 # Sistema operativo / editores
 .DS_Store
 Thumbs.db

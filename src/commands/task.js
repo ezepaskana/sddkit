@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import { read, readJSON, write, writeJSON, existsSync } from '../lib/fsutil.js';
+import { read, readJSON, write, writeJSON } from '../lib/fsutil.js';
 import { openFile, openEnabled } from '../lib/open.js';
 import { readFileSync } from 'node:fs';
 import { PKG_SKILLS } from '../lib/skills.js';

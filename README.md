@@ -1,8 +1,13 @@
 # sddkit
 
+[![CI](https://github.com/ezepaskana/sddkit/actions/workflows/ci.yml/badge.svg)](https://github.com/ezepaskana/sddkit/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/sddkit.svg)](https://www.npmjs.com/package/sddkit)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A518-brightgreen.svg)](https://nodejs.org)
+
 **Spec-driven development para agentes de IA.** Documentación C4 viva, catálogo de convenciones validadas y flujo SDD que se dispara solo — sin comandos manuales del dev. Multi-agente: Claude Code, Cursor y cualquier herramienta que lea AGENTS.md.
 
-> v0.5 — prototipo. La versión exacta vive en package.json (`sdd` sin argumentos la muestra). Sin dependencias: solo necesita Node ≥ 18.
+> Prototipo. La versión exacta vive en package.json (`sdd` sin argumentos la muestra). Sin dependencias: solo necesita Node ≥ 18.
 
 ## Qué resuelve
 
@@ -10,7 +15,7 @@ Los agentes de código escriben código que funciona pero ignora tu arquitectura
 
 1. **Arquitectura C4 viva** (`.sdd/c4/`) — generada del código real, mantenida en cada cambio, con preguntas explícitas (❓ VALIDAR) que los agentes responden o te preguntan.
 2. **Catálogo de convenciones** — si hay 3 formas de escribir endpoints en tu repo, sddkit las detecta, vos elegís la canónica, y todos los agentes la respetan. El código legacy queda como deuda tolerada que solo puede bajar (ratchet).
-3. **Flujo SDD por tarea con artefactos persistentes** — para cada tarea no trivial el agente crea `.sdd/tasks/<id>/` con el requisito original verbatim, la spec refinada (preguntas de clarificación + criterios EARS, con aprobación del dev) y un plan en pasos chicos trackeables. Se puede pausar y retomar en otra sesión (`sdd task show <id>` indica el próximo paso), y cada paso lleva un hint de modelo (`económico`/`potente`) para que el agente delegue lo mecánico a un modelo barato. Inspirado en GitHub Spec Kit y Kiro.
+3. **Flujo SDD por tarea con artefactos persistentes** — para cada tarea no trivial el agente crea `.sdd/tasks/<id>/` con el requisito original verbatim, la spec refinada (preguntas de clarificación + criterios EARS, con aprobación del dev) y un plan en pasos chicos trackeables. Se puede pausar y retomar en otra sesión (`sdd task show <id>` indica el próximo paso), y cada paso lleva un hint de modelo (`rapido`/`medio`/`fuerte`) para que el agente delegue lo mecánico a un modelo barato. Inspirado en GitHub Spec Kit y Kiro.
 4. **Check de drift** — `sdd validate` falla (exit 1) si el código diverge de las docs o alguien viola el catálogo. Listo para CI o pre-commit.
 
 ## Instalación
@@ -76,7 +81,7 @@ Un grafo central y opcional que conecta los endpoints que expone cada repo con q
   ```
   Omitir `"sqlite"` usa el default.
 
-- **MySQL compartido por el equipo:**
+- **MySQL compartido por el equipo** _(experimental — ver nota abajo):_
   ```json
   {
     "graph": {
@@ -86,6 +91,8 @@ Un grafo central y opcional que conecta los endpoints que expone cada repo con q
   }
   ```
   La connection string se lee de la variable de entorno indicada, nunca va literal en el config versionado (BR-015).
+
+  > ⚠️ **El driver MySQL es experimental y aún no está soportado.** Su contrato asíncrono no está completo y no hay tests de integración contra un MySQL real, por lo que las consultas pueden devolver resultados incorrectos. Usá el driver **SQLite** (default) hasta que se cierre. Seguimiento en el ADR-0002 / BR-015.
 
 **Comandos:**
 
@@ -212,4 +219,4 @@ Para reportar una vulnerabilidad, ver [`SECURITY.md`](SECURITY.md).
 
 ## Licencia
 
-MIT (provisional — pendiente de decisión final).
+MIT — ver [LICENSE](LICENSE).

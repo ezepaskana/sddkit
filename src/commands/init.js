@@ -1,4 +1,4 @@
-import { join, basename } from 'node:path';
+import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { symlinkSync, unlinkSync, lstatSync } from 'node:fs';
 import { detectAgentEnv, detectStack } from '../lib/detect.js';

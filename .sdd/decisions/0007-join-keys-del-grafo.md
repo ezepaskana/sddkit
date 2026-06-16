@@ -18,7 +18,7 @@ Tres tipos de join key, según el tipo de hecho:
 ## Alternativas consideradas
 
 - **Identificador global único (UUID) por recurso/sistema, asignado por un registro central previo:** descartado — requeriría un paso de registro previo a cualquier publish, y los recursos de infra ya tienen identificadores naturales y estables (ARNs); para HTTP, método+ruta es el identificador natural que ya usan ambos lados (cliente y servidor).
-- **Matching difuso de nombres de sistema sin tabla curada** (similaridad de strings sobre el nombre del paquete/repo): descartado para sistemas — nombres de repos/paquetes varían demasiado entre convenciones (`backend-service` vs `solar-backend` vs "Solar Backend") como para confiar en matching automático; se prefiere curación manual mínima (una tabla chica, editada a mano) sobre heurísticas que fallarían silenciosamente.
+- **Matching difuso de nombres de sistema sin tabla curada** (similaridad de strings sobre el nombre del paquete/repo): descartado para sistemas — nombres de repos/paquetes varían demasiado entre convenciones (`backend-service` vs `payments-backend` vs "Payments Backend") como para confiar en matching automático; se prefiere curación manual mínima (una tabla chica, editada a mano) sobre heurísticas que fallarían silenciosamente.
 
 ## Consecuencias
 

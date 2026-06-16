@@ -76,6 +76,7 @@ Comandos internos (los usan el agente y el pre-commit hook, no vos):
              (pide confirmación; quita SOLO lo que sddkit instaló).
 
 Opciones: --dir=<path>  --force  --why=<texto>  --agent  --update  --repo  --yes
+          --local  --global  (sdd setup: alcance de instalación de skills)
           --terraform=<path>  (sdd scan: ruta a un \`terraform show -json\`)
 `;
 
@@ -95,8 +96,13 @@ try {
   else if (cmd === 'sync') await sync(root, flags);
   else if (cmd === 'publish') await publish(root, flags);
   else if (cmd === 'impact') await impact(root, pos, flags);
-  else console.log(HELP);
+  else {
+    console.log(HELP);
+    // Comando desconocido (no vacío) es un error de uso: salir ≠0 para que
+    // un script que invoque `sdd <typo>` detecte el fallo. `sdd` a secas → 0.
+    if (cmd) process.exit(1);
+  }
 } catch (err) {
   console.error('✖ ' + (err && err.message ? err.message : err));
-  process.exit(2);
+  process.exit(1);
 }

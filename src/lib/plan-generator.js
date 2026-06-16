@@ -30,7 +30,7 @@ export function originBranch(policy) {
  * `opts.usingDefaults` (boolean, opcional) fuerza el aviso de defaults,
  * independientemente de si `policy` fue provisto.
  */
-export function generateRamaDeTrabajoSection(taskId, taskTitle, policy, opts = {}) {
+export function generateWorkBranchSection(taskId, taskTitle, policy, opts = {}) {
   const usingDefaults = opts.usingDefaults ?? !policy;
   const activePolicy = policy ?? getBranchingDefaults();
   const branchName = formatBranchName(taskId, taskTitle, activePolicy);
@@ -107,7 +107,7 @@ export function renumberSteps(planMarkdown, offset) {
 export function applyBranchingToPlan(planMarkdown, taskId, taskTitle, policy, opts = {}) {
   const activePolicy = policy ?? getBranchingDefaults();
   const branchName = formatBranchName(taskId, taskTitle, activePolicy);
-  const ramaSection = generateRamaDeTrabajoSection(taskId, taskTitle, policy, opts);
+  const workBranchSection = generateWorkBranchSection(taskId, taskTitle, policy, opts);
   const checkoutStep = generateCheckoutStep(branchName);
 
   // Renumerar los pasos existentes (Paso 1 → Paso 2, etc.)
@@ -118,7 +118,7 @@ export function applyBranchingToPlan(planMarkdown, taskId, taskTitle, policy, op
 
   if (pasosIdx === -1) {
     // No hay encabezado "## Pasos": insertar la sección + Paso 1 al final.
-    return [renumbered.trimEnd(), '', ramaSection.trimEnd(), '', checkoutStep.trimEnd(), ''].join('\n');
+    return [renumbered.trimEnd(), '', workBranchSection.trimEnd(), '', checkoutStep.trimEnd(), ''].join('\n');
   }
 
   // Insertar la sección "Rama de trabajo" antes de "## Pasos", y el Paso 1
@@ -128,7 +128,7 @@ export function applyBranchingToPlan(planMarkdown, taskId, taskTitle, policy, op
 
   const result = [
     ...before,
-    ramaSection.trimEnd(),
+    workBranchSection.trimEnd(),
     '',
     '## Pasos',
     '',

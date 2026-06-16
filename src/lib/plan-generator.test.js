@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  generateRamaDeTrabajoSection,
+  generateWorkBranchSection,
   generateCheckoutStep,
   renumberSteps,
   applyBranchingToPlan,
@@ -16,7 +16,7 @@ test('rama de trabajo section: incluye nombre de rama, origen, destino y patrón
     flujo: 'GitHub Flow',
     patrón: 'task/{numero}-{slug}',
   };
-  const section = generateRamaDeTrabajoSection('011', 'Integracion plan', policy);
+  const section = generateWorkBranchSection('011', 'Integracion plan', policy);
 
   assert.match(section, /^## Rama de trabajo/m);
   assert.match(section, /\*\*Rama:\*\*.*task\/011-integracion-plan/);
@@ -32,14 +32,14 @@ test('rama de trabajo section: con flujo Git Flow, origen y destino son develop'
     flujo: 'Git Flow',
     patrón: 'feature/{slug}',
   };
-  const section = generateRamaDeTrabajoSection('012', 'Feature X', policy);
+  const section = generateWorkBranchSection('012', 'Feature X', policy);
 
   assert.match(section, /\*\*Origen:\*\*.*develop/);
   assert.match(section, /\*\*Destino:\*\*.*develop/);
 });
 
 test('rama de trabajo section: sin policy (null) usa defaults y agrega aviso de defaults', () => {
-  const section = generateRamaDeTrabajoSection('013', 'Tarea sin policy', null);
+  const section = generateWorkBranchSection('013', 'Tarea sin policy', null);
   const defaults = getBranchingDefaults();
 
   assert.match(section, /⚠️ Política de branching no definida\. Usamos defaults\./);

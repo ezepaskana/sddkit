@@ -28,3 +28,6 @@ Línea base: estado consolidado del proyecto al inicio del historial de changelo
 - Scanner de infraestructura Terraform (recursos compartibles y aristas).
 - Modelo de branching configurable (`.sdd/branching.md`) y hooks pre-commit / post-commit.
 - Política de seguridad (`SECURITY.md`) y modelo de amenaza documentado.
+
+[Unreleased]: https://github.com/ezepaskana/sddkit/compare/v0.0.1...HEAD
+[0.0.1]: https://github.com/ezepaskana/sddkit/releases/tag/v0.0.1

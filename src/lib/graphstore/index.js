@@ -27,6 +27,11 @@ function wrap(store) {
  * - `sqlite` → store SQLite; si el módulo no está instalado → `missing-dependency`.
  * - `mysql` → store MySQL (BR-015); sin `config.mysql.urlEnv`/env var seteada →
  *   `missing-env`; si el módulo no está instalado → `missing-dependency`.
+ *
+ * ⚠️ EXPERIMENTAL: el driver `mysql` aún no está soportado. Su contrato asíncrono
+ * está incompleto (`wrap()` consume `store.listSystems()` sin await) y no hay tests
+ * de integración contra un MySQL real, por lo que las consultas pueden devolver
+ * resultados incorrectos. Usar `sqlite` (default) en producción. Ver README → grafo.
  */
 export async function createGraphStore(cfg, deps = {}) {
   const driver = cfg?.graph?.driver;
@@ -37,6 +42,7 @@ export async function createGraphStore(cfg, deps = {}) {
       const store = await createSqliteStore(cfg.graph, deps);
       return wrap(store);
     } catch (err) {
+      if (!isModuleNotFound(err)) throw err;
       return { ok: false, reason: 'missing-dependency', install: 'npm i better-sqlite3' };
     }
   }
@@ -47,9 +53,23 @@ export async function createGraphStore(cfg, deps = {}) {
       if (result.ok === false) return result; // missing-env: propagar tal cual
       return wrap(result);
     } catch (err) {
+      if (!isModuleNotFound(err)) throw err;
       return { ok: false, reason: 'missing-dependency', install: 'npm i mysql2' };
     }
   }
 
   return { ok: false, reason: 'not-configured' };
+}
+
+/**
+ * Distingue "el módulo opcional no está instalado" (única causa que justifica el
+ * mensaje `missing-dependency`) de cualquier otro fallo de apertura (DB corrupta,
+ * bindings rotos, permisos, bug del store), que debe propagarse con su mensaje real.
+ */
+function isModuleNotFound(err) {
+  if (!err) return false;
+  if (err.code === 'ERR_MODULE_NOT_FOUND' || err.code === 'MODULE_NOT_FOUND') return true;
+  // El import dinámico de un paquete ausente no siempre trae `code`; el mensaje
+  // de Node es "Cannot find module/package '<x>'".
+  return /Cannot find (module|package)/i.test(err.message || '');
 }

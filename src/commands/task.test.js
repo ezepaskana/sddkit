@@ -183,3 +183,61 @@ test('sdd task plan defaults warning: sin .sdd/branching.md, usa defaults y avis
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+// --- Tests para analysis.md y estado analyzed ---------------------------------
+
+import { existsSync } from 'node:fs';
+
+test('sdd task new crea analysis.md con sección "Análisis crítico"', () => {
+  const root = mkdtempSync(join(tmpdir(), 'sddkit-task-new-'));
+  try {
+    const r = spawnSync(process.execPath, [BIN, 'task', 'new', 'test analysis', `--dir=${root}`, '--no-open'], { encoding: 'utf8' });
+    assert.equal(r.status, 0, `stderr: ${r.stderr}\nstdout: ${r.stdout}`);
+
+    const analysisPath = join(root, '.sdd', 'tasks', '001-test-analysis', 'analysis.md');
+    assert.ok(existsSync(analysisPath), `analysis.md no existe en ${analysisPath}`);
+
+    const content = readFileSync(analysisPath, 'utf8');
+    assert.match(content, /Análisis crítico/, 'analysis.md debe contener "Análisis crítico"');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+/** Fixture con una tarea en estado draft para probar transición a analyzed. */
+function fixtureWithDraftTask() {
+  const root = mkdtempSync(join(tmpdir(), 'sddkit-task-analyzed-'));
+  mkdirSync(join(root, '.sdd', 'tasks', '001-demo'), { recursive: true });
+  writeFileSync(join(root, '.sdd', 'tasks', 'index.json'), JSON.stringify({
+    nextId: 2,
+    tasks: [{ id: '001', dir: '001-demo', title: 'Demo', status: 'draft', createdAt: '2026-01-01', updatedAt: '2026-01-01' }],
+  }, null, 2));
+  writeFileSync(join(root, '.sdd', 'tasks', '001-demo', 'analysis.md'), '# Analysis\n\n## Análisis crítico\n\nContenido de prueba.\n');
+  writeFileSync(join(root, '.sdd', 'tasks', '001-demo', 'plan.md'), '# Plan\n');
+  return root;
+}
+
+test('sdd task status <id> analyzed es un estado válido y actualiza index.json', () => {
+  const root = fixtureWithDraftTask();
+  try {
+    const r = spawnSync(process.execPath, [BIN, 'task', 'status', '001', 'analyzed', `--dir=${root}`, '--no-open'], { encoding: 'utf8' });
+    assert.equal(r.status, 0, `stderr: ${r.stderr}\nstdout: ${r.stdout}`);
+
+    const idx = JSON.parse(readFileSync(join(root, '.sdd', 'tasks', 'index.json'), 'utf8'));
+    const task = idx.tasks.find((t) => t.id === '001');
+    assert.equal(task.status, 'analyzed', 'El estado en index.json debe ser "analyzed"');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test('sdd task status <id> analyzed muestra analysis.md en stdout', () => {
+  const root = fixtureWithDraftTask();
+  try {
+    const r = spawnSync(process.execPath, [BIN, 'task', 'status', '001', 'analyzed', `--dir=${root}`, '--no-open'], { encoding: 'utf8' });
+    assert.equal(r.status, 0, `stderr: ${r.stderr}\nstdout: ${r.stdout}`);
+    assert.match(r.stdout, /analysis\.md/, 'stdout debe contener "analysis.md" como archivo para revisar');
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});

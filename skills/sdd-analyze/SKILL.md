@@ -7,14 +7,14 @@ description: Análisis crítico dual - fase 2 del flujo SDD (dentro de una tarea
 
 Esta skill tiene **dos modos** según el contexto:
 
-- **(A) Modo tarea** — sos la fase 2 del flujo SDD: hay una tarea activa creada con `sdd task new` y su `spec.md` está pendiente. Analizás críticamente el requisito, clarificás, escribís en `spec.md` y seguís con `sdd-specify`. Acá SÍ escribís artefactos.
+- **(A) Modo tarea** — sos la fase 2 del flujo SDD: hay una tarea activa creada con `sdd task new` y su `analysis.md` está pendiente. Analizás críticamente el requisito, clarificás, escribís en `analysis.md` y seguís con `sdd-specify`. Acá SÍ escribís artefactos.
 - **(B) Modo standalone** — no hay tarea activa: el dev quiere investigar, debuggear o hacer brainstorm sin pedir un cambio. Investigación **read-only**: leés, analizás, proponés, pero **nunca modificás archivos**. Si la charla converge en un cambio, derivás a `/sdd-task`.
 
 ## Detección de modo
 
 Antes de arrancar, decidí en qué modo estás:
 
-1. **¿Hay una tarea activa esperando spec?** Mirá si venís de `sdd task new` o si hay una tarea en estado `new`/`captured` con `spec.md` pendiente en `.sdd/tasks/<id>/`. Si sí → **modo tarea (A)**.
+1. **¿Hay una tarea activa esperando análisis?** Mirá si venís de `sdd task new` o si hay una tarea en estado `new`/`draft` con `analysis.md` pendiente en `.sdd/tasks/<id>/`. Si sí → **modo tarea (A)**.
 2. **¿El usuario hizo una pregunta pura** ("¿cómo funciona X?", "¿por qué falla?", "¿cómo podríamos?") **sin pedir un cambio y sin tarea activa?** → **modo standalone (B)**.
 3. **¿Ambiguo?** Si el mensaje mezcla investigación con un pedido claro de cambio, preguntale al dev si quiere investigar acá (standalone) o arrancar `/sdd-task`.
 
@@ -24,7 +24,7 @@ Antes de arrancar, decidí en qué modo estás:
 
 **El requisito del dev es una HIPÓTESIS, no una orden.** El dev puede equivocarse y tu trabajo es detectarlo ANTES de construir. La complacencia acá es un bug, no cortesía.
 
-### Análisis (completar la sección "Análisis crítico" de spec.md)
+### Análisis (completar la sección "Análisis crítico" de analysis.md)
 
 Arrancá con `sdd context` (destilado) y, para "¿ya existe?", con `sdd find <término>` — busca en el índice de endpoints, módulos, reglas y aprendizajes sin explorar el repo. Solo explorá código a mano si `find` no alcanza. Después respondé:
 
@@ -42,14 +42,14 @@ Cerrá con una **recomendación honesta**: `proceder | proceder con cambios | re
 
 ### Clarificación
 
-Preguntale al dev **todo lo que haga falta, sin límite de cantidad**: ambigüedades, casos borde, comportamiento en error, y los supuestos que tu análisis puso en duda. Priorizá las que cambian el alcance o invalidan el enfoque; hacelas en tandas razonables (no de a una). Registrá cada respuesta en spec.md.
+Preguntale al dev **todo lo que haga falta, sin límite de cantidad**: ambigüedades, casos borde, comportamiento en error, y los supuestos que tu análisis puso en duda. Priorizá las que cambian el alcance o invalidan el enfoque; hacelas en tandas razonables (no de a una). Registrá cada respuesta en analysis.md.
 
 ### Calibración: qué amerita objeción y qué no
 
 - ❌ NO objetar por objetar: preferencias de estilo, micro-optimizaciones, "yo lo haría distinto".
 - ✅ SÍ objetar: duplicación de algo existente, violación de una regla BR-NNN o un ADR, complejidad desproporcionada al valor, supuestos falsos verificables en el código.
 
-Cuando termines: seguí con la skill **sdd-specify**.
+Cuando termines: corré `sdd task status <id> analyzed` para abrir analysis.md al dev. Esperá su aprobación. Recién entonces seguí con la skill **sdd-specify**.
 
 ---
 
@@ -106,7 +106,7 @@ Escenarios ideales:
 
 **Si te descubrís a punto de editar un archivo — FRENÁ. Presentá tu sugerencia verbalmente.**
 
-(Esta restricción NO aplica en modo tarea, donde escribir en `spec.md` es parte del trabajo.)
+(Esta restricción NO aplica en modo tarea, donde escribir en `analysis.md` es parte del trabajo.)
 
 ---
 

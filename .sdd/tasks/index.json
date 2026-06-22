@@ -1,5 +1,5 @@
 {
-  "nextId": 5,
+  "nextId": 6,
   "tasks": [
     {
       "id": "001",
@@ -29,6 +29,14 @@
       "id": "004",
       "dir": "004-fusionar-sdd-think-con-sdd-analyze",
       "title": "Fusionar sdd-think con sdd-analyze: eliminar sdd-think como …",
+      "status": "done",
+      "createdAt": "2026-06-22",
+      "updatedAt": "2026-06-22"
+    },
+    {
+      "id": "005",
+      "dir": "005-ajustar-sdd-analyze-y-sdd-specify",
+      "title": "Ajustar sdd-analyze y sdd-specify para separar outputs y res…",
       "status": "in-progress",
       "createdAt": "2026-06-22",
       "updatedAt": "2026-06-22"

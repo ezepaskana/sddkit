@@ -1,10 +1,9 @@
 # Preguntas pendientes del proyecto
 
-> Generado por `sdd scan` el 2026-06-15. **Agente:** intentá responder estas preguntas en este orden de fuentes: 1) la documentación existente listada abajo, 2) el código, 3) preguntándole al dev. Al responder una, escribí la respuesta en el doc C4 correspondiente y marcá su checkbox allí — este archivo se regenera desde los docs C4.
+> Generado por `sdd scan` el 2026-06-22. **Agente:** intentá responder estas preguntas en este orden de fuentes: 1) la documentación existente listada abajo, 2) el código, 3) preguntándole al dev. Al responder una, escribí la respuesta en el doc C4 correspondiente y marcá su checkbox allí — este archivo se regenera desde los docs C4.
 
 ## Fuentes de documentación existente (leelas primero)
 
-- `docs/` (2 archivos): docs/DESIGN.md, docs/REQUISITO-grafo-impacto.md
 - `README.md` (1 archivo)
 
 ## Preguntas abiertas (8)

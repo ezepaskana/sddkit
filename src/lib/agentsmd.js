@@ -13,8 +13,9 @@ export function buildBlock(stack, cat, date) {
 
 Cuando el usuario escriba un mensaje, ejecutá automáticamente:
 
-- **\`/sdd-task\`** si detectás palabras clave de cambio: _agregar, crear, implementar, cambiar, refactor, bug_
-- **\`/sdd-analyze\`** si detectás palabras clave de pregunta SIN cambio: _¿, cómo, por qué, investigar, entender, verificar_
+- **\`/sdd-task\`** si la intención principal es un cambio: _agregar, crear, implementar, cambiar, refactor, bug, arreglar, corregir, mejorar, modificar, configurar, ajustar, extender, aumentar, reducir, "quiero/necesito que X haga/sea Y", "hacer que"_
+- **\`/sdd-analyze\`** si la intención es SOLO entender, sin pedir ningún cambio: _¿, cómo, por qué, investigar, entender, verificar, saber, explicar, "cuál es la causa", "qué hace"_
+- **Si no estás seguro** de cuál aplicar (el mensaje mezcla investigación con pedido de cambio, o es ambiguo), **preguntale al usuario** con tres opciones: (a) Implementar un cambio → sdd-task, (b) Investigar/analizar → sdd-analyze, (c) Solo charlar sin SDD
 
 ## Ante dudas o incongruencias: preguntale al dev
 
@@ -45,13 +46,14 @@ Hay candidatos pendientes de decisión en \`.sdd/patterns.json\`. Si tu tarea to
 
 Para cualquier tarea no trivial (feature, endpoint, módulo, refactor), aplicá este flujo **automáticamente, sin que te lo pidan**:
 
-El flujo deja artefactos en \`.sdd/tasks/<id>/\` (requirement.md verbatim, spec.md refinada, plan.md con pasos) que permiten pausar, retomar en otra sesión y auditar:
+El flujo deja artefactos en \`.sdd/tasks/<id>/\` (requirement.md verbatim, analysis.md con análisis crítico, spec.md refinada, plan.md con pasos) que permiten pausar, retomar en otra sesión y auditar:
 
 1. **Capturar** — \`sdd task new "<requisito verbatim del dev>"\` y seguí el contrato que imprime.
-2. **Spec** — análisis CRÍTICO primero (el requisito es una hipótesis: ¿ya existe?, ¿hay algo más simple?, ¿riesgos? — recomendación honesta, incluso "reconsiderar"), clarificación sin límite de preguntas (en tandas, registradas en spec.md), spec refinada con criterios EARS + **métrica de impacto** (baseline → resultado esperado) → **aprobación del dev** → \`sdd task status <id> specified\`.
-3. **Plan** — pasos chicos verificables en plan.md (tests antes que implementación; nivel de modelo por paso: \`rapido\`/\`medio\`/\`fuerte\`, mapeados a modelos concretos en \`.sdd/config.json → models\`) → **aprobación del dev** → \`sdd task status <id> planned\`.
-4. **Ejecutar (orquestador/workers)** — \`sdd task status <id> in-progress\`. El agente principal NO implementa: lanza cada paso (incluidos los \`fuerte\`) en un subagente fresco con el modelo de su nivel, que lee los archivos de la tarea por sí mismo. El orquestador verifica cada resultado y recién entonces marca el checkbox. Subagente bloqueado → devuelve la pregunta, el orquestador la resuelve con el dev y la registra en spec.md. Pausar: \`sdd task status <id> paused\`. Retomar: \`sdd task show <id>\`.
-5. **Cierre con retro** — \`sdd task status <id> done\` exige retro.md completa: resultado de la métrica vs baseline, desvíos del plan, aprendizajes. Cosechá los generales a \`.sdd/LEARNINGS.md\` (curado, máx ~30) y promové lo reusable al catálogo o los docs C4. Así cada tarea mejora a las siguientes. El pre-commit corre \`sdd validate\` solo.
+2. **Analizar** — análisis CRÍTICO en analysis.md: el requisito es una hipótesis (¿ya existe?, ¿hay algo más simple?, ¿riesgos? — recomendación honesta, incluso "reconsiderar"), clarificación sin límite de preguntas (en tandas, registradas en analysis.md), métrica de impacto si aplica (baseline → resultado esperado) → **aprobación del dev** → \`sdd task status <id> analyzed\`.
+3. **Spec** — spec refinada en spec.md: historia, criterios EARS, reglas de negocio, fuera de alcance, impacto en arquitectura → **aprobación del dev** → \`sdd task status <id> specified\`.
+4. **Plan** — pasos chicos verificables en plan.md (tests antes que implementación; nivel de modelo por paso: \`rapido\`/\`medio\`/\`fuerte\`, mapeados a modelos concretos en \`.sdd/config.json → models\`) → **aprobación del dev** → \`sdd task status <id> planned\`.
+5. **Ejecutar (orquestador/workers)** — \`sdd task status <id> in-progress\`. El agente principal NO implementa: lanza cada paso (incluidos los \`fuerte\`) en un subagente fresco con el modelo de su nivel, que lee los archivos de la tarea por sí mismo. El orquestador verifica cada resultado y recién entonces marca el checkbox. Subagente bloqueado → devuelve la pregunta, el orquestador la resuelve con el dev y la registra en analysis.md. Pausar: \`sdd task status <id> paused\`. Retomar: \`sdd task show <id>\`.
+6. **Cierre con retro** — \`sdd task status <id> done\` exige retro.md completa: resultado de la métrica vs baseline, desvíos del plan, aprendizajes. Cosechá los generales a \`.sdd/LEARNINGS.md\` (curado, máx ~30) y promové lo reusable al catálogo o los docs C4. Así cada tarea mejora a las siguientes. El pre-commit corre \`sdd validate\` solo.
 ${END}`;
 }
 

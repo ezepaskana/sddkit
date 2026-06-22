@@ -31,7 +31,7 @@ El orquestador ejecuta esto **ANTES de la retro** (puedes hacer foco en aprendiz
 
 Retro completa (`retro.md`):
 
-1. **Métrica**: medí el "después" y compará contra el baseline de spec.md. Si no se cumplió lo esperado, decilo — un resultado negativo también es aprendizaje.
+1. **Métrica**: medí el "después" y compará contra el baseline de analysis.md. Si no se cumplió lo esperado, decilo — un resultado negativo también es aprendizaje.
 2. **Desvíos**: qué anticipó mal la spec, qué pasos se replanificaron y por qué.
 3. **Cosecha**: los aprendizajes que apliquen a futuras tareas van a `.sdd/LEARNINGS.md` — reglas de curado en `references/curado.md`.
 4. **Promoción** (cada conocimiento a su destino):
@@ -41,3 +41,9 @@ Retro completa (`retro.md`):
    - Cambio estructural → `.sdd/c4/`
    - Pregunta de clarificación que ya apareció en otra tarea → respondela permanentemente en los docs
 5. Verificá que el pre-commit pase y cerrá: `sdd task status <id> done`.
+
+## Additional Resources
+
+- `examples/retro-ejemplo.md` — Ejemplo de retro completa con datos reales (tarea sdd sync).
+- `references/curado.md` — Reglas de curado para LEARNINGS.md (accionable, fusionar, podar, tope ~30).
+- `templates/retro.md` — Template canónico de retro.md.

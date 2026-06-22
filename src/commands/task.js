@@ -12,7 +12,7 @@ import { applyBranchingToPlan, originBranch } from '../lib/plan-generator.js';
 import { runExecuteGate } from './execute.js';
 import { spawnSync } from 'node:child_process';
 
-const STATUSES = ['draft', 'specified', 'planned', 'in-progress', 'paused', 'done', 'cancelled'];
+const STATUSES = ['draft', 'analyzed', 'specified', 'planned', 'in-progress', 'paused', 'done', 'cancelled'];
 
 const tasksDir = (root) => join(root, '.sdd', 'tasks');
 const loadIndex = (root) => readJSON(join(tasksDir(root), 'index.json')) || { nextId: 1, tasks: [] };
@@ -62,6 +62,7 @@ function loadTemplate(skill, file, vars) {
   for (const [k, v] of Object.entries(vars)) t = t.split('__' + k + '__').join(v);
   return t;
 }
+const analysisTemplate = (id, title) => loadTemplate('sdd-analyze', 'analysis.md', { ID: id, TITLE: title });
 const specTemplate = (id, title) => loadTemplate('sdd-specify', 'spec.md', { ID: id, TITLE: title });
 const planTemplate = (id, title) => loadTemplate('sdd-plan', 'plan.md', { ID: id, TITLE: title });
 const retroTemplate = (id, title, date) => loadTemplate('sdd-close', 'retro.md', { ID: id, TITLE: title, DATE: date });
@@ -120,6 +121,7 @@ export async function task(root, pos, flags) {
     const title = text.length > 60 ? text.slice(0, 60) + '…' : text;
     const dir = `${id}-${slugify(text)}`;
     write(join(tasksDir(root), dir, 'requirement.md'), requirementTemplate(id, text, date));
+    write(join(tasksDir(root), dir, 'analysis.md'), analysisTemplate(id, title));
     write(join(tasksDir(root), dir, 'spec.md'), specTemplate(id, title));
     write(join(tasksDir(root), dir, 'plan.md'), planTemplate(id, title));
     idx.tasks.push({ id, dir, title, status: 'draft', createdAt: date, updatedAt: date });
@@ -128,34 +130,37 @@ export async function task(root, pos, flags) {
     const abs = join(tasksDir(root), dir);
     console.log(`✓ Tarea ${id} creada:`);
     console.log(`  ${join(abs, 'requirement.md')}`);
+    console.log(`  ${join(abs, 'analysis.md')}`);
     console.log(`  ${join(abs, 'spec.md')}`);
     console.log(`  ${join(abs, 'plan.md')}`);
     console.log(`
 AGENTE — flujo obligatorio para esta tarea:
  1. ANALIZAR (críticamente)  leé .sdd/c4/, el catálogo y el código. El requisito es una HIPÓTESIS:
-          ¿ya existe?, ¿hay algo más simple?, ¿qué supuestos trae?, ¿riesgos? Completá el
-          "Análisis crítico" de spec.md y cerrá con recomendación honesta (proceder/con
-          cambios/reconsiderar). Si recomendás reconsiderar, discutilo con el dev ANTES de seguir.
- 2. CLARIFICAR  preguntale al dev TODO lo que haga falta (sin límite, en tandas, priorizando lo
-          que cambia el alcance). Registrá cada respuesta en spec.md.
- 3. SPEC  completá la spec refinada (historia, criterios EARS, fuera de alcance, impacto) y la
-          MÉTRICA de impacto (baseline + resultado esperado; sin baseline → instrumentar es el
-          paso 1 del plan). Luego corré:
+          ¿ya existe?, ¿hay algo más simple?, ¿qué supuestos trae?, ¿riesgos? Completá
+          analysis.md: análisis crítico (7 preguntas) con recomendación honesta (proceder/con
+          cambios/reconsiderar), clarificación sin límite (preguntale al dev TODO lo que haga
+          falta, en tandas, registrá cada respuesta) y métrica de impacto (baseline + resultado
+          esperado; si aplica). Si recomendás reconsiderar, discutilo con el dev ANTES de seguir.
+          Luego corré:
+          sdd task status ${id} analyzed    ← esto le ABRE analysis.md al dev en su editor
+          Pedile aprobación en el chat antes de pasar a la spec.
+ 2. SPEC  completá spec.md: historia, criterios EARS, reglas de negocio, fuera de alcance,
+          impacto en arquitectura. Luego corré:
           sdd task status ${id} specified   ← esto le ABRE spec.md al dev en su editor
           Pedile aprobación en el chat; con su ok marcá la línea de aprobación en spec.md.
- 4. PLAN  completá plan.md con pasos CHICOS (tests antes que implementación, archivos por paso,
+ 3. PLAN  completá plan.md con pasos CHICOS (tests antes que implementación, archivos por paso,
           dependencias, nivel de modelo por paso (rapido/medio/fuerte, ver
           .sdd/config.json → models), verificación) y corré:
           sdd task status ${id} planned     ← esto le ABRE plan.md al dev
           Pedile aprobación en el chat antes de ejecutar.
- 5. EJECUTAR  sdd task status ${id} in-progress. Sos el ORQUESTADOR: no implementes vos.
+ 4. EJECUTAR  sdd task status ${id} in-progress. Sos el ORQUESTADOR: no implementes vos.
           Cada paso (incluidos los fuerte) corre en un SUBAGENTE fresco con el modelo de su
           nivel (.sdd/config.json → models), que lee los archivos de la tarea él mismo.
           Verificá VOS el resultado de cada paso antes de marcarlo. Al terminar
           CADA paso: marcá su checkbox en plan.md y verificá según su criterio.
- 6. PAUSAR/RETOMAR  el dev puede cortar cuando quiera: sdd task status ${id} paused.
+ 5. PAUSAR/RETOMAR  el dev puede cortar cuando quiera: sdd task status ${id} paused.
           Para retomar (otra sesión, otro agente): sdd task show ${id} → te dice el próximo paso.
- 7. CERRAR  actualizá .sdd/c4/ si cambió la arquitectura y corré: sdd task status ${id} done
+ 6. CERRAR  actualizá .sdd/c4/ si cambió la arquitectura y corré: sdd task status ${id} done
           El cierre exige la RETRO (retro.md): resultado de la métrica vs baseline, desvíos del
           plan, aprendizajes. Cosechá los aprendizajes generales a .sdd/LEARNINGS.md (curado,
           máx ~30 entradas) — así cada tarea hace mejor a las siguientes.`);
@@ -184,12 +189,13 @@ AGENTE — flujo obligatorio para esta tarea:
     const absT = join(tasksDir(root), t.dir);
     console.log(`Estado: ${t.status} · Pasos: ${p.done}/${p.total}`);
     console.log(`  ${join(absT, 'requirement.md')}`);
+    console.log(`  ${join(absT, 'analysis.md')}`);
     console.log(`  ${join(absT, 'spec.md')}`);
     console.log(`  ${join(absT, 'plan.md')}`);
     if (p.next) {
       console.log(`\nPróximo paso pendiente:\n  ${p.next}`);
       for (const d of p.nextDetail) console.log(`    ${d}`);
-      console.log(`\nAGENTE para retomar: leé requirement.md + spec.md + plan.md de la carpeta, ejecutá SOLO el próximo paso, marcá su checkbox y verificá. Si el estado es "paused", primero: sdd task status ${t.id} in-progress`);
+      console.log(`\nAGENTE para retomar: leé requirement.md + analysis.md + spec.md + plan.md de la carpeta, ejecutá SOLO el próximo paso, marcá su checkbox y verificá. Si el estado es "paused", primero: sdd task status ${t.id} in-progress`);
     } else if (p.total > 0) {
       console.log('\nTodos los pasos completados. Si la arquitectura cambió actualizá .sdd/c4/ y cerrá: sdd task status ' + t.id + ' done');
     } else {
@@ -242,8 +248,11 @@ AGENTE — flujo obligatorio para esta tarea:
     if (!block) throw new Error(`Paso ${n} no encontrado en plan.md`);
     const spec = read(join(tasksDir(root), t.dir, 'spec.md')) || '';
     const refined = mdSection(spec, 'Spec refinada') || '(spec refinada no encontrada — leé spec.md completo)';
-    // Solo las reglas BR citadas en la spec, no todo domain.md
-    const brIds = [...new Set((spec.match(/BR-\d+/g) || []))];
+    const analysis = read(join(tasksDir(root), t.dir, 'analysis.md')) || '';
+    const recommendation = mdSection(analysis, 'Recomendación') || mdSection(analysis, 'Análisis crítico');
+    // Solo las reglas BR citadas en la spec o el análisis, no todo domain.md
+    const allText = spec + '\n' + analysis;
+    const brIds = [...new Set((allText.match(/BR-\d+/g) || []))];
     const dom = read(join(root, '.sdd', 'domain.md')) || '';
     const brLines = brIds.map((id) => {
       const all = dom.match(new RegExp('^- \\*\\*' + id + '\\*\\*.+$', 'gm')) || [];
@@ -253,6 +262,7 @@ AGENTE — flujo obligatorio para esta tarea:
     console.log(`# Brief — tarea ${t.id}, paso ${n} (generado por sdd task brief: contexto mínimo del paso)\n`);
     console.log('## Tu paso (lo ÚNICO que implementás)\n\n' + block + '\n');
     console.log(refined + '\n');
+    if (recommendation) console.log('## Análisis (resumen de analysis.md)\n\n' + recommendation + '\n');
     if (brLines.length) console.log('## Reglas de negocio citadas (vinculantes)\n\n' + brLines.join('\n') + '\n');
     if (cat.decisions.length) console.log('## Catálogo (vinculante)\n\n' + cat.decisions.map((d) => `- ${d.topic} → usar ${d.chosen}`).join('\n') + '\n');
     console.log('Reglas: no toques archivos fuera de los del paso sin reportarlo; no "mejores" fuera de alcance; si falta una decisión, frená y devolvé la pregunta; reportá archivos tocados + resultado de la verificación.');
@@ -320,7 +330,7 @@ AGENTE — flujo obligatorio para esta tarea:
       console.log('  ✓ Retro registrada. AGENTE: verificá que los aprendizajes generales estén en .sdd/LEARNINGS.md (curado: fusionar similares, podar viejos, máx ~30) y que las preguntas recurrentes hayan sido promovidas a los docs C4.');
     }
     // Gates de revisión: mostrar el archivo a leer y abrirlo (es más cómodo que la consola).
-    const reviewFile = status === 'specified' ? 'spec.md' : status === 'planned' ? 'plan.md' : null;
+    const reviewFile = status === 'analyzed' ? 'analysis.md' : status === 'specified' ? 'spec.md' : status === 'planned' ? 'plan.md' : null;
     if (reviewFile) {
       const fp = join(tasksDir(root), t.dir, reviewFile);
       console.log(`\n📄 Para revisar y aprobar: ${fp}`);

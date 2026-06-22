@@ -1,6 +1,6 @@
 ---
 name: sdd-task
-description: Flujo spec-driven development por tarea, con artefactos persistentes y catálogo de convenciones del repo. Usar automáticamente al implementar features, endpoints, módulos, integraciones o refactors — no requiere que el usuario lo invoque. También usar cuando el usuario pida "agregar", "crear", "implementar" o "cambiar" funcionalidad.
+description: Flujo spec-driven development por tarea con artefactos persistentes. Usar cuando el usuario pida un cambio (crear, implementar, arreglar, mejorar, refactor, "quiero/necesito que X haga Y"). Si hay ambigüedad entre analizar y cambiar, preguntar.
 ---
 
 # sdd-task — el flujo SDD por tarea
@@ -18,15 +18,15 @@ Una tarea es "no trivial" si toca más de un archivo, agrega comportamiento nuev
 | Fase | Skill | Salida |
 |---|---|---|
 | 1. Capturar | (este archivo) `sdd task new "<requisito verbatim>"` | requirement.md inmutable |
-| 2. Analizar + clarificar | **sdd-analyze** | Análisis crítico + respuestas en spec.md |
-| 3. Especificar | **sdd-specify** | spec.md completa → gate de aprobación |
+| 2. Analizar + clarificar | **sdd-analyze** | analysis.md → gate `analyzed` |
+| 3. Especificar | **sdd-specify** | spec.md → gate `specified` |
 | 4. Planificar | **sdd-plan** | plan.md en pasos chicos → gate de aprobación |
 | 5. Ejecutar | **sdd-execute** | pasos via subagentes, checkboxes verificados |
 | 6. Cerrar | **sdd-close** | retro.md + cosecha a LEARNINGS/catálogo/docs |
 
 Transversal: **sdd-test** — toda corrida de tests (verificaciones, pre-cierre) usa `sdd test`, nunca comandos razonados a mano.
 
-Estados: `sdd task status <id> <draft|specified|planned|in-progress|paused|done>`. Retomar en cualquier sesión: `sdd task show <id>`.
+Estados: `sdd task status <id> <draft|analyzed|specified|planned|in-progress|paused|done>`. Retomar en cualquier sesión: `sdd task show <id>`.
 
 ## Disparadores de delegación (cuándo tu contexto se está por contaminar)
 
@@ -44,6 +44,11 @@ El objetivo no es ceremonia: es un orquestador responsable con contexto limpio y
 
 ## Reglas duras del flujo
 
-- Dos gates de aprobación del dev: spec y plan. No avances sin el ok explícito.
+- Tres gates de aprobación del dev: analysis, spec y plan. No avances sin el ok explícito.
 - No uses --no-verify; el pre-commit corre `sdd validate`.
 - Para fixes triviales de un archivo sin ambigüedad podés saltear el flujo de tarea, pero catálogo, dominio y C4 aplican igual.
+
+## Additional Resources
+
+- `examples/flujo-ejemplo.md` — Ejemplo del flujo completo de una tarea SDD, desde el trigger hasta el cierre.
+- `references/triggers-delegacion.md` — Triggers de delegación expandidos con ejemplos concretos.

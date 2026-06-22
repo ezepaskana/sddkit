@@ -25,8 +25,13 @@ Cuando el agente orquestador corre `sdd task plan <id>`, sddkit:
 3. **Archivos explícitos** por paso: rutas exactas, no "varios archivos".
 4. **Dependencias**: qué paso necesita a cuál; `[P]` marca los paralelizables.
 5. **Nivel de modelo por paso**: `(rapido)` mecánico/boilerplate/renames · `(medio)` implementación estándar · `(fuerte)` diseño, lógica compleja, edge cases. Mapean a modelos concretos en `.sdd/config.json → models`.
-6. **El primer paso instrumenta la métrica** si la spec no tenía baseline.
+6. **El primer paso instrumenta la métrica** si analysis.md no tenía baseline.
 
 ## El gate
 
 Corré `sdd task status <id> planned` — **le abre plan.md al dev**. Esperá su aprobación en el chat. Con el ok: `sdd task status <id> in-progress` y seguí con la skill **sdd-execute**.
+
+## Additional Resources
+
+- `examples/plan-ejemplo.md` — Ejemplo de pasos bien descompuestos (3 pasos + anti-ejemplo).
+- `templates/plan.md` — Template canónico de plan.md con estructura de checkboxes.

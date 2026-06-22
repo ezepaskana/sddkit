@@ -23,10 +23,15 @@ Resumen del ciclo por paso (incluidos los `(fuerte)`):
 2. Generá el contexto mínimo del paso: `sdd task brief <id> <paso>` — el CLI recorta determinísticamente (el paso + spec refinada + solo las BR citadas + catálogo). NO le digas al worker "leé spec.md y plan.md completos": el brief reemplaza esas lecturas y se paga una sola vez por paso.
 3. Lanzá un subagente con el modelo del nivel del paso (`.sdd/config.json → models`) cuyo prompt sea el output del brief (ver protocolo).
 4. Cuando reporta, **verificá VOS**: `sdd task verify <id> <paso>` — si la verificación es `cmd:` se ejecuta literal (exit 0 = pasó; exit 3 = verificación manual, ahí sí juzgá vos). Tests sueltos: `sdd test` / `sdd check`. Solo con verificación en verde marcá el checkbox en plan.md.
-5. Subagente bloqueado → te devuelve la pregunta; resolvela con el dev, registrá la respuesta en spec.md, relanzá.
+5. Subagente bloqueado → te devuelve la pregunta; resolvela con el dev, registrá la respuesta en analysis.md, relanzá.
 6. Pasos `[P]` sin dependencias cruzadas: subagentes paralelos.
 7. Si un paso falla o revela un problema de la spec: frená y consultá al dev antes de improvisar.
 
-Sin subagentes disponibles (p.ej. Cursor): ejecutá secuencial, pero releé spec.md y plan.md antes de cada paso en vez de confiar en tu memoria de la conversación.
+Sin subagentes disponibles (p.ej. Cursor): ejecutá secuencial, pero releé analysis.md, spec.md y plan.md antes de cada paso en vez de confiar en tu memoria de la conversación.
 
 Pausar: `sdd task status <id> paused`. Retomar (cualquier sesión/agente): `sdd task show <id>`. Al completar todos los pasos: skill **sdd-close**.
+
+## Additional Resources
+
+- `examples/ejecucion-ejemplo.md` — Ejemplo completo de ejecución con bloqueo, clarificación y reintento.
+- `references/protocolo-subagentes.md` — Protocolo de prompt, verificación y modelo por nivel para workers.

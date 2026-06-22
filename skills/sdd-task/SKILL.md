@@ -1,6 +1,6 @@
 ---
 name: sdd-task
-description: Flujo spec-driven development por tarea, con artefactos persistentes y catálogo de convenciones del repo. Usar automáticamente cuando el usuario pida un cambio (agregar, crear, implementar, cambiar, refactor, bug, arreglar, corregir, mejorar, modificar, configurar, ajustar, "quiero/necesito que X haga/sea Y"). Si hay ambigüedad entre analizar y cambiar, preguntarle al usuario.
+description: Flujo spec-driven development por tarea con artefactos persistentes. Usar cuando el usuario pida un cambio (crear, implementar, arreglar, mejorar, refactor, "quiero/necesito que X haga Y"). Si hay ambigüedad entre analizar y cambiar, preguntar.
 ---
 
 # sdd-task — el flujo SDD por tarea

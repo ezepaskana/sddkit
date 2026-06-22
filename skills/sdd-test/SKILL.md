@@ -33,3 +33,10 @@ Mismo patrón con `templates/run-checks.mjs` → `.sdd/run-checks.mjs` → `sdd 
 - Exit code = verdad. 0 = verde. No interpretes "casi pasan".
 - Si el script falla por entorno (no por tests), arreglá el script — no vuelvas al modo manual.
 - En la fase de ejecución (sdd-execute): toda verificación "tests en verde" se hace con `sdd test`.
+
+## Additional Resources
+
+- `examples/corrida-ejemplo.md` — Corridas típicas: verde, rojo (test-first), Docker y error de entorno.
+- `references/docker.md` — Estrategias Docker para tests reproducibles (Dockerfile.test, compose, imagen + volumen).
+- `templates/run-tests.mjs` — Script determinístico de tests con autodetección de stack y Docker.
+- `templates/run-checks.mjs` — Script de checks completos (lint + build + tests).

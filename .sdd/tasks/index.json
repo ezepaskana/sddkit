@@ -1,5 +1,5 @@
 {
-  "nextId": 2,
+  "nextId": 5,
   "tasks": [
     {
       "id": "001",
@@ -8,6 +8,30 @@
       "status": "done",
       "createdAt": "2026-06-16",
       "updatedAt": "2026-06-16"
+    },
+    {
+      "id": "002",
+      "dir": "002-agregar-fallback-de-3-opciones-en",
+      "title": "Agregar fallback de 3 opciones en los triggers de skills SDD…",
+      "status": "done",
+      "createdAt": "2026-06-17",
+      "updatedAt": "2026-06-17"
+    },
+    {
+      "id": "003",
+      "dir": "003-implementar-las-3-propuestas-de-mejora",
+      "title": "Implementar las 3 propuestas de mejora de alta prioridad par…",
+      "status": "in-progress",
+      "createdAt": "2026-06-22",
+      "updatedAt": "2026-06-22"
+    },
+    {
+      "id": "004",
+      "dir": "004-fusionar-sdd-think-con-sdd-analyze",
+      "title": "Fusionar sdd-think con sdd-analyze: eliminar sdd-think como …",
+      "status": "in-progress",
+      "createdAt": "2026-06-22",
+      "updatedAt": "2026-06-22"
     }
   ]
 }

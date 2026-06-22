@@ -3,14 +3,15 @@
 Spec-driven development para agentes de IA: documentación C4 viva, catálogo de convenciones validadas y flujo SDD auto-disparado. Multi-agente (Claude Code, Cursor, cualquier lector de AGENTS.md).
 
 <!-- sddkit:begin -->
-<!-- Bloque gestionado por sddkit (se regenera con `sdd scan`). Todo lo de afuera del bloque es del equipo y nunca se toca. Última actualización: 2026-06-15 -->
+<!-- Bloque gestionado por sddkit (se regenera con `sdd scan`). Todo lo de afuera del bloque es del equipo y nunca se toca. Última actualización: 2026-06-17 -->
 
 ## Triggers automáticos de skills
 
 Cuando el usuario escriba un mensaje, ejecutá automáticamente:
 
-- **`/sdd-task`** si detectás palabras clave de cambio: _agregar, crear, implementar, cambiar, refactor, bug_
-- **`/sdd-analyze`** si detectás palabras clave de pregunta SIN cambio: _¿, cómo, por qué, investigar, entender, verificar_
+- **`/sdd-task`** si la intención principal es un cambio: _agregar, crear, implementar, cambiar, refactor, bug, arreglar, corregir, mejorar, modificar, configurar, ajustar, extender, aumentar, reducir, "quiero/necesito que X haga/sea Y", "hacer que"_
+- **`/sdd-analyze`** si la intención es SOLO entender, sin pedir ningún cambio: _¿, cómo, por qué, investigar, entender, verificar, saber, explicar, "cuál es la causa", "qué hace", "pensar sobre", "revisar esto"_
+- **Si no estás seguro** de cuál aplicar (el mensaje mezcla investigación con pedido de cambio, o es ambiguo), **preguntale al usuario** con tres opciones: (a) Implementar un cambio → sdd-task, (b) Investigar/analizar → sdd-analyze, (c) Solo charlar sin SDD
 
 ## Ante dudas o incongruencias: preguntale al dev
 

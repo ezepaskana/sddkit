@@ -1,5 +1,5 @@
 {
-  "nextId": 7,
+  "nextId": 8,
   "tasks": [
     {
       "id": "001",
@@ -45,9 +45,17 @@
       "id": "006",
       "dir": "006-ajustar-el-flujo-post-ejecucion-sdd",
       "title": "Ajustar el flujo post-ejecución SDD para que: (1) los worker…",
-      "status": "in-progress",
+      "status": "done",
       "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-24"
+      "updatedAt": "2026-06-25"
+    },
+    {
+      "id": "007",
+      "dir": "007-invertir-el-orden-en-sdd-close",
+      "title": "Invertir el orden en sdd-close: la retro (retro.md, LEARNING…",
+      "status": "in-progress",
+      "createdAt": "2026-06-25",
+      "updatedAt": "2026-06-25"
     }
   ]
 }

@@ -17,6 +17,8 @@ description: Fase de ejecución de una tarea SDD con patrón orquestador/workers
 
 Esto asegura que todos los commits van a la rama correcta. El orquestador ejecuta Paso 1 automáticamente cuando corrés `sdd task execute <id>` (antes de lanzar workers para Paso 2+).
 
+**Regla crítica: NO commitear durante la ejecución.** Ni workers ni orquestador hacen `git add` ni `git commit` mientras se ejecutan los pasos. Todos los cambios quedan como modificaciones locales hasta la fase de prueba local (ver abajo).
+
 Resumen del ciclo por paso (incluidos los `(fuerte)`):
 
 1. **Paso 1 ya se ejecutó** (rama creada, validada). Partir de Paso 2.
@@ -29,7 +31,27 @@ Resumen del ciclo por paso (incluidos los `(fuerte)`):
 
 Sin subagentes disponibles (p.ej. Cursor): ejecutá secuencial, pero releé analysis.md, spec.md y plan.md antes de cada paso en vez de confiar en tu memoria de la conversación.
 
-Pausar: `sdd task status <id> paused`. Retomar (cualquier sesión/agente): `sdd task show <id>`. Al completar todos los pasos: skill **sdd-close**.
+Pausar: `sdd task status <id> paused`. Retomar (cualquier sesión/agente): `sdd task show <id>`.
+
+## Prueba local (post-ejecución)
+
+**Trigger:** todos los checkboxes del plan están marcados y verificados.
+
+Antes de commitear, el orquestador analiza qué tipo de cambio se hizo y le presenta al dev instrucciones concretas para probar localmente:
+
+| Tipo de cambio | Instrucción sugerida |
+|---|---|
+| **Comando CLI** (nuevo/modificado) | "Corré `<comando>` y verificá que la salida/comportamiento es el esperado." |
+| **Función de librería** | "Importá/usá la función y verificá que devuelve lo esperado." |
+| **Config/docs** | "Revisá los archivos modificados con `git diff` y verificá que el contenido es correcto." |
+| **Skill** | "Probá el flujo que la skill describe en una tarea de prueba." |
+
+**Flujo:**
+
+1. El orquestador presenta las instrucciones de prueba adaptadas al cambio concreto.
+2. **Esperá confirmación del dev.** No avances sin ella.
+3. Si el dev reporta problemas: corregí sin commitear, volvé a pedir confirmación. Repetí hasta que el dev confirme que todo funciona.
+4. Recién cuando el dev confirma: commiteá (con mensaje convencional según `.sdd/branching.md`) y transicioná a skill **sdd-close**.
 
 ## Additional Resources
 

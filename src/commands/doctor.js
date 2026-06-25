@@ -4,6 +4,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { read, readJSON } from '../lib/fsutil.js';
 import { PKG_SKILLS, availableSkills, globalBase } from '../lib/skills.js';
 import { VERSION } from '../version.js';
+import { createRequire } from 'node:module';
+const _req = createRequire(import.meta.url);
 
 const ok = (m) => console.log('  ✓ ' + m);
 const warn = (m) => console.log('  ⚠ ' + m);
@@ -11,7 +13,7 @@ const bad = (m) => console.log('  ✖ ' + m);
 const info = (m) => console.log('  – ' + m);
 
 /** `sdd doctor` — diagnóstico read-only del ecosistema sddkit (no modifica nada). */
-export async function doctor(root) {
+export async function doctor(root, deps = {}) {
   console.log(`\nsddkit doctor v${VERSION} — diagnóstico read-only\n`);
 
   // Entorno
@@ -39,6 +41,16 @@ export async function doctor(root) {
   if (cfg.hooks?.autoPublish === false) info('post-commit hook (auto-publish) desactivado por config');
   else if (postCommitHook?.includes('sdd publish')) ok('post-commit hook (auto-publish) activo');
   else warn('post-commit hook (auto-publish) ausente — corré `sdd sync`');
+
+  // Driver SQLite
+  if (cfg.graph?.driver === 'sqlite') {
+    try {
+      (deps.requireSqlite || (() => _req('better-sqlite3')))();
+      ok('better-sqlite3 disponible (driver sqlite operativo)');
+    } catch {
+      warn('better-sqlite3 no encontrado — instalalo con: npm i better-sqlite3');
+    }
+  }
 
   // Skills
   const scope = cfg.skills || 'local';

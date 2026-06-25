@@ -1,5 +1,5 @@
 {
-  "nextId": 8,
+  "nextId": 9,
   "tasks": [
     {
       "id": "001",
@@ -53,6 +53,14 @@
       "id": "007",
       "dir": "007-invertir-el-orden-en-sdd-close",
       "title": "Invertir el orden en sdd-close: la retro (retro.md, LEARNING…",
+      "status": "in-progress",
+      "createdAt": "2026-06-25",
+      "updatedAt": "2026-06-25"
+    },
+    {
+      "id": "008",
+      "dir": "008-bug-sdd-publish-no-encuentra-better",
+      "title": "Bug: sdd publish no encuentra better-sqlite3 instalado globa…",
       "status": "in-progress",
       "createdAt": "2026-06-25",
       "updatedAt": "2026-06-25"

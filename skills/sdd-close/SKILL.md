@@ -7,10 +7,11 @@ description: Fase de cierre de una tarea SDD. Usar al completar todos los pasos 
 
 `sdd task status <id> done` exige una retro completa (`retro.md`; el comando crea la plantilla — formato canónico en `templates/retro.md`).
 
-## Rama y Pull Request (automática)
+## Push y Pull Request
 
-Antes de empezar la retro, `sdd task close <id>` ejecuta automáticamente:
-1. **Verifica rama pusheada** — valida que la rama de la tarea existe en `origin` (remote).
+El dev ya probó localmente todos los pasos en `sdd-execute`, y los cambios están commiteados en la rama de la tarea. Ahora `sdd task close <id>` ejecuta automáticamente:
+
+1. **Pushea la rama** — si no está pusheada en `origin`, corre `git push -u origin <rama>`.
 2. **Detecta plataforma git** — GitHub, Azure DevOps, GitLab (u otra).
 3. **Construye PR** — automáticamente crea un PR en draft con:
    - Título: `[tarea <id>] <título>`

@@ -103,9 +103,36 @@ Marca el checkbox: `- [x] **4. Actualizar docs** _(rapido)_`
 
 ---
 
-## Todos los pasos completados
+## Prueba local
 
-No quedan checkboxes pendientes en plan.md. Transición:
+Todos los pasos están verificados en el ambiente de tests. El orquestador prepara la prueba con el dev:
+
+> **Orquestador → Dev:** Todos los pasos verificados en CI. Probá localmente antes de commitear:
+> 
+> ```bash
+> sdd doctor
+> ```
+> 
+> Esto debe mostrar el estado de hooks, dependencias (incluyendo better-sqlite3, gh, glab) y configuración del proyecto. Confirmá que el output es el esperado.
+
+**Dev:** Corre `sdd doctor` en un repo con sddkit. El comando lista:
+- ✓ Hooks: pre-commit configurado
+- ⚠ Dependencias: better-sqlite3 (OK), gh (OK), glab (falta)
+- ✓ Config: .sdd/config.json presente
+
+**Dev:** "Funciona. Glab lo instalaré después de mergear. Listos para commitear."
+
+El orquestador commitea con mensaje convencional:
+
+```bash
+$ git add src/commands/doctor.js tests/doctor.test.js && git commit -m "feat(doctor): agregar comando sdd doctor para diagnosticar estado del repo"
+```
+
+---
+
+## Transición a cierre
+
+Todos los checkboxes de plan.md están marcados. El orquestador cierra la tarea:
 
 ```
 $ sdd task status 003 done

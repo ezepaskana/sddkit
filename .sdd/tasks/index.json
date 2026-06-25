@@ -1,5 +1,5 @@
 {
-  "nextId": 6,
+  "nextId": 7,
   "tasks": [
     {
       "id": "001",
@@ -40,6 +40,14 @@
       "status": "done",
       "createdAt": "2026-06-22",
       "updatedAt": "2026-06-22"
+    },
+    {
+      "id": "006",
+      "dir": "006-ajustar-el-flujo-post-ejecucion-sdd",
+      "title": "Ajustar el flujo post-ejecución SDD para que: (1) los worker…",
+      "status": "in-progress",
+      "createdAt": "2026-06-24",
+      "updatedAt": "2026-06-24"
     }
   ]
 }

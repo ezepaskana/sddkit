@@ -13,3 +13,9 @@ El reporte del subagente es un claim, no una prueba. El orquestador corre la ver
 ## Modelo por nivel
 
 `rapido`/`medio`/`fuerte` → `.sdd/config.json → models`. La primera vez, verificá que esos modelos existan en tu runtime; si no, corregí el archivo con los disponibles.
+
+## NO commitear
+
+Los workers **NO deben ejecutar** `git add`, `git commit`, `git push` ni ningún comando git que modifique el historial. Los cambios quedan como modificaciones locales: archivos modificados sin staged (unstaged) y archivos nuevos sin tracking (untracked).
+
+El dev necesita ver los diffs limpios para probar localmente antes de que se commitee. El commit lo hace el orquestador **solo después** de que el dev confirme que probó y está OK.

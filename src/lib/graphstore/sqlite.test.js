@@ -36,6 +36,16 @@ test('missing-dependency (sqlite): import inyectado que rechaza → {ok:false, r
   assert.deepEqual(res, { ok: false, reason: 'missing-dependency', install: 'npm i better-sqlite3' });
 });
 
+test('missing-dependency (sqlite, CJS style): error con code MODULE_NOT_FOUND → {ok:false, reason:missing-dependency, install}', async () => {
+  const err = new Error('Cannot find module');
+  err.code = 'MODULE_NOT_FOUND';
+  const res = await createGraphStore(
+    { graph: { driver: 'sqlite' } },
+    { importSqlite: () => Promise.reject(err) },
+  );
+  assert.deepEqual(res, { ok: false, reason: 'missing-dependency', install: 'npm i better-sqlite3' });
+});
+
 test('mysql sin config.mysql.urlEnv → {ok:false, reason:missing-env, envVar:undefined}', async () => {
   const res = await createGraphStore({ graph: { driver: 'mysql' } });
   assert.deepEqual(res, { ok: false, reason: 'missing-env', envVar: undefined });

@@ -1,6 +1,8 @@
 import os from 'node:os';
 import fs from 'node:fs';
 import path from 'node:path';
+import { createRequire } from 'node:module';
+const _req = createRequire(import.meta.url);
 
 /**
  * Resuelve la ruta del archivo SQLite a partir de `config.sqlite?.path`:
@@ -70,7 +72,7 @@ function rowToSystem(row) {
  * `{ok:false, reason:'missing-dependency'}` (ADR-0008).
  */
 export async function createSqliteStore(config, deps = {}) {
-  const importSqlite = deps.importSqlite || (() => import('better-sqlite3'));
+  const importSqlite = deps.importSqlite || (() => Promise.resolve().then(() => ({ default: _req('better-sqlite3') })));
   const dbPath = resolveDbPath(config);
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 

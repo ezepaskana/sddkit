@@ -165,3 +165,49 @@ test('doctor: sdd-bootstrap global ausente sigue sugiriendo `sdd setup` (no sdd 
     process.env.HOME = originalHome;
   }
 });
+
+// Tests para chequeo de better-sqlite3 en doctor con patrón inyectable deps.requireSqlite
+
+// Test 1: graph.driver === 'sqlite' + deps.requireSqlite que resuelve → output contiene "better-sqlite3 disponible"
+test('doctor: graph.driver === sqlite + deps.requireSqlite sin error → output contiene "better-sqlite3 disponible"', async () => {
+  const root = tmpRepo();
+  setupRepoWithConfig(root, { graph: { driver: 'sqlite' } });
+
+  const deps = { requireSqlite: () => {} };
+  const { logs } = await withCapturedLogs(() => doctor(root, deps));
+  const full = logs.join('\n');
+
+  assert.ok(
+    full.includes('better-sqlite3 disponible'),
+    `Se esperaba "better-sqlite3 disponible" en salida, salida: ${full}`
+  );
+});
+
+// Test 2: graph.driver === 'sqlite' + deps.requireSqlite que lanza → output contiene "better-sqlite3 no encontrado"
+test('doctor: graph.driver === sqlite + deps.requireSqlite lanza → output contiene "better-sqlite3 no encontrado"', async () => {
+  const root = tmpRepo();
+  setupRepoWithConfig(root, { graph: { driver: 'sqlite' } });
+
+  const deps = { requireSqlite: () => { throw new Error('not found'); } };
+  const { logs } = await withCapturedLogs(() => doctor(root, deps));
+  const full = logs.join('\n');
+
+  assert.ok(
+    full.includes('better-sqlite3 no encontrado'),
+    `Se esperaba "better-sqlite3 no encontrado" en salida, salida: ${full}`
+  );
+});
+
+// Test 3: Sin graph configurado (config default) → output NO contiene "better-sqlite3"
+test('doctor: sin graph configurado → output NO contiene "better-sqlite3"', async () => {
+  const root = tmpRepo();
+  setupRepoWithConfig(root); // Sin segundo arg, sin field graph
+
+  const { logs } = await withCapturedLogs(() => doctor(root));
+  const full = logs.join('\n');
+
+  assert.ok(
+    !full.includes('better-sqlite3'),
+    `Se esperaba que "better-sqlite3" NO esté en salida, salida: ${full}`
+  );
+});

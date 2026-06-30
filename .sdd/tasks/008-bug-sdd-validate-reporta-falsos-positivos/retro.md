@@ -16,7 +16,7 @@
 - Detectar en el análisis que `genComponents` NO genera la tabla secundaria (lo hace un agente de IA) fue importante para no ir por el fix incorrecto.
 
 **No anticipó bien:**
-- La spec podría haber explicitado el workaround conocido del título `…` en `retro.md` como paso del plan (ya son 5 tareas con el mismo workaround manual). No es un fallo de la spec de esta tarea, pero sí evidencia que el fix del gate sigue pendiente.
+- La spec podría haber explicitado el workaround conocido del título truncado en `retro.md` como paso del plan (ya son 5 tareas con el mismo workaround manual). No es un fallo de la spec de esta tarea, pero sí evidencia que el fix del gate sigue pendiente.
 
 ## Desvíos del plan
 
@@ -32,7 +32,7 @@ Ninguno. Los 4 pasos se ejecutaron en orden, sin replanificación ni bloqueos:
 
 - **Fix de bug de pre-commit en sddkit requiere test de regresión en la misma tarea.** `validate.js` no tenía ningún test antes de esta tarea. En proyectos como sddkit (herramienta de desarrollo, no de producción), el pre-commit es la única señal que el dev ve en cada commit — un falso positivo allí es ruido constante que erosiona la confianza en toda la herramienta. Cualquier fix de `validate.js` debe venir con test.
 
-- **Workaround de `…` en título de retro.md sigue activo (5 tareas acumuladas).** Este workaround manual (editar el título para quitar `…`) se repite desde la tarea 005. El fix real está documentado en LEARNINGS pero no se planificó. Próxima oportunidad: incluirlo como deuda técnica explícita o resolverlo en la primera tarea que toque `task.js`.
+- **Workaround del título truncado en retro.md sigue activo (5 tareas acumuladas).** El check del gate detecta el caracter de truncado como placeholder sin completar. Se repite desde la tarea 005. El fix real está documentado en LEARNINGS pero no se planificó. Próxima oportunidad: incluirlo como deuda técnica explícita o resolverlo en la primera tarea que toque `task.js`.
 
 ## Que para el catalogo, el dominio o la arquitectura
 

@@ -43,7 +43,8 @@ export async function validate(root, flags) {
   // 2. Drift estructural: components.md vs realidad del repo.
   const compDoc = read(join(root, '.sdd', 'c4', 'components.md'));
   if (compDoc) {
-    const docDirs = [...compDoc.matchAll(/^\| `([^`]+)` \|/gm)].map((m) => m[1]);
+    const mainTable = compDoc.split(/^#{2,3}\s/m)[0];
+    const docDirs = [...mainTable.matchAll(/^\| `([^`]+)` \|/gm)].map((m) => m[1]);
     const { srcRoot, groups } = componentGroups(files);
     const current = Object.keys(groups).map((d) => (srcRoot && d !== '(raíz)' ? `${srcRoot}/${d}` : d));
     for (const d of current) {

@@ -1,5 +1,5 @@
 {
-  "nextId": 9,
+  "nextId": 10,
   "tasks": [
     {
       "id": "001",
@@ -64,6 +64,14 @@
       "status": "done",
       "createdAt": "2026-06-25",
       "updatedAt": "2026-06-25"
+    },
+    {
+      "id": "009",
+      "dir": "008-bug-sdd-validate-reporta-falsos-positivos",
+      "title": "Bug: sdd validate reporta falsos positivos de drift para pro…",
+      "status": "done",
+      "createdAt": "2026-06-28",
+      "updatedAt": "2026-06-30"
     }
   ]
 }

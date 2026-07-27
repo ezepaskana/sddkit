@@ -30,6 +30,11 @@ cd /ruta/a/sddkit && npm link
 
 En Windows: `node C:\ruta\a\sddkit\bin\sdd.js <comando>` desde la raíz de tu repo.
 
+**`npm link` falla con un error de permisos** (`EACCES`, o intenta escribir en `/usr/local` o crear una carpeta que no existe)**:** el prefix global de npm no es escribible por tu usuario. Soluciones, de más a menos recomendada:
+
+- Usar [nvm](https://github.com/nvm-sh/nvm) para instalar Node — su prefix ya vive en tu home y no necesita permisos especiales.
+- O apuntar el prefix global a una carpeta propia: `npm config set prefix ~/.npm-global` y agregar `~/.npm-global/bin` al `PATH` (en tu `~/.zshrc`/`~/.bashrc`, no en un `.npmrc` del proyecto — npm no permite fijar `prefix` a nivel de proyecto).
+
 ## Uso
 
 ```bash

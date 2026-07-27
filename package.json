@@ -36,7 +36,7 @@
   },
   "optionalDependencies": {
     "better-sqlite3": "^13.0.1",
-    "mysql2": "^3.9.0"
+    "mysql2": "^3.23.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

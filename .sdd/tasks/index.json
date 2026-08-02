@@ -1,5 +1,5 @@
 {
-  "nextId": 17,
+  "nextId": 18,
   "tasks": [
     {
       "id": "010",
@@ -65,6 +65,16 @@
       "createdAt": "2026-08-02",
       "updatedAt": "2026-08-02",
       "tipo": "bug",
+      "riesgo": "bajo"
+    },
+    {
+      "id": "017",
+      "dir": "017-necesito-que-siempre-me-responda-en",
+      "title": "necesito que siempre me responda en pocas palabras simples, …",
+      "status": "planned",
+      "createdAt": "2026-08-02",
+      "updatedAt": "2026-08-02",
+      "tipo": "feature",
       "riesgo": "bajo"
     }
   ]

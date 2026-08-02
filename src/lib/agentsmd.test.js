@@ -133,3 +133,36 @@ test('buildBlock: Preferencias de respuesta incluye BR-063 (instrucción context
   assert.ok(preferencesSection.includes('TERMINAL_EMULATOR=JetBrains-JediTerm'), 'La sección debería incluir "TERMINAL_EMULATOR=JetBrains-JediTerm"');
   assert.ok(preferencesSection.includes('TERM_PROGRAM=vscode'), 'La sección debería incluir "TERM_PROGRAM=vscode"');
 });
+
+test('buildBlock: Preferencias de respuesta incluye BR-064/BR-066 (resumen corto + opciones, detalle en archivo)', () => {
+  const result = buildBlock({ name: 'demo' }, { decisions: [] }, '2026-08-01');
+
+  const preferencesStart = result.indexOf('## Preferencias de respuesta');
+  assert.ok(preferencesStart !== -1, 'La sección "Preferencias de respuesta" debería existir');
+
+  const nextSectionStart = result.indexOf('\n## ', preferencesStart + 1);
+  const preferencesSection = nextSectionStart !== -1
+    ? result.substring(preferencesStart, nextSectionStart)
+    : result.substring(preferencesStart);
+
+  assert.match(
+    preferencesSection,
+    /150 palabras/,
+    'La sección debería declarar el presupuesto de 150 palabras del resumen (BR-064)'
+  );
+  assert.match(
+    preferencesSection,
+    /opciones/i,
+    'La sección debería pedir opciones numeradas para que el dev elija (BR-064)'
+  );
+  assert.match(
+    preferencesSection,
+    /esper/i,
+    'La sección debería indicar que el agente espera la elección antes de seguir (BR-064)'
+  );
+  assert.match(
+    preferencesSection,
+    /archivo/i,
+    'La sección debería indicar que el detalle va a un archivo, no al chat (BR-064)'
+  );
+});

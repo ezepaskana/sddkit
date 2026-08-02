@@ -2,28 +2,62 @@
 
 > `/sdd-analyze ¿por qué sdd task verify falla con "no tiene línea de Verificación" en pasos que claramente la tienen?`
 
-## Qué está pasando
+---
 
-`sdd task verify <id> <n>` reporta que el paso no tiene línea de Verificación aunque `plan.md` la tiene bien escrita. Mismo síntoma en `sdd task brief`: el subagente recibe un "Tu paso" cortado a la mitad. No falla en todos: solo en los pasos cuyos sub-ítems usan un marcador de lista que el extractor no contempla.
+## 1. Al chat
 
-## Por qué pasa (causa raíz)
+> `stepBlock` (`src/commands/task.js`) recorta el paso siguiendo el regex `/^\s+(-|\d+\.) /`. Con cualquier otro marcador de sub-lista (`a)`, `b)`) el bloque se **trunca antes** de llegar a `**Verificación:**` — por eso falla solo en algunos pasos. `sdd task brief` tiene el mismo síntoma: le entrega el paso cortado al subagente.
+>
+> `.sdd/LEARNINGS.md` ya registra este modo de falla en la tarea 004: el fix de entonces fue extender el regex para `N. `. Reapareció con un formato nuevo.
+>
+> ¿Qué querés ver?
+>
+> 1. El fix que propongo (3 pasos, con test de regresión)
+> 2. Cómo reproducirlo
+> 3. Qué otros consumidores de `stepBlock` pueden estar afectados
+>
+> Detalle en `.sdd/notes/stepblock-truncado.md`.
 
-`stepBlock` (`src/commands/task.js`) recorta el bloque siguiendo líneas indentadas que arranquen con `- ` o `N. ` — regex `/^\s+(-|\d+\.) /`. Con cualquier otro marcador (p. ej. `a)` / `b)`) el bloque se **trunca antes** de llegar a `**Verificación:**`, así que:
+**118 palabras.** Causa raíz con `archivo:línea` + menú. No adelanta el fix hasta que el dev lo pide.
 
-- `sdd task verify` no la encuentra → falla.
-- `sdd task brief` entrega un paso incompleto al subagente.
+---
 
-`.sdd/LEARNINGS.md` (tarea 004) ya documenta este modo de falla: el fix de entonces fue extender el regex para `N. `. La reaparición sugiere un formato nuevo de sub-lista.
+## 2. A la nota (`.sdd/notes/stepblock-truncado.md`)
 
-## Archivos
+```markdown
+# stepBlock trunca el paso según el marcador de sub-lista
 
-- `src/commands/task.js` → `stepBlock` (el truncado ocurre acá) y sus dos consumidores, `verify` y `brief`.
-- `.sdd/LEARNINGS.md` → entrada de la tarea 004 con la receta.
+**Estado:** en curso · **Última sesión:** 2026-08-02
 
-## Fix sugerido (descrito, no aplicado)
+## Conclusión hasta ahora
+Causa raíz confirmada: el regex de `stepBlock` solo contempla `- ` y `N. `.
+Es una reaparición del bug de la tarea 004, con un marcador nuevo.
 
+## Decisiones del dev
+- (pendiente)
+
+## Detalle
+### Síntoma
+`sdd task verify <id> <n>` reporta "no tiene línea de Verificación" con el plan bien escrito.
+
+### Archivos
+- `src/commands/task.js` → `stepBlock` (el truncado ocurre acá)
+- consumidores: `verify` (falla) y `brief` (entrega un paso incompleto, sin error visible)
+- `.sdd/LEARNINGS.md` → entrada de la tarea 004 con la receta
+
+### Fix sugerido (descrito, NO aplicado — standalone es read-only)
 1. Reproducir con un `plan.md` cuyo paso use el marcador sospechoso.
 2. Extender el regex de `stepBlock` a ese formato, conservando `- ` y `N. `.
-3. Test de regresión con sub-listas mezcladas que verifique que el bloque llega hasta `**Verificación:**`.
+3. Test de regresión con sub-listas mezcladas: el bloque debe llegar hasta `**Verificación:**`.
 
-> ¿Listo para arreglarlo? Corré `/sdd-task` con: "que `stepBlock` no trunque el paso cuando los sub-ítems usan \<formato\>, con test de regresión". Es un `bug`: reproducción + test rojo + fix.
+## Abierto
+- [ ] ¿Conviene invertir la lógica (cortar en el próximo `- [ ] **N.`) en vez de enumerar marcadores?
+```
+
+---
+
+## Handoff
+
+Cuando el dev decide arreglarlo:
+
+> Corré `/sdd-task` con: "que `stepBlock` no trunque el paso cuando los sub-ítems usan `<formato>`, con test de regresión". Es un `bug`: reproducción + test rojo + fix.

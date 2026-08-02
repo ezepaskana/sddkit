@@ -11,69 +11,82 @@ export function buildBlock(stack, cat, date) {
 
 ## Triggers automáticos de skills
 
-Cuando el usuario escriba un mensaje, ejecutá automáticamente:
+Ejecutá \`/sdd-task\` ante pedidos de cambio (agregar, crear, implementar, arreglar, mejorar, refactor, "quiero que X haga Y") y \`/sdd-analyze\` ante preguntas sin pedido de cambio (¿, cómo, por qué, investigar, explicar). Ambiguo → preguntale al dev: (a) implementar, (b) investigar, (c) solo charlar.
 
-- **\`/sdd-task\`** si la intención principal es un cambio: _agregar, crear, implementar, cambiar, refactor, bug, arreglar, corregir, mejorar, modificar, configurar, ajustar, extender, aumentar, reducir, "quiero/necesito que X haga/sea Y", "hacer que"_
-- **\`/sdd-analyze\`** si la intención es SOLO entender, sin pedir ningún cambio: _¿, cómo, por qué, investigar, entender, verificar, saber, explicar, "cuál es la causa", "qué hace"_
-- **Si no estás seguro** de cuál aplicar (el mensaje mezcla investigación con pedido de cambio, o es ambiguo), **preguntale al usuario** con tres opciones: (a) Implementar un cambio → sdd-task, (b) Investigar/analizar → sdd-analyze, (c) Solo charlar sin SDD
+## Preferencias de respuesta
+
+Responde siempre de forma breve y directa. Evitá explicaciones largas o preámbulos salvo que se pidan explícitamente. Priorizá código y respuestas cortas sobre prosa extensa.
+
+Para mostrarle un archivo al dev, mirá el contexto de terminal: si es la terminal embebida de un IDE (\`TERMINAL_EMULATOR=JetBrains-JediTerm\` o \`TERM_PROGRAM=vscode\`), mostralo en ese mismo IDE; si es una terminal standalone, abrilo con el comando de \`.sdd/config.json → ui.opener\` si está configurado (\`<opener> "<ruta>"\`); sin \`ui.opener\`, usá tu comportamiento default.
 
 ## Ante dudas o incongruencias: preguntale al dev
 
-Preguntar no es una falla — es la respuesta correcta cuando algo no cierra. Si encontrás un requisito que contradice el código existente, una instrucción que violaría una convención del catálogo o una regla de negocio/ADR ya documentada, información que falta o es ambigua, o cualquier otra cosa que simplemente no tiene sentido, **frená y preguntale al dev antes de seguir** — no avances con una suposición. Las decisiones menores que el buen juicio normal resuelve no necesitan esto: esas resolvélas vos y seguí.
+Preguntar no es una falla. Si un requisito contradice el código, una instrucción violaría el catálogo o una regla BR/ADR documentada, falta información o algo no tiene sentido, **frená y preguntale al dev antes de seguir** — no avances con una suposición. Las decisiones menores resolvélas con buen juicio normal y seguí.
 
 ## Arquitectura (modelo C4 vivo)
 
-Antes de hacer cambios estructurales, leé la documentación de arquitectura en \`.sdd/c4/\`:
-
-- \`.sdd/LEARNINGS.md\` — aprendizajes curados de tareas anteriores (LEELO PRIMERO si existe)
-- \`.sdd/domain.md\` — glosario, entidades y **reglas de negocio (BR-NNN): vinculantes igual que el catálogo**; las specs las citan por ID
-- \`.sdd/decisions/\` — ADRs: el porqué de las decisiones de arquitectura; no contradigas una aceptada sin ADR nuevo
-- \`.sdd/c4/context.md\` — qué es el sistema y con qué se integra
-- \`.sdd/c4/containers.md\` — unidades desplegables y stores de datos
-- \`.sdd/c4/components.md\` — módulos internos y sus roles
-
-Si tu cambio modifica la arquitectura (nuevo módulo, nueva dependencia externa, nuevo store de datos), **actualizá esos archivos como parte del mismo cambio**. Las preguntas abiertas del proyecto están indexadas en \`.sdd/QUESTIONS.md\` junto con las fuentes de documentación existente del repo: usá esas fuentes (y el código) para responderlas cuando tengas contexto, escribiendo las respuestas en los docs C4. Lo que no puedas responder con certeza, preguntáselo al dev.
+Antes de cambios estructurales, leé \`.sdd/c4/\` (context, containers, components), \`.sdd/domain.md\` (glosario + **reglas BR-NNN, vinculantes**), \`.sdd/decisions/\` (ADRs: no contradigas una aceptada sin ADR nuevo) y \`.sdd/LEARNINGS.md\` (leelo primero si existe). Si tu cambio toca la arquitectura, **actualizá esos docs en el mismo cambio**. Preguntas abiertas en \`.sdd/QUESTIONS.md\`: respondelas con el código si podés, si no preguntale al dev.
 
 ## Catálogo de convenciones validadas
 
-Estas decisiones fueron validadas por el equipo. **Cumplilas siempre** — no introduzcas variantes nuevas de un topic ya decidido:
+Decisiones ya validadas por el equipo. **Cumplilas siempre** — no introduzcas variantes nuevas de un topic decidido:
 
 ${renderCatalogMd(cat)}
 
-Hay candidatos pendientes de decisión en \`.sdd/patterns.json\`. Si tu tarea toca un topic pendiente (hay más de una forma de hacerlo en el código), **preguntale al dev cuál variante usar antes de implementar** y sugerile registrarla con \`sdd decide\`.
+Topics pendientes en \`.sdd/patterns.json\`: preguntale al dev cuál variante usar y sugerile \`sdd decide\`.
 
 ## Flujo SDD (spec-driven development)
 
-Para cualquier tarea no trivial (feature, endpoint, módulo, refactor), aplicá este flujo **automáticamente, sin que te lo pidan**:
-
-El flujo deja artefactos en \`.sdd/tasks/<id>/\` (requirement.md verbatim, analysis.md con análisis crítico, spec.md refinada, plan.md con pasos) que permiten pausar, retomar en otra sesión y auditar:
-
-1. **Capturar** — \`sdd task new "<requisito verbatim del dev>"\` y seguí el contrato que imprime.
-2. **Analizar** — análisis CRÍTICO en analysis.md: el requisito es una hipótesis (¿ya existe?, ¿hay algo más simple?, ¿riesgos? — recomendación honesta, incluso "reconsiderar"), clarificación sin límite de preguntas (en tandas, registradas en analysis.md), métrica de impacto si aplica (baseline → resultado esperado) → **aprobación del dev** → \`sdd task status <id> analyzed\`.
-3. **Spec** — spec refinada en spec.md: historia, criterios EARS, reglas de negocio, fuera de alcance, impacto en arquitectura → **aprobación del dev** → \`sdd task status <id> specified\`.
-4. **Plan** — pasos chicos verificables en plan.md (tests antes que implementación; nivel de modelo por paso: \`rapido\`/\`medio\`/\`fuerte\`, mapeados a modelos concretos en \`.sdd/config.json → models\`) → **aprobación del dev** → \`sdd task status <id> planned\`.
-5. **Ejecutar (orquestador/workers)** — \`sdd task status <id> in-progress\`. El agente principal NO implementa: lanza cada paso (incluidos los \`fuerte\`) en un subagente fresco con el modelo de su nivel, que lee los archivos de la tarea por sí mismo. El orquestador verifica cada resultado y recién entonces marca el checkbox. Subagente bloqueado → devuelve la pregunta, el orquestador la resuelve con el dev y la registra en analysis.md. Pausar: \`sdd task status <id> paused\`. Retomar: \`sdd task show <id>\`.
-6. **Cierre con retro** — \`sdd task status <id> done\` exige retro.md completa: resultado de la métrica vs baseline, desvíos del plan, aprendizajes. Cosechá los generales a \`.sdd/LEARNINGS.md\` (curado, máx ~30) y promové lo reusable al catálogo o los docs C4. Así cada tarea mejora a las siguientes. El pre-commit corre \`sdd validate\` solo.
+Para tarea no trivial, aplicá **automáticamente**: \`sdd task new "<requisito verbatim>"\` y seguí el contrato que imprime. El detalle de cada fase vive en las skills \`sdd-task\`/\`sdd-analyze\`/\`sdd-specify\`/\`sdd-plan\`/\`sdd-execute\`/\`sdd-close\` — seguilas, no lo repitas de memoria.
 ${END}`;
 }
 
-/** Crea o actualiza AGENTS.md sin tocar contenido ajeno al bloque gestionado. */
+const LAST_UPDATED_RE = /Última actualización: \d{4}-\d{2}-\d{2}/;
+
+/** Normaliza la fecha del comentario "Última actualización: YYYY-MM-DD" para poder
+ *  comparar dos versiones del bloque gestionado sin que la fecha cuente como cambio. */
+function normalizeLastUpdated(text) {
+  return text.replace(LAST_UPDATED_RE, 'Última actualización: 0000-00-00');
+}
+
+/** Crea o actualiza CLAUDE.md sin tocar contenido ajeno al bloque gestionado.
+ *  Migración: si AGENTS.md tiene un bloque gestionado previo (legacy), se limpia
+ *  de ahí (preservando su contenido manual) y el bloque vigente pasa a CLAUDE.md.
+ *
+ *  Retorno: `string | null`. Si ya existía CLAUDE.md con bloque gestionado y el
+ *  contenido nuevo es idéntico al existente (ignorando la fecha de "Última
+ *  actualización:"), no escribe nada (se preserva la fecha vieja) y devuelve
+ *  `null` como señal de "sin cambios". En cualquier otro caso (creado, agregado
+ *  al final, o bloque gestionado con contenido distinto) escribe y devuelve el
+ *  string de acción. */
 export function upsertAgentsMd(root, stack, cat, date) {
-  const p = join(root, 'AGENTS.md');
+  const agentsPath = join(root, 'AGENTS.md');
+  const claudePath = join(root, 'CLAUDE.md');
   const block = buildBlock(stack, cat, date);
-  const existing = read(p);
+
+  const agentsExisting = read(agentsPath);
+  if (agentsExisting !== null && agentsExisting.includes(BEGIN) && agentsExisting.includes(END)) {
+    const cleaned = agentsExisting.slice(0, agentsExisting.indexOf(BEGIN))
+      + agentsExisting.slice(agentsExisting.indexOf(END) + END.length);
+    write(agentsPath, cleaned);
+  }
+
+  const existing = read(claudePath);
   let next;
   let action;
   if (existing === null) {
-    next = `# AGENTS.md — ${stack.name}\n\n${stack.description ? stack.description + '\n\n' : ''}${block}\n`;
+    next = `# CLAUDE.md — ${stack.name}\n\n${stack.description ? stack.description + '\n\n' : ''}${block}\n`;
     action = 'creado';
   } else if (existing.includes(BEGIN) && existing.includes(END)) {
     next = existing.slice(0, existing.indexOf(BEGIN)) + block + existing.slice(existing.indexOf(END) + END.length);
+    if (normalizeLastUpdated(next) === normalizeLastUpdated(existing)) {
+      return null;
+    }
     action = 'bloque gestionado actualizado (el resto quedó intacto)';
   } else {
     next = existing.trimEnd() + '\n\n' + block + '\n';
     action = 'bloque gestionado agregado al final (contenido previo intacto)';
   }
-  write(p, next);
+  write(claudePath, next);
   return action;
 }

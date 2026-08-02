@@ -41,49 +41,21 @@ function withCapturedLogs(fn) {
     .finally(() => { console.log = originalLog; });
 }
 
-test('doctor: sin .git/hooks/post-commit → loguea "ausente"', async () => {
-  const root = tmpRepo();
-  setupRepoWithConfig(root);
+test('doctor: ya no reporta nada sobre "post-commit" (hook retirado, BR-023/027/028 supersedidas)', async () => {
+  // Caso sin hook instalado
+  const root1 = tmpRepo();
+  setupRepoWithConfig(root1);
+  const { logs: logs1 } = await withCapturedLogs(() => doctor(root1));
+  const full1 = logs1.join('\n');
+  assert.ok(!full1.includes('post-commit'), `No se esperaba mención de "post-commit" sin hook instalado, salida: ${full1}`);
 
-  const { logs } = await withCapturedLogs(() => doctor(root));
-  const full = logs.join('\n');
-
-  assert.ok(
-    full.includes('post-commit hook (auto-publish) ausente'),
-    `Se esperaba mensaje de "ausente", salida: ${full}`
-  );
-});
-
-test('doctor: .git/hooks/post-commit instalado vía installPostCommit → loguea "activo"', async () => {
-  const root = tmpRepo();
-  setupRepoWithConfig(root);
-
-  // Instalar el hook post-commit
-  installPostCommit(root);
-
-  const { logs } = await withCapturedLogs(() => doctor(root));
-  const full = logs.join('\n');
-
-  assert.ok(
-    full.includes('post-commit hook (auto-publish) activo'),
-    `Se esperaba mensaje de "activo", salida: ${full}`
-  );
-});
-
-test('doctor: cfg.hooks.autoPublish = false → loguea "desactivado por config"', async () => {
-  const root = tmpRepo();
-  setupRepoWithConfig(root, { hooks: { preCommit: true, autoPublish: false } });
-
-  // Aunque instalemos el hook, si autoPublish es false debería reportar como desactivado
-  installPostCommit(root);
-
-  const { logs } = await withCapturedLogs(() => doctor(root));
-  const full = logs.join('\n');
-
-  assert.ok(
-    full.includes('post-commit hook (auto-publish) desactivado por config'),
-    `Se esperaba mensaje de "desactivado por config", salida: ${full}`
-  );
+  // Caso con el hook legacy instalado (installPostCommit) — doctor no debe mencionarlo ni para bien ni para mal
+  const root2 = tmpRepo();
+  setupRepoWithConfig(root2);
+  installPostCommit(root2);
+  const { logs: logs2 } = await withCapturedLogs(() => doctor(root2));
+  const full2 = logs2.join('\n');
+  assert.ok(!full2.includes('post-commit'), `No se esperaba mención de "post-commit" con el hook legacy presente, salida: ${full2}`);
 });
 
 // Nuevos tests para caso 1: Config version desactualizada sugiere `sdd sync`
@@ -111,20 +83,6 @@ test('doctor: pre-commit hook ausente sugiere `sdd sync`', async () => {
   assert.ok(
     full.includes('pre-commit hook ausente') && full.includes('sdd sync'),
     `Se esperaba "sdd sync" en la línea de pre-commit ausente, salida: ${full}`
-  );
-});
-
-// Nuevo test para caso 3: post-commit hook ausente sugiere `sdd sync` (extender test existente)
-test('doctor: post-commit hook ausente sugiere `sdd sync`', async () => {
-  const root = tmpRepo();
-  setupRepoWithConfig(root);
-
-  const { logs } = await withCapturedLogs(() => doctor(root));
-  const full = logs.join('\n');
-
-  assert.ok(
-    full.includes('post-commit hook (auto-publish) ausente') && full.includes('sdd sync'),
-    `Se esperaba "sdd sync" en la línea de post-commit ausente, salida: ${full}`
   );
 });
 
@@ -166,48 +124,68 @@ test('doctor: sdd-bootstrap global ausente sigue sugiriendo `sdd setup` (no sdd 
   }
 });
 
-// Tests para chequeo de better-sqlite3 en doctor con patrón inyectable deps.requireSqlite
+// Tests para deprecación de graph.driver "sqlite" (ADR-0011, BR-049) y detección
+// heurística de CI/CD corriendo `sdd publish` cuando graph.driver === "mysql".
 
-// Test 1: graph.driver === 'sqlite' + deps.requireSqlite que resuelve → output contiene "better-sqlite3 disponible"
-test('doctor: graph.driver === sqlite + deps.requireSqlite sin error → output contiene "better-sqlite3 disponible"', async () => {
+test('doctor: graph.driver === sqlite → reporta ERROR de deprecación (ADR-0011)', async () => {
   const root = tmpRepo();
   setupRepoWithConfig(root, { graph: { driver: 'sqlite' } });
 
-  const deps = { requireSqlite: () => {} };
-  const { logs } = await withCapturedLogs(() => doctor(root, deps));
+  const { logs } = await withCapturedLogs(() => doctor(root));
   const full = logs.join('\n');
 
   assert.ok(
-    full.includes('better-sqlite3 disponible'),
-    `Se esperaba "better-sqlite3 disponible" en salida, salida: ${full}`
+    full.includes('✖ graph.driver: "sqlite" está deprecado (ver ADR-0011) — migrá a "mysql" + CI/CD'),
+    `Se esperaba el error de deprecación de sqlite, salida: ${full}`
   );
 });
 
-// Test 2: graph.driver === 'sqlite' + deps.requireSqlite que lanza → output contiene "better-sqlite3 no encontrado"
-test('doctor: graph.driver === sqlite + deps.requireSqlite lanza → output contiene "better-sqlite3 no encontrado"', async () => {
-  const root = tmpRepo();
-  setupRepoWithConfig(root, { graph: { driver: 'sqlite' } });
-
-  const deps = { requireSqlite: () => { throw new Error('not found'); } };
-  const { logs } = await withCapturedLogs(() => doctor(root, deps));
-  const full = logs.join('\n');
-
-  assert.ok(
-    full.includes('better-sqlite3 no encontrado'),
-    `Se esperaba "better-sqlite3 no encontrado" en salida, salida: ${full}`
-  );
-});
-
-// Test 3: Sin graph configurado (config default) → output NO contiene "better-sqlite3"
-test('doctor: sin graph configurado → output NO contiene "better-sqlite3"', async () => {
+test('doctor: sin graph configurado → NO menciona sqlite ni mysql', async () => {
   const root = tmpRepo();
   setupRepoWithConfig(root); // Sin segundo arg, sin field graph
 
   const { logs } = await withCapturedLogs(() => doctor(root));
   const full = logs.join('\n');
 
+  assert.ok(!full.includes('sqlite'), `No se esperaba mención de "sqlite" sin graph configurado, salida: ${full}`);
+  assert.ok(!full.includes('mysql'), `No se esperaba mención de "mysql" sin graph configurado, salida: ${full}`);
+});
+
+test('doctor: graph.driver === mysql + CI/CD detectado (.github/workflows corriendo sdd publish) → "✓ CI/CD detectado corriendo sdd publish"', async () => {
+  const root = tmpRepo();
+  setupRepoWithConfig(root, { graph: { driver: 'mysql', mysql: { urlEnv: 'X' } } });
+
+  const workflowsDir = join(root, '.github', 'workflows');
+  fs.mkdirSync(workflowsDir, { recursive: true });
+  fs.writeFileSync(join(workflowsDir, 'ci.yml'), [
+    'name: CI',
+    'on: push',
+    'jobs:',
+    '  publish:',
+    '    steps:',
+    '      - run: sdd publish',
+    '',
+  ].join('\n'));
+
+  const { logs } = await withCapturedLogs(() => doctor(root));
+  const full = logs.join('\n');
+
   assert.ok(
-    !full.includes('better-sqlite3'),
-    `Se esperaba que "better-sqlite3" NO esté en salida, salida: ${full}`
+    full.includes('✓ CI/CD detectado corriendo sdd publish'),
+    `Se esperaba detección de CI/CD corriendo sdd publish, salida: ${full}`
+  );
+});
+
+test('doctor: graph.driver === mysql + sin CI/CD detectado → warning (ver BR-050)', async () => {
+  const root = tmpRepo();
+  setupRepoWithConfig(root, { graph: { driver: 'mysql', mysql: { urlEnv: 'X' } } });
+  // Sin ningún archivo de CI (.github/workflows, .gitlab-ci.yml, Jenkinsfile)
+
+  const { logs } = await withCapturedLogs(() => doctor(root));
+  const full = logs.join('\n');
+
+  assert.ok(
+    full.includes('⚠ Sin CI/CD detectado corriendo sdd publish — el grafo puede quedar desactualizado (ver BR-050)'),
+    `Se esperaba el warning de CI/CD ausente, salida: ${full}`
   );
 });

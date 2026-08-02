@@ -20,7 +20,7 @@ function fixture(files) {
   return { root, cleanup: () => rmSync(root, { recursive: true, force: true }) };
 }
 
-test('sdd scan: persiste capabilities.consumptions en patterns.json y "Dependencias salientes" en containers.md', async () => {
+test('sdd scan sin patterns.json previo: capabilities queda vacío y containers.md muestra placeholder de "Dependencias salientes"', async () => {
   const { root, cleanup } = fixture({
     'package.json': JSON.stringify({ name: 'demo-app', version: '1.0.0' }, null, 2),
     'src/api/plants.ts': [
@@ -33,12 +33,35 @@ test('sdd scan: persiste capabilities.consumptions en patterns.json y "Dependenc
     await scan(root, { quiet: true });
 
     const patterns = JSON.parse(readFileSync(join(root, '.sdd', 'patterns.json'), 'utf8'));
-    assert.deepEqual(patterns.capabilities.consumptions, [
-      { method: 'GET', target: '/plants', file: 'src/api/plants.ts' },
-    ]);
+    assert.deepEqual(patterns.capabilities, { endpoints: [], consumptions: [] });
 
     const containers = readFileSync(join(root, '.sdd', 'c4', 'containers.md'), 'utf8');
     assert.match(containers, /## Dependencias salientes/);
+    assert.match(containers, /_Sin dependencias salientes detectadas\._/);
+  } finally { cleanup(); }
+});
+
+test('sdd scan preserva capabilities ya presentes en .sdd/patterns.json (detectadas por sdd publish) en vez de recalcularlas', async () => {
+  const { root, cleanup } = fixture({
+    'package.json': JSON.stringify({ name: 'demo-app', version: '1.0.0' }, null, 2),
+  });
+  try {
+    const existingCapabilities = {
+      endpoints: [{ method: 'GET', path: '/health', file: 'src/api/health.ts' }],
+      consumptions: [{ method: 'GET', target: '/plants', file: 'src/api/plants.ts' }],
+    };
+    mkdirSync(join(root, '.sdd'), { recursive: true });
+    writeFileSync(
+      join(root, '.sdd', 'patterns.json'),
+      JSON.stringify({ scannedAt: '2020-01-01', filesScanned: 0, patterns: [], capabilities: existingCapabilities }, null, 2),
+    );
+
+    await scan(root, { quiet: true });
+
+    const patterns = JSON.parse(readFileSync(join(root, '.sdd', 'patterns.json'), 'utf8'));
+    assert.deepEqual(patterns.capabilities, existingCapabilities);
+
+    const containers = readFileSync(join(root, '.sdd', 'c4', 'containers.md'), 'utf8');
     assert.match(containers, /\| GET \| \/plants \| src\/api\/plants\.ts \|/);
   } finally { cleanup(); }
 });

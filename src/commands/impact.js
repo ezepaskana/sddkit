@@ -47,9 +47,9 @@ export async function impact(root, pos, flags) {
 
   try {
     if (query.system != null) {
-      const results = store.queryImpact(query);
+      const results = await store.queryImpact(query);
       if (results === null) {
-        const infraResults = store.queryInfraImpact(pos[0]);
+        const infraResults = await store.queryInfraImpact(pos[0]);
         if (infraResults.length > 0) {
           console.log(`Recurso de infra "${pos[0]}":`);
           for (const r of infraResults) {
@@ -72,7 +72,7 @@ export async function impact(root, pos, flags) {
       return;
     }
 
-    const results = store.queryImpact(query);
+    const results = await store.queryImpact(query);
     if (results.length === 0) {
       console.log(`Sin consumidores publicados hasta la fecha para ${query.method} ${normalizeRoute(query.path)}.`);
       return;
@@ -80,6 +80,6 @@ export async function impact(root, pos, flags) {
     console.log(`Consumidores de ${query.method} ${query.path}:`);
     for (const c of results) printConsumer(c);
   } finally {
-    store.close();
+    await store.close();
   }
 }

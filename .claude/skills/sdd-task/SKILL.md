@@ -3,52 +3,76 @@ name: sdd-task
 description: Flujo spec-driven development por tarea con artefactos persistentes. Usar cuando el usuario pida un cambio (crear, implementar, arreglar, mejorar, refactor, "quiero/necesito que X haga Y"). Si hay ambigüedad entre analizar y cambiar, preguntar.
 ---
 
-# sdd-task — el flujo SDD por tarea
+# sdd-task — flujo SDD adaptativo por tipo
 
-Una tarea es "no trivial" si toca más de un archivo, agrega comportamiento nuevo, o el requisito tiene cualquier ambigüedad. Para esas, NUNCA empieces a codear directo: el flujo deja artefactos en `.sdd/tasks/<id>/` que permiten pausar, retomar en otra sesión y auditar.
+El flujo se adapta al **tipo** de tarea: solo se recorren las fases (y se crean los artefactos) que ese tipo amerita. Todo queda en `.sdd/tasks/<id>/` para pausar, retomar en otra sesión y auditar.
 
-## Contexto obligatorio antes de cualquier fase (barato en tokens)
+## 0. Contexto, antes de cualquier fase
 
-1. **Corré `sdd context`**: es el destilado determinístico de reglas BR, catálogo, módulos, ADRs y aprendizajes — un output corto en vez de leer seis archivos largos. Solo abrí los archivos completos (`.sdd/domain.md`, `.sdd/c4/*`, `.sdd/decisions/*`) cuando el destilado no alcance para la decisión que estás tomando.
-2. **NO releas tareas `done`** (`.sdd/tasks/` viejas): su conocimiento útil ya está destilado en LEARNINGS (incluido en `sdd context`).
-3. Las reglas BR-NNN y el catálogo del destilado son **vinculantes**; nunca introduzcas variantes nuevas de un topic decidido.
+- Corré `sdd context`: destilado determinístico (reglas BR, catálogo, módulos, ADRs, aprendizajes, diagramas). Abrí `.sdd/domain.md`, `.sdd/c4/*` o `.sdd/decisions/*` completos solo si el destilado no alcanza.
+- **NO releas tareas `done`**: lo útil ya está destilado en LEARNINGS.
+- Las BR-NNN y el catálogo son **vinculantes**: nunca introduzcas una variante nueva de un topic ya decidido.
 
-## Las fases (cada una tiene su propia skill — leela al entrar en la fase)
+## 1. Capturar (siempre)
 
-| Fase | Skill | Salida |
+```bash
+sdd task new "<requisito verbatim del dev>"
+```
+
+Crea `requirement.md` (inmutable) y nada más. El refinamiento va en los artefactos del tipo.
+
+## 2. Clasificar (siempre) — BR-057
+
+Decidí **tipo** (`simple | bug | feature | refactor`) y **riesgo** (`bajo | alto`), anuncialo en **UNA línea** y registralo:
+
+```bash
+sdd task type <id> <tipo> [--riesgo=alto]     # crea SOLO los artefactos de ese tipo
+```
+
+> Ejemplo de anuncio: _"Lo trato como `bug` (riesgo bajo): reproduzco, test rojo, fix. Decime si preferís otro tipo."_
+
+| Tipo | Señal | Riesgo `alto` si… |
 |---|---|---|
-| 1. Capturar | (este archivo) `sdd task new "<requisito verbatim>"` | requirement.md inmutable |
-| 2. Analizar + clarificar | **sdd-analyze** | analysis.md → gate `analyzed` |
-| 3. Especificar | **sdd-specify** | spec.md → gate `specified` |
-| 4. Planificar | **sdd-plan** | plan.md en pasos chicos → gate de aprobación |
-| 5. Ejecutar | **sdd-execute** | pasos via subagentes, checkboxes verificados |
-| 6. Cerrar | **sdd-close** | retro.md + cosecha a LEARNINGS/catálogo/docs |
+| `simple` | un archivo, sin ambigüedad, sin comportamiento nuevo | (si dudás, no es simple) |
+| `bug` | algo ya existe y no hace lo que debería | toca datos, seguridad, o el fix no es local |
+| `feature` | comportamiento nuevo, o el requisito tiene ambigüedad | contrato público, migración, dependencia nueva |
+| `refactor` | mismo comportamiento, distinta forma | toca módulos con muchos dependientes |
 
-Transversal: **sdd-test** — toda corrida de tests (verificaciones, pre-cierre) usa `sdd test`, nunca comandos razonados a mano.
+## 3. Flujo por tipo (BR-058)
 
-Estados: `sdd task status <id> <draft|analyzed|specified|planned|in-progress|paused|done>`. Retomar en cualquier sesión: `sdd task show <id>`.
+| Tipo | Artefactos | Flujo | Gates |
+|---|---|---|---|
+| `simple` | `nota.md` | qué entendí + qué hago → implementar con tests | 1: el dev aprueba la nota (muy pocas palabras) |
+| `bug` | `reproduccion.md`, `plan.md` | reproducir → **test rojo** que lo captura → fix → test verde | reproducción + plan |
+| `refactor` | `analysis.md`, `plan.md` | `sdd impact` (si hay grafo) → **tests verdes ANTES** → cambio → los mismos tests verdes después | analysis + plan |
+| `feature` | `analysis.md`, `spec.md`, `plan.md` | **sdd-analyze** → **sdd-specify** → **sdd-plan** → **sdd-execute** | analysis + spec + plan |
 
-## Disparadores de delegación (cuándo tu contexto se está por contaminar)
+- `bug`: el test de regresión **reemplaza la spec** — no escribas `spec.md`.
+- `refactor`: sin criterios EARS; el criterio de aceptación es "los tests que ya existían siguen verdes".
+- **Riesgo `alto`**: no recortes profundidad — clarificá más, pasos más chicos, verificación ejecutable en todos. **Riesgo `bajo`**: una línea por punto alcanza.
+- Ejecución y cierre son iguales para todos los tipos: **sdd-execute** y **sdd-close**.
 
-No esperes a "sentirte" saturado — estos triggers son objetivos:
+## 4. Re-clasificar cuando el alcance muta
 
-| Situación | Acción esperada |
-|---|---|
-| Vas a leer 4+ archivos para entender un flujo | Delegá la exploración a un subagente (rapido) que te devuelva un resumen |
-| El cambio toca 2+ archivos no triviales | Un solo writer (subagente) por paso; nunca dos manos en el mismo archivo |
-| Commit/push/PR después de cambios | Review con contexto fresco (subagente) salvo diff trivial de docs |
-| Accidente de git/worktree, merge raro, entorno de test confuso | FRENÁ — auditoría con contexto fresco antes de seguir |
-| Sesión larga monolítica acumulando complejidad | Pausá la tarea (`sdd task status <id> paused`), replanificá o justificá por qué no |
+Si una `simple` se complejiza (o una `feature` resulta trivial): **anuncialo en una línea** y corré `sdd task type <id> <tipo nuevo>`. Se crean los artefactos faltantes sin pisar ni borrar lo hecho. El dev puede corregir tipo o riesgo cuando quiera: aceptá la corrección sin fricción y seguí el flujo nuevo.
 
-El objetivo no es ceremonia: es un orquestador responsable con contexto limpio y un solo writer por vez.
+## Concisión y gates (BR-059, BR-061)
 
-## Reglas duras del flujo
+- Cada template declara **su** presupuesto en el encabezado: respetalo. No lo compenses con prosa fuera de las secciones.
+- `N/A: <motivo>` es respuesta válida en cualquier sección que no aplique, y **satisface el gate**. Lo que no lo satisface es dejar un `…` sin reemplazar.
+- Diagrama Mermaid **solo si reemplaza prosa** (3+ actores, o pasos con bifurcaciones); si el flujo se explica en dos líneas, no hay diagrama.
+- Gate = el dev aprueba en el chat después de que `sdd task status <id> <estado>` le abre el archivo. No avances sin el ok explícito.
 
-- Tres gates de aprobación del dev: analysis, spec y plan. No avances sin el ok explícito.
-- No uses --no-verify; el pre-commit corre `sdd validate`.
-- Para fixes triviales de un archivo sin ambigüedad podés saltear el flujo de tarea, pero catálogo, dominio y C4 aplican igual.
+## Reglas duras
+
+- Estados: `sdd task status <id> <draft|analyzed|specified|planned|in-progress|paused|done>`. Retomar en cualquier sesión: `sdd task show <id>`.
+- Tests: siempre con la skill **sdd-test** (`sdd test`), nunca comandos razonados a mano.
+- No uses `--no-verify`; el pre-commit corre `sdd validate`.
+- Un solo writer por archivo; delegá según los triggers de `references/triggers-delegacion.md` (leer 4+ archivos, cambio en 2+ archivos no triviales, review antes de commit/PR, accidente de git, sesión larga).
 
 ## Additional Resources
 
-- `examples/flujo-ejemplo.md` — Ejemplo del flujo completo de una tarea SDD, desde el trigger hasta el cierre.
-- `references/triggers-delegacion.md` — Triggers de delegación expandidos con ejemplos concretos.
+- `examples/tipos-ejemplo.md` — Clasificación y artefactos reales de los tipos `simple`, `bug` y `refactor`.
+- `examples/flujo-ejemplo.md` — Flujo completo de una tarea `feature`, del trigger al cierre.
+- `references/triggers-delegacion.md` — Triggers de delegación con ejemplos concretos.
+- `templates/nota.md`, `templates/reproduccion.md` — Artefactos de los tipos `simple` y `bug`.

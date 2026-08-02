@@ -1,81 +1,37 @@
-# Ejemplo: Auditoría de sdd-execute
+# Ejemplo: auditoría de `sdd-execute`
 
-Escenario: el usuario pide `/sdd-improve-skill sdd-execute`.
+El dev pide `/sdd-improve-skill sdd-execute`.
 
----
+## Steps 1-3 — leer
 
-## Step 1-3: Identificar, leer y evaluar
+`skills/sdd-execute/SKILL.md` (397 words), su ejemplo y `references/protocolo-subagentes.md`.
 
-Archivos leídos:
-- `skills/sdd-execute/SKILL.md` (397 words)
-- `skills/sdd-execute/examples/ejecucion-ejemplo.md`
-- `skills/sdd-execute/references/protocolo-subagentes.md`
+## Steps 4-5 — evaluación y reporte
 
----
+| Categoría | Estado | Hallazgo |
+|---|---|---|
+| Trigger description | PASS | 161 chars, clara |
+| Progressive disclosure | PASS | 397 words, protocolo en `references/` |
+| Completitud del directorio | PASS | SKILL.md + example + references |
+| Calidad de contenido | IMPROVE | Punto 5: "registrá en spec.md" → debe ser analysis.md |
+| Ejemplos | IMPROVE | Misma inconsistencia; además 142 líneas (límite: 40) |
+| Robustez | PASS | Paso 1 bloqueante, verificación por el orquestador |
 
-## Step 4-5: Evaluación y reporte
+**Mejoras propuestas:** [Alto] corregir las 2 referencias a `spec.md`; [Alto] recortar el ejemplo a ≤ 40 líneas; [Bajo] agregar Additional Resources. → Dev: _"todas"_.
 
-## Evaluación: sdd-execute
-
-| Categoría                    | Estado  | Hallazgo                                           |
-|------------------------------|---------|---------------------------------------------------|
-| Trigger Description          | PASS    | 161 chars, clara                                   |
-| Progressive Disclosure       | PASS    | 397 words, protocolo en references/                |
-| Completitud de directorio    | PASS    | SKILL.md + example + references                    |
-| Calidad de contenido         | IMPROVE | Punto 5 dice "registrá en spec.md" → debe ser analysis.md |
-| Ejemplos y recursos          | IMPROVE | Ejemplo dice "registra en spec.md" → misma inconsistencia |
-| Robustez                     | PASS    | Paso 1 bloqueante, verificación por orquestador    |
-
-### Mejoras recomendadas
-
-1. [Alto] En SKILL.md punto 5: "spec.md" → "analysis.md"
-2. [Alto] En ejemplo: "registra la respuesta en spec.md" → "analysis.md"
-3. [Bajo] Agregar sección Additional Resources
-
-Pregunta al usuario: **¿Qué mejoras querés que aplique?**
-
-→ Usuario: "Todas"
-
----
-
-## Step 6: Aplicar mejoras
-
-### Mejora 1 — SKILL.md
+## Step 6 — aplicar
 
 ```diff
 - resolvela con el dev, registrá la respuesta en spec.md, relanzá.
 + resolvela con el dev, registrá la respuesta en analysis.md, relanzá.
 ```
 
-### Mejora 2 — Ejemplo
+Ejemplo recortado a 38 líneas conservando el bloqueo y el reintento (lo que enseña el caso).
 
-```diff
-- El orquestador registra la respuesta en spec.md:
-+ El orquestador registra la respuesta en analysis.md:
-```
+## Steps 7-8 — verificar y resumir
 
-### Mejora 3 — Additional Resources
+- ✓ `grep -q "analysis.md" skills/sdd-execute/SKILL.md` y en el ejemplo
+- ✓ `wc -l` del ejemplo: 142 → 38
+- ✓ Todas las referencias apuntan a archivos existentes · word count 397 → 428 (bajo ~1800)
 
-Agregada sección al final del SKILL.md apuntando a example y references.
-
----
-
-## Step 7: Verificar
-
-- ✓ `grep -q "analysis.md" skills/sdd-execute/SKILL.md`
-- ✓ `grep -q "analysis.md" skills/sdd-execute/examples/ejecucion-ejemplo.md`
-- ✓ `grep -q "Additional Resources" skills/sdd-execute/SKILL.md`
-- ✓ Todas las referencias apuntan a archivos existentes
-- ✓ Word count: 397 → 428 words (bajo ~1800)
-
----
-
-## Step 8: Resultado
-
-| Archivo | Acción |
-|---|---|
-| `skills/sdd-execute/SKILL.md` | 2 refs "spec.md" → "analysis.md". Additional Resources agregado |
-| `skills/sdd-execute/examples/ejecucion-ejemplo.md` | 1 ref "spec.md" → "analysis.md" |
-| `.claude/skills/sdd-execute/` | Sincronizado |
-
-Word count: 397 → 428 words. Todas las categorías en PASS.
+Archivos tocados: `SKILL.md`, `examples/ejecucion-ejemplo.md`, y `.claude/skills/sdd-execute/` sincronizado.

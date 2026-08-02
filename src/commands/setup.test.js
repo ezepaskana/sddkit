@@ -39,13 +39,38 @@ function withCapturedLogs(fn) {
     .finally(() => { console.log = originalLog; });
 }
 
-test('setup: repo nuevo (sin .sdd/config.json) → activa graph sqlite con path default', async () => {
+test('setup: repo nuevo (sin .sdd/config.json) → NO activa graph sqlite, imprime que el grafo no está configurado', async () => {
   const { root, cleanup } = plainFixture();
   try {
-    await withCapturedLogs(() => setup(root, { agent: true }));
+    const { logs } = await withCapturedLogs(() => setup(root, { agent: true }));
 
     const cfg = readJSON(join(root, '.sdd', 'config.json'));
-    assert.deepEqual(cfg.graph, { driver: 'sqlite', sqlite: { path: '~/.sddkit/graph.db' } });
+    assert.equal(cfg.graph, undefined, 'cfg.graph no debería setearse automáticamente');
+
+    const full = logs.join('\n');
+    assert.ok(
+      full.includes('– Grafo de impacto: no configurado. Requiere driver "mysql" + CI/CD corriendo `sdd publish` (ver ADR-0011).'),
+      `Se esperaba el mensaje de grafo no configurado, salida: ${full}`
+    );
+  } finally { cleanup(); }
+});
+
+test('setup: con graph sqlite preexistente → no lo modifica pero advierte deprecación (ADR-0011)', async () => {
+  const { root, cleanup } = plainFixture();
+  try {
+    const originalGraph = { driver: 'sqlite', sqlite: { path: '~/.sddkit/graph.db' } };
+    setupRepoWithConfig(root, { graph: originalGraph });
+
+    const { logs } = await withCapturedLogs(() => setup(root, { agent: true }));
+
+    const cfg = readJSON(join(root, '.sdd', 'config.json'));
+    assert.deepEqual(cfg.graph, originalGraph, 'no debería modificar el graph sqlite preexistente');
+
+    const full = logs.join('\n');
+    assert.ok(
+      full.includes('⚠ graph.driver: "sqlite" está deprecado (ver ADR-0011) — migrá a "mysql" + CI/CD. No se modifica automáticamente.'),
+      `Se esperaba la advertencia de deprecación de sqlite, salida: ${full}`
+    );
   } finally { cleanup(); }
 });
 

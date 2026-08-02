@@ -1,31 +1,22 @@
 # Retro — tarea __ID__: __TITLE__
 
-> La completa el agente al cerrar la tarea, con input del dev. Es la fuente del aprendizaje del framework: alimenta `.sdd/LEARNINGS.md`, el catálogo y los docs. Creada el __DATE__.
+> La AUTOGENERA el agente al cerrar, con datos que ya tiene (desvíos registrados en el plan, métrica por `cmd:`, checkboxes) — sin preguntarle nada al dev, que la lee en el PR. Alimenta `.sdd/LEARNINGS.md`, el catálogo y los docs. Creada el __DATE__.
+>
+> **Tipo `simple`/`bug` riesgo bajo: reemplazá TODO el cuerpo por una sola línea** (qué se hizo + cómo se verificó). Resto de tipos: presupuesto **≤ 150 palabras**. `N/A: <motivo>` es válido en cualquier campo y satisface el gate; un `…` sin reemplazar no.
 
-## Resultado de la métrica de impacto
+## Métrica vs baseline
 
-- **Baseline (de analysis.md):** …
-- **Resultado medido después:** …
-- **¿Se cumplió lo esperado?:** …  _(si no se pudo medir, explicar por qué y cómo medirla a futuro)_
-
-## Qué anticipó bien la spec y qué no
-
-…
+- **Baseline (de analysis.md) → resultado medido:** …
+- **¿Se cumplió lo esperado?:** … _(si no se pudo medir: `N/A: <motivo>` + cómo medirla a futuro)_
 
 ## Desvíos del plan
 
-_(pasos que fallaron, se replanificaron o se agregaron — y por qué)_
+_(condensá los ya registrados en plan.md — pasos que fallaron, se replanificaron o se agregaron, y lo que la spec no anticipó)_
 
 …
 
 ## Aprendizajes accionables
 
-_(reglas concretas para futuras tareas en este repo: gotchas, decisiones, trampas. Las que apliquen a todo el repo → promoverlas a .sdd/LEARNINGS.md)_
-
-…
-
-## ¿Algo para el catálogo, el dominio o la arquitectura?
-
-_(convención nueva → `sdd decide` · regla de negocio nueva/cambiada → .sdd/domain.md (numerada) · decisión de arquitectura → ADR en .sdd/decisions/ · cambio estructural → .sdd/c4/ · pregunta repetida → responderla permanente en los docs)_
+_(solo los que superen el umbral "otro agente tropezaría con esto". Generales → `.sdd/LEARNINGS.md` (bullets ≤ 200 chars) · convención nueva → `sdd decide` · regla de negocio → `.sdd/domain.md` · decisión de arquitectura → ADR en `.sdd/decisions/`)_
 
 …

@@ -14,6 +14,10 @@ import { spawnSync } from 'node:child_process';
 
 const STATUSES = ['draft', 'analyzed', 'specified', 'planned', 'in-progress', 'paused', 'done', 'cancelled'];
 
+/** Tipos de tarea del flujo adaptativo (BR-057) y niveles de riesgo. */
+const TASK_TYPES = ['simple', 'bug', 'feature', 'refactor'];
+const RIESGOS = ['bajo', 'alto'];
+
 const tasksDir = (root) => join(root, '.sdd', 'tasks');
 const loadIndex = (root) => readJSON(join(tasksDir(root), 'index.json')) || { nextId: 1, tasks: [] };
 const saveIndex = (root, idx) => writeJSON(join(tasksDir(root), 'index.json'), idx);
@@ -66,6 +70,20 @@ const analysisTemplate = (id, title) => loadTemplate('sdd-analyze', 'analysis.md
 const specTemplate = (id, title) => loadTemplate('sdd-specify', 'spec.md', { ID: id, TITLE: title });
 const planTemplate = (id, title) => loadTemplate('sdd-plan', 'plan.md', { ID: id, TITLE: title });
 const retroTemplate = (id, title, date) => loadTemplate('sdd-close', 'retro.md', { ID: id, TITLE: title, DATE: date });
+const notaTemplate = (id, title) => loadTemplate('sdd-task', 'nota.md', { ID: id, TITLE: title });
+const reproduccionTemplate = (id, title) => loadTemplate('sdd-task', 'reproduccion.md', { ID: id, TITLE: title });
+
+/**
+ * Artefactos que exige cada tipo de tarea (BR-058). `sdd task type` crea SOLO
+ * estos: los que ya existen no se pisan, y los de una clasificación anterior no
+ * se borran al re-clasificar.
+ */
+const ARTIFACTS_BY_TYPE = {
+  simple: [['nota.md', notaTemplate]],
+  bug: [['reproduccion.md', reproduccionTemplate], ['plan.md', planTemplate]],
+  refactor: [['analysis.md', analysisTemplate], ['plan.md', planTemplate]],
+  feature: [['analysis.md', analysisTemplate], ['spec.md', specTemplate], ['plan.md', planTemplate]],
+};
 
 const LEARNINGS_TEMPLATE = `# Aprendizajes del proyecto
 
@@ -121,49 +139,60 @@ export async function task(root, pos, flags) {
     const title = text.length > 60 ? text.slice(0, 60) + '…' : text;
     const dir = `${id}-${slugify(text)}`;
     write(join(tasksDir(root), dir, 'requirement.md'), requirementTemplate(id, text, date));
-    write(join(tasksDir(root), dir, 'analysis.md'), analysisTemplate(id, title));
-    write(join(tasksDir(root), dir, 'spec.md'), specTemplate(id, title));
-    write(join(tasksDir(root), dir, 'plan.md'), planTemplate(id, title));
     idx.tasks.push({ id, dir, title, status: 'draft', createdAt: date, updatedAt: date });
     idx.nextId += 1;
     saveIndex(root, idx);
     const abs = join(tasksDir(root), dir);
-    console.log(`✓ Tarea ${id} creada:`);
-    console.log(`  ${join(abs, 'requirement.md')}`);
-    console.log(`  ${join(abs, 'analysis.md')}`);
-    console.log(`  ${join(abs, 'spec.md')}`);
-    console.log(`  ${join(abs, 'plan.md')}`);
-    console.log(`
-AGENTE — flujo obligatorio para esta tarea:
- 1. ANALIZAR (críticamente)  leé .sdd/c4/, el catálogo y el código. El requisito es una HIPÓTESIS:
-          ¿ya existe?, ¿hay algo más simple?, ¿qué supuestos trae?, ¿riesgos? Completá
-          analysis.md: análisis crítico (7 preguntas) con recomendación honesta (proceder/con
-          cambios/reconsiderar), clarificación sin límite (preguntale al dev TODO lo que haga
-          falta, en tandas, registrá cada respuesta) y métrica de impacto (baseline + resultado
-          esperado; si aplica). Si recomendás reconsiderar, discutilo con el dev ANTES de seguir.
-          Luego corré:
-          sdd task status ${id} analyzed    ← esto le ABRE analysis.md al dev en su editor
-          Pedile aprobación en el chat antes de pasar a la spec.
- 2. SPEC  completá spec.md: historia, criterios EARS, reglas de negocio, fuera de alcance,
-          impacto en arquitectura. Luego corré:
-          sdd task status ${id} specified   ← esto le ABRE spec.md al dev en su editor
-          Pedile aprobación en el chat; con su ok marcá la línea de aprobación en spec.md.
- 3. PLAN  completá plan.md con pasos CHICOS (tests antes que implementación, archivos por paso,
-          dependencias, nivel de modelo por paso (rapido/medio/fuerte, ver
-          .sdd/config.json → models), verificación) y corré:
-          sdd task status ${id} planned     ← esto le ABRE plan.md al dev
-          Pedile aprobación en el chat antes de ejecutar.
- 4. EJECUTAR  sdd task status ${id} in-progress. Sos el ORQUESTADOR: no implementes vos.
-          Cada paso (incluidos los fuerte) corre en un SUBAGENTE fresco con el modelo de su
-          nivel (.sdd/config.json → models), que lee los archivos de la tarea él mismo.
-          Verificá VOS el resultado de cada paso antes de marcarlo. Al terminar
-          CADA paso: marcá su checkbox en plan.md y verificá según su criterio.
- 5. PAUSAR/RETOMAR  el dev puede cortar cuando quiera: sdd task status ${id} paused.
-          Para retomar (otra sesión, otro agente): sdd task show ${id} → te dice el próximo paso.
- 6. CERRAR  actualizá .sdd/c4/ si cambió la arquitectura y corré: sdd task status ${id} done
-          El cierre exige la RETRO (retro.md): resultado de la métrica vs baseline, desvíos del
-          plan, aprendizajes. Cosechá los aprendizajes generales a .sdd/LEARNINGS.md (curado,
-          máx ~30 entradas) — así cada tarea hace mejor a las siguientes.`);
+    console.log(`✓ Tarea ${id} creada: ${join(abs, 'requirement.md')}`);
+    console.log('');
+    console.log('AGENTE: clasificá tipo+riesgo y seguí el flujo de esa skill:');
+    console.log(`  sdd task type ${id} <${TASK_TYPES.join('|')}> [--riesgo=alto]`);
+    console.log('Eso crea solo los artefactos que el tipo requiere (nota | reproducción+plan | analysis+spec+plan).');
+    console.log('Anunciá la clasificación en una línea; si el alcance muta, re-clasificá sin perder lo hecho.');
+    console.log('Detalle completo del flujo: skill sdd-task (y sdd-analyze/specify/plan/execute/close según el tipo).');
+    return;
+  }
+
+  if (sub === 'type') {
+    // Flujo adaptativo (BR-057/BR-058): el agente clasifica la tarea y el CLI
+    // materializa SOLO los artefactos que ese tipo requiere.
+    const [id, tipo] = rest;
+    if (!id || !tipo) {
+      throw new Error(`Uso: sdd task type <id> <${TASK_TYPES.join('|')}> [--riesgo=alto]`);
+    }
+    if (!TASK_TYPES.includes(tipo)) {
+      throw new Error(`Tipo inválido: "${tipo}". Válidos: ${TASK_TYPES.join(' | ')}. Uso: sdd task type <id> <${TASK_TYPES.join('|')}> [--riesgo=alto]`);
+    }
+    const riesgo = flags.riesgo === undefined ? 'bajo' : String(flags.riesgo);
+    if (!RIESGOS.includes(riesgo)) {
+      throw new Error(`Riesgo inválido: "${riesgo}". Válidos: ${RIESGOS.join(' | ')} (default: bajo). Se pasa como --riesgo=alto.`);
+    }
+    const idx = loadIndex(root);
+    const t = idx.tasks.find((x) => x.id === id);
+    if (!t) throw new Error(`Tarea no encontrada: "${id}". Listá con: sdd task list`);
+
+    const previo = t.tipo;
+    t.tipo = tipo;
+    t.riesgo = riesgo;
+    t.updatedAt = date;
+    saveIndex(root, idx);
+
+    const abs = join(tasksDir(root), t.dir);
+    const created = []; const kept = [];
+    for (const [file, tpl] of ARTIFACTS_BY_TYPE[tipo]) {
+      const fp = join(abs, file);
+      if (read(fp) !== null) { kept.push(file); continue; }
+      write(fp, tpl(t.id, t.title));
+      created.push(file);
+    }
+
+    const reclass = previo && previo !== tipo;
+    console.log(`✓ Tarea ${t.id} → tipo: ${tipo} · riesgo: ${riesgo}${reclass ? ` (re-clasificada desde "${previo}")` : ''}`);
+    for (const f of created) console.log(`  + ${join(abs, f)}`);
+    for (const f of kept) console.log(`  = ${join(abs, f)} (ya existía — no se pisa)`);
+    if (!created.length) console.log('  (sin artefactos nuevos: el tipo ya tenía los suyos)');
+    console.log(`\nAGENTE: seguí el flujo del tipo "${tipo}" (detalle en la skill sdd-task). Si el alcance muta, re-clasificá: sdd task type ${t.id} <${TASK_TYPES.join('|')}>`);
+    if (created.length && openEnabled(root, flags)) openFile(join(abs, created[0]), root);
     return;
   }
 
@@ -233,7 +262,7 @@ AGENTE — flujo obligatorio para esta tarea:
     if (usingDefaults) {
       console.log('  ⚠️ Política de branching no definida. Usamos defaults. Correr `sdd branching-policy --define` para personalizarlo.');
     }
-    if (openEnabled(root, flags)) openFile(planPath);
+    if (openEnabled(root, flags)) openFile(planPath, root);
     return;
   }
 
@@ -313,11 +342,15 @@ AGENTE — flujo obligatorio para esta tarea:
       const rc = read(rp);
       if (rc === null) {
         write(rp, retroTemplate(t.id, t.title, date));
-        if (openEnabled(root, flags)) openFile(rp);
-        throw new Error(`Falta la retro. Creé la plantilla:\n  ${rp}\nAGENTE: completala (resultado de la métrica, desvíos del plan, aprendizajes) con input del dev, cosechá los aprendizajes generales hacia .sdd/LEARNINGS.md, y volvé a correr: sdd task status ${id} done`);
+        if (openEnabled(root, flags)) openFile(rp, root);
+        throw new Error(`Falta la retro. Creé la plantilla:\n  ${rp}\nAGENTE: AUTOGENERALA con datos que ya tenés (métrica por cmd:, desvíos registrados en el plan) — sin preguntarle nada al dev; simple/bug riesgo bajo = 1 línea. Cosechá aprendizajes generales hacia .sdd/LEARNINGS.md solo si los hay, y volvé a correr: sdd task status ${id} done`);
       }
-      if (rc.includes('…')) {
-        throw new Error(`La retro tiene campos sin completar (…):\n  ${rp}\nCompletá todos los campos antes de cerrar.`);
+      // Ignorar `…` citados dentro de backticks (notas del template, ej. el
+      // aviso "dejar un `…` sin reemplazar"): solo un `…` en prosa real
+      // significa un campo sin completar. `N/A: <motivo>` es respuesta válida.
+      const withoutCodeSpans = rc.replace(/`[^`]*`/g, '');
+      if (withoutCodeSpans.includes('…')) {
+        throw new Error(`La retro tiene campos sin completar (…):\n  ${rp}\nCompletá todos los campos (usá "N/A: <motivo>" si alguno no aplica) antes de cerrar.`);
       }
       const lp = join(root, '.sdd', 'LEARNINGS.md');
       if (read(lp) === null) write(lp, LEARNINGS_TEMPLATE);
@@ -335,8 +368,8 @@ AGENTE — flujo obligatorio para esta tarea:
       const fp = join(tasksDir(root), t.dir, reviewFile);
       console.log(`\n📄 Para revisar y aprobar: ${fp}`);
       if (openEnabled(root, flags)) {
-        openFile(fp);
-        console.log('   (abierto con tu editor por defecto — desactivable con --no-open o en .sdd/config.json: "ui": {"openFiles": false})');
+        openFile(fp, root);
+        console.log('   (abierto con "ui.opener" de .sdd/config.json o el editor por defecto — desactivable con --no-open o "ui": {"openFiles": false})');
       }
     }
     return;
@@ -415,5 +448,5 @@ AGENTE — flujo obligatorio para esta tarea:
     return;
   }
 
-  throw new Error('Uso: sdd task <new|list|show|plan|status|brief|verify|execute|close> …');
+  throw new Error('Uso: sdd task <new|type|list|show|plan|status|brief|verify|execute|close> …');
 }

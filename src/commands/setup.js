@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
-import { walk, read, readJSON, writeJSON } from '../lib/fsutil.js';
+import { walk, read, readJSON } from '../lib/fsutil.js';
 import { detectStack } from '../lib/detect.js';
 import { loadCatalog, recordDecision } from '../lib/catalog.js';
 import { upsertAgentsMd } from '../lib/agentsmd.js';
@@ -53,31 +53,18 @@ export async function setup(root, flags) {
     }
   }
 
-  // Grafo de impacto local: el dev elige (o acepta el default) dónde vive el SQLite del grafo.
-  let graphSqlitePath = null;
+  // Grafo de impacto: ya no se autoconfigura (ADR-0011 deprecó el driver sqlite local).
+  // El grafo compartido requiere driver "mysql" + CI/CD corriendo `sdd publish`.
   if (!cfg0?.graph) {
-    if (interactive) {
-      const rl1 = createInterface({ input: process.stdin, output: process.stdout });
-      const a = (await rl1.question('¿Dónde guardo el grafo de impacto local (SQLite)? [Enter=~/.sddkit/graph.db]: ')).trim();
-      rl1.close();
-      graphSqlitePath = a === '' ? '~/.sddkit/graph.db' : a;
-    } else {
-      graphSqlitePath = '~/.sddkit/graph.db';
-      console.log('Grafo de impacto: sqlite local en ~/.sddkit/graph.db (default en modo agente; el dev puede cambiarlo en .sdd/config.json).');
-    }
+    console.log('– Grafo de impacto: no configurado. Requiere driver "mysql" + CI/CD corriendo `sdd publish` (ver ADR-0011).');
+  } else if (cfg0.graph.driver === 'sqlite') {
+    console.log('⚠ graph.driver: "sqlite" está deprecado (ver ADR-0011) — migrá a "mysql" + CI/CD. No se modifica automáticamente.');
   }
 
   await init(root, { ...flags, quiet: true });
 
-  if (graphSqlitePath) {
-    const cfg = readJSON(join(root, '.sdd', 'config.json'));
-    cfg.graph = { driver: 'sqlite', sqlite: { path: graphSqlitePath } };
-    writeJSON(join(root, '.sdd', 'config.json'), cfg);
-    console.log('✓ Grafo de impacto: sqlite local → ' + graphSqlitePath);
-  }
-
   const scanRes = await scan(root, { ...flags, quiet: true });
-  console.log('\n✓ Hook: ' + installPreCommit(root));
+  console.log('\n✓ Hook: ' + installPreCommit(root).msg);
 
   // Decisiones de convenciones pendientes
   const pj = readJSON(join(root, '.sdd', 'patterns.json'));
@@ -141,6 +128,6 @@ export async function setup(root, flags) {
   }
 
   console.log('\n━━━ setup completo ━━━');
-  console.log('· Los agentes ya ven la arquitectura, el catálogo y el flujo SDD (AGENTS.md / skill / rules).');
+  console.log('· Claude ya ve la arquitectura, el catálogo y el flujo SDD (CLAUDE.md + skills).');
   console.log('· `sdd validate` corre solo en cada commit (desactivable en .sdd/config.json).');
 }

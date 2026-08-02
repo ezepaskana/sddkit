@@ -1,7 +1,7 @@
 import { join, isAbsolute, resolve } from 'node:path';
 import { walk, read, write, writeJSON, readJSON } from '../lib/fsutil.js';
 import { detectStack, detectDocs } from '../lib/detect.js';
-import { detectPatterns, extractEndpoints, extractConsumptions } from '../lib/patterns.js';
+import { detectPatterns } from '../lib/patterns.js';
 import { loadCatalog } from '../lib/catalog.js';
 import { upsertAgentsMd } from '../lib/agentsmd.js';
 import { buildContainers, genContext, genContainers, genComponents, preserveManual } from '../lib/c4.js';
@@ -54,7 +54,8 @@ export async function scan(root, flags) {
   const stack = detectStack(root, files);
   const containers = buildContainers(root, stack);
   const docSources = detectDocs(root, files);
-  const capabilities = { endpoints: extractEndpoints(root, files), consumptions: extractConsumptions(root, files) };
+  const existingPatternsJson = readJSON(join(root, '.sdd', 'patterns.json'));
+  const capabilities = existingPatternsJson?.capabilities ?? { endpoints: [], consumptions: [] };
 
   // 1. Docs C4 (preservando secciones manuales)
   const c4dir = join(root, '.sdd', 'c4');

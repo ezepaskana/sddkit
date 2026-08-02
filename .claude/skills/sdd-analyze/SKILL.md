@@ -5,119 +5,67 @@ description: Análisis crítico e investigación read-only. Usar como fase 2 del
 
 # sdd-analyze — análisis crítico (modo dual)
 
-Esta skill tiene **dos modos** según el contexto:
+- **(A) Modo tarea** — hay una tarea clasificada como `feature` o `refactor` con `analysis.md` pendiente. Escribís ese artefacto y seguís el flujo del tipo. Las tareas `simple` (nota.md) y `bug` (reproduccion.md) **NO pasan por acá**: BR-058.
+- **(B) Modo standalone** — no hay tarea: el dev quiere investigar, debuggear o brainstormear. **Read-only**: leés, analizás, proponés; nunca escribís. Si converge en un cambio, derivás a `/sdd-task`.
 
-- **(A) Modo tarea** — sos la fase 2 del flujo SDD: hay una tarea activa creada con `sdd task new` y su `analysis.md` está pendiente. Analizás críticamente el requisito, clarificás, escribís en `analysis.md` y seguís con `sdd-specify`. Acá SÍ escribís artefactos.
-- **(B) Modo standalone** — no hay tarea activa: el dev quiere investigar, debuggear o hacer brainstorm sin pedir un cambio. Investigación **read-only**: leés, analizás, proponés, pero **nunca modificás archivos**. Si la charla converge en un cambio, derivás a `/sdd-task`.
-
-## Detección de modo
-
-Antes de arrancar, decidí en qué modo estás:
-
-1. **¿Hay una tarea activa esperando análisis?** Mirá si venís de `sdd task new` o si hay una tarea en estado `new`/`draft` con `analysis.md` pendiente en `.sdd/tasks/<id>/`. Si sí → **modo tarea (A)**.
-2. **¿El usuario hizo una pregunta pura** ("¿cómo funciona X?", "¿por qué falla?", "¿cómo podríamos?") **sin pedir un cambio y sin tarea activa?** → **modo standalone (B)**.
-3. **¿Ambiguo?** Si el mensaje mezcla investigación con un pedido claro de cambio, preguntale al dev si quiere investigar acá (standalone) o arrancar `/sdd-task`.
+Si el mensaje mezcla investigación con un pedido de cambio, preguntale al dev cuál de los dos quiere.
 
 ---
 
-## Modo tarea (fase 2 SDD)
+## (A) Modo tarea
 
 **El requisito del dev es una HIPÓTESIS, no una orden.** El dev puede equivocarse y tu trabajo es detectarlo ANTES de construir. La complacencia acá es un bug, no cortesía.
 
-### Análisis (completar la sección "Análisis crítico" de analysis.md)
+**Presupuesto: `analysis.md` ≤ 350 palabras.** Las secciones y sus preguntas ya están en el template — no las repitas acá, completalas: una línea por punto (dos solo con evidencia dura: `archivo:línea`, número medido). `N/A: <motivo>` es válido y satisface el gate.
 
-Arrancá con `sdd context` (destilado) y, para "¿ya existe?", con `sdd find <término>` — busca en el índice de endpoints, módulos, reglas y aprendizajes sin explorar el repo. Solo explorá código a mano si `find` no alcanza. Después respondé:
+### Cómo investigar (barato primero)
 
-1. ¿Qué problema real resuelve?
-2. ¿Ya existe algo en el repo (o una librería) que lo resuelve total o parcialmente?
-3. ¿Hay una alternativa más simple que logre el 80% del valor con el 20% del esfuerzo?
-4. ¿Qué supuestos trae el dev que podrían no ser ciertos?
-5. ¿Riesgos y efectos secundarios? (arquitectura, performance, seguridad, mantenimiento)
-6. ¿Qué pasa si NO se hace?
-7. Si esta funcionalidad puede fallar en uso real, ¿cómo nos enteraríamos (logs, métricas, alertas, mensajes de error) y cómo debería reaccionar el sistema (reintento, fallback, mensaje al dev/usuario, degradación)? Si no aplica (sin lógica nueva que pueda fallar), decilo explícitamente.
+1. `sdd context` — destilado de BR, catálogo, módulos, ADRs y aprendizajes.
+2. `sdd find <término>` para "¿ya existe?" — busca en el índice sin recorrer el repo. Explorá a mano solo si no alcanza.
+3. `sdd impact <archivo|símbolo>` si el repo tiene grafo (`.sdd/config.json → graph`): quién depende de lo que vas a tocar. **Obligatorio en `refactor`**; sin grafo, `N/A`. Detalle en `references/impacto-grafo.md`.
 
-Cerrá con una **recomendación honesta**: `proceder | proceder con cambios | reconsiderar`. Si es "reconsiderar", presentale tus argumentos al dev antes de seguir — no construyas algo que creés incorrecto sin decirlo. Ver `examples/analisis-ejemplo.md` para el nivel de profundidad esperado.
+### Específico de `refactor`
 
-**¿A quién impacto?** Si el repo tiene grafo configurado (`.sdd/config.json` → `graph`), corré `sdd impact` para ver qué depende de lo que vas a tocar. Sin grafo, omití este paso. Ver `references/impacto-grafo.md` para detalle de endpoints, sistemas y recursos de infra.
+Sin criterios EARS: el criterio de aceptación es que **los tests que ya existían sigan verdes**. Dejá registrado en analysis.md el comando exacto y su resultado ANTES del cambio (baseline verde); si el área no tiene tests, cubrirla es el primer paso del plan.
+
+### Qué amerita objeción
+
+- ❌ No objetes por objetar: estilo, micro-optimizaciones, "yo lo haría distinto".
+- ✅ Sí objetá: duplicación de algo existente, violación de una BR-NNN o un ADR, complejidad desproporcionada al valor, supuestos falsos verificables en el código.
+
+Cerrá con una recomendación honesta (`proceder | proceder con cambios | reconsiderar`). Si es "reconsiderar", discutilo con el dev ANTES de seguir.
 
 ### Clarificación
 
-Preguntale al dev **todo lo que haga falta, sin límite de cantidad**: ambigüedades, casos borde, comportamiento en error, y los supuestos que tu análisis puso en duda. Priorizá las que cambian el alcance o invalidan el enfoque; hacelas en tandas razonables (no de a una). Registrá cada respuesta en analysis.md.
+Preguntá lo que cambie el alcance o invalide el enfoque, en tandas (no de a una), y registrá cada respuesta en analysis.md. Riesgo `alto` → más preguntas; riesgo `bajo` → las mínimas que destraben.
 
-### Calibración: qué amerita objeción y qué no
+### Gate
 
-- ❌ NO objetar por objetar: preferencias de estilo, micro-optimizaciones, "yo lo haría distinto".
-- ✅ SÍ objetar: duplicación de algo existente, violación de una regla BR-NNN o un ADR, complejidad desproporcionada al valor, supuestos falsos verificables en el código.
-
-Cuando termines: corré `sdd task status <id> analyzed` para abrir analysis.md al dev. Esperá su aprobación. Recién entonces seguí con la skill **sdd-specify**.
+`sdd task status <id> analyzed` le abre analysis.md al dev. Con su ok: **sdd-specify** si es `feature`, **sdd-plan** si es `refactor`.
 
 ---
 
-## Modo standalone (investigación read-only)
+## (B) Modo standalone (read-only)
 
-Entrás en **modo investigación**: leés código, analizás, proponés opciones y debatís con el dev — pero **nunca modificás archivos**. Tu salida es entendimiento y conversación, no diffs ni artefactos. Si la charla converge en un cambio, derivás a `/sdd-task`; vos no construís.
+Investigás y conversás; tu salida es entendimiento, no diffs. Sirve para: entender un módulo o flujo, debuggear, brainstormear diseño, revisar código o estimar impacto.
 
-### Cuándo usar
+1. Arrancá por `sdd context` y `sdd find <término>`; después leé los archivos y seguí la cadena de dependencias.
+2. Estructurá la respuesta según el tipo de pregunta — guías breves en `references/formatos-respuesta.md`.
+3. Quedate en conversación: presentá hallazgos, escuchá objeciones, refiná. Cerrá con entendimiento o decisión, no con un cambio.
+4. Handoff: _"¿Listo para implementar? Corré `/sdd-task` con esta descripción: …"_.
 
-Escenarios ideales:
+### RESTRICCIÓN CRÍTICA (solo standalone)
 
-1. **Entender un módulo o flujo**: "¿cómo funciona `sdd task verify`?", "explicame el flujo de sync".
-2. **Debuggear un comportamiento inesperado**: "¿por qué falla X?", "esto debería pasar y no pasa".
-3. **Brainstorm de diseño**: "¿cómo podríamos hacer que las skills se actualicen solas?".
-4. **Revisar código existente**: "¿este enfoque está bien?", "¿hay riesgos en este patrón?".
-5. **Análisis de impacto**: "¿qué pasa si cambiamos la firma de `stepBlock`?".
-6. **Preguntas abiertas del codebase**: cualquier "¿?" sobre cómo está armado el sistema, sin pedido de cambio.
-
-### Cómo investigar
-
-1. **Leé el contexto del proyecto** con `sdd context` — destilado determinístico (módulos, reglas, convenciones, aprendizajes). Es el punto de partida más barato; evita explorar el repo a ciegas. Para "¿ya existe?" o "¿dónde está X?", usá `sdd find <término>` — busca en el índice de endpoints, módulos, reglas y aprendizajes sin recorrer el repo a mano.
-
-2. **Entendé la pregunta** y categorizala en uno de 5 tipos:
-   - **Bug/comportamiento**: algo está roto o es inesperado → foco en trazar el issue.
-   - **Comprensión**: cómo funciona X → foco en leer y explicar.
-   - **Brainstorm**: cómo podríamos hacer X → foco en opciones y tradeoffs.
-   - **Revisión**: ¿este código está bien? → foco en patrones, gaps, riesgos.
-   - **Análisis de impacto**: qué pasa si cambiamos X → foco en dependientes y efectos secundarios.
-
-3. **Investigación profunda** — leé todos los archivos fuente, tests y docs relevantes. Seguí la cadena de dependencias (quién llama a quién, qué importa qué). Usá `Read`, `Grep` y `Bash` en modo **read-only** (`git log`, `git blame`, `git diff`, `ls`, `find`).
-
-4. **Estructurá el análisis según el tipo de pregunta**. Cada tipo tiene un formato propio (resumen breve acá; detalle completo en `references/formatos-respuesta.md`):
-   - **Bug**: comportamiento observado → causa raíz → archivos/líneas → fix sugerido (descrito, no aplicado).
-   - **Comprensión**: explicación de alto nivel → flujo paso a paso → archivos clave.
-   - **Brainstorm**: contexto actual → 2-4 opciones con pros/cons → recomendación → pregunta de cierre.
-   - **Revisión**: qué está bien → qué preocupa (gaps/riesgos) → sugerencias priorizadas.
-   - **Impacto**: qué cambia → quién depende → efectos secundarios → riesgo neto.
-
-5. **Entrá en discusión** — quedate en modo conversación. Presentá hallazgos, escuchá objeciones del dev, refiná. No cierres con un cambio; cerrá con entendimiento compartido o una decisión.
-
-6. **Handoff a implementación** — cuando el dev decide actuar, sugerí:
-   > ¿Listo para implementar? Corré `/sdd-task` con esta descripción: ...
-
-### RESTRICCIÓN CRÍTICA (solo modo standalone)
-
-**En modo standalone estás en modo read-only. No modificás NADA.**
-
-- **NO** uses la herramienta **Edit**.
-- **NO** uses la herramienta **Write**.
-- **NO** uses **Bash** para escribir, agregar, mover o borrar archivos (nada de `>`, `>>`, `sed -i`, `mv`, `rm`, `cp`, `touch`, `tee`).
-- **NO** crees stories, plans, specs ni ningún artefacto.
-- **NO** hagas commits.
-- **Únicas herramientas permitidas**: `Read`, `Grep`, `Bash` (solo lectura: `git log`, `git blame`, `git diff`, `ls`, `find`), `Agent` (solo para exploración).
-
-**Si te descubrís a punto de editar un archivo — FRENÁ. Presentá tu sugerencia verbalmente.**
-
-(Esta restricción NO aplica en modo tarea, donde escribir en `analysis.md` es parte del trabajo.)
-
----
+**No modificás NADA.** Nada de `Edit`, `Write`, ni Bash que escriba (`>`, `>>`, `sed -i`, `mv`, `rm`, `cp`, `touch`, `tee`). Nada de artefactos ni commits. Permitido: `Read`, `Grep`, Bash de lectura (`git log`/`blame`/`diff`, `ls`, `find`) y `Agent` para explorar. **Si te descubrís por editar un archivo — FRENÁ** y proponelo verbalmente. (En modo tarea no aplica: escribir `analysis.md` es el trabajo.)
 
 ## Idioma
 
-Respondé en el mismo idioma que usó el usuario. Términos técnicos en inglés (no traduzcas `stepBlock`, `regex`, `merge`, `overlay`, etc.).
+Respondé en el idioma del usuario. Términos técnicos en inglés (`stepBlock`, `regex`, `merge`, `overlay`).
 
 ## Additional Resources
 
-- `references/formatos-respuesta.md` — Formatos de respuesta estructurados por tipo de pregunta (modo standalone).
-- `references/impacto-grafo.md` — Cómo usar `sdd impact` para análisis de impacto vía grafo (modo tarea, opcional).
-- `examples/analisis-ejemplo.md` — Nivel de profundidad esperado para el análisis crítico (modo tarea).
-- `examples/example-brainstorm.md` — Brainstorm sobre cómo mejorar el sistema de catálogo (modo standalone).
-- `examples/example-bug-investigation.md` — Investigación de por qué `sdd task verify` falla en ciertos pasos (modo standalone).
+- `templates/analysis.md` — Artefacto canónico con sus secciones y su presupuesto.
+- `references/formatos-respuesta.md` — Guías de respuesta por tipo de pregunta (standalone).
+- `references/impacto-grafo.md` — Cómo usar `sdd impact`.
+- `examples/analisis-ejemplo.md` — Nivel de profundidad esperado (modo tarea).
+- `examples/example-brainstorm.md`, `examples/example-bug-investigation.md` — Standalone.

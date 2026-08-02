@@ -160,3 +160,164 @@ test('querySystem: sin filas → null; ejecuta SELECT ... WHERE canonical_name =
   assert.match(selectCall.sql, /WHERE canonical_name = \?/);
   assert.deepEqual(selectCall.params, ['algo']);
 });
+
+// --- living docs (tarea 010): tablas inputs/outputs/entidades/casos_de_uso ---
+
+test('living docs: al abrir el store se crean las 4 tablas nuevas (CREATE TABLE IF NOT EXISTS)', async (t) => {
+  const ENV_VAR = 'SDDKIT_TEST_MYSQL_URL_LIVINGDOCS_CREATE';
+  process.env[ENV_VAR] = 'mysql://user:pass@localhost/db';
+  t.after(() => delete process.env[ENV_VAR]);
+
+  const calls = [];
+  const stubPool = {
+    execute: async (sql, params) => {
+      calls.push({ sql, params });
+      return [[]];
+    },
+    end: async () => {},
+  };
+  const createPool = async () => stubPool;
+
+  const store = await createMysqlStore({ mysql: { urlEnv: ENV_VAR } }, { createPool });
+  t.after(() => store.close());
+
+  assert.ok(
+    calls.some((c) => /CREATE TABLE IF NOT EXISTS inputs/i.test(c.sql)),
+    'debe crear la tabla inputs',
+  );
+  assert.ok(
+    calls.some((c) => /CREATE TABLE IF NOT EXISTS outputs/i.test(c.sql)),
+    'debe crear la tabla outputs',
+  );
+  assert.ok(
+    calls.some((c) => /CREATE TABLE IF NOT EXISTS entidades/i.test(c.sql)),
+    'debe crear la tabla entidades',
+  );
+  assert.ok(
+    calls.some((c) => /CREATE TABLE IF NOT EXISTS casos_de_uso/i.test(c.sql)),
+    'debe crear la tabla casos_de_uso',
+  );
+});
+
+test('living docs: upsertLivingDocs con 1 ítem en inputs → DELETE en las 4 tablas + INSERT en inputs con los datos del ítem', async (t) => {
+  const ENV_VAR = 'SDDKIT_TEST_MYSQL_URL_LIVINGDOCS_UPSERT';
+  process.env[ENV_VAR] = 'mysql://user:pass@localhost/db';
+  t.after(() => delete process.env[ENV_VAR]);
+
+  const calls = [];
+  const stubPool = {
+    execute: async (sql, params) => {
+      calls.push({ sql, params });
+      return [[]];
+    },
+    end: async () => {},
+  };
+  const createPool = async () => stubPool;
+
+  const store = await createMysqlStore({ mysql: { urlEnv: ENV_VAR } }, { createPool });
+  t.after(() => store.close());
+
+  calls.length = 0; // descartamos las CREATE TABLE de la apertura, nos interesa solo upsertLivingDocs
+
+  await store.upsertLivingDocs('sistema-x', {
+    inputs: [{ text: 'a', author: 'ana', date: '2026-01-01', commitHash: 'abc' }],
+    outputs: [],
+    entidades: [],
+    casosDeUso: [],
+  });
+
+  for (const table of ['inputs', 'outputs', 'entidades', 'casos_de_uso']) {
+    const deleteCall = calls.find(
+      (c) => new RegExp(`DELETE FROM ${table}\\b`, 'i').test(c.sql) && c.params.includes('sistema-x'),
+    );
+    assert.ok(deleteCall, `debe ejecutar DELETE FROM ${table} con canonical_name='sistema-x'`);
+  }
+
+  const insertCall = calls.find((c) => /INSERT INTO inputs/i.test(c.sql));
+  assert.ok(insertCall, 'debe haber ejecutado un INSERT INTO inputs');
+  assert.ok(insertCall.params.includes('sistema-x'), 'params incluye canonical_name');
+  assert.ok(insertCall.params.includes('a'), 'params incluye text');
+  assert.ok(insertCall.params.includes('ana'), 'params incluye author');
+  assert.ok(insertCall.params.includes('2026-01-01'), 'params incluye date');
+  assert.ok(insertCall.params.includes('abc'), 'params incluye commitHash');
+});
+
+test('living docs: upsertLivingDocs con array vacío en una categoría → DELETE corre igual pero sin INSERT hacia esa tabla', async (t) => {
+  const ENV_VAR = 'SDDKIT_TEST_MYSQL_URL_LIVINGDOCS_EMPTY';
+  process.env[ENV_VAR] = 'mysql://user:pass@localhost/db';
+  t.after(() => delete process.env[ENV_VAR]);
+
+  const calls = [];
+  const stubPool = {
+    execute: async (sql, params) => {
+      calls.push({ sql, params });
+      return [[]];
+    },
+    end: async () => {},
+  };
+  const createPool = async () => stubPool;
+
+  const store = await createMysqlStore({ mysql: { urlEnv: ENV_VAR } }, { createPool });
+  t.after(() => store.close());
+
+  calls.length = 0;
+
+  await store.upsertLivingDocs('sistema-y', {
+    inputs: [{ text: 'algo', author: 'bea', date: '2026-02-02', commitHash: 'def' }],
+    outputs: [],
+    entidades: [],
+    casosDeUso: [],
+  });
+
+  const deleteOutputs = calls.find(
+    (c) => /DELETE FROM outputs\b/i.test(c.sql) && c.params.includes('sistema-y'),
+  );
+  assert.ok(deleteOutputs, 'el DELETE de outputs debe correr aunque el array venga vacío');
+
+  const insertOutputs = calls.find((c) => /INSERT INTO outputs/i.test(c.sql));
+  assert.equal(insertOutputs, undefined, 'no debe haber ningún INSERT hacia outputs si el array viene vacío');
+});
+
+test('living docs: upsertLivingDocs con 2 ítems en la misma categoría → ambos ítems llegan reflejados', async (t) => {
+  const ENV_VAR = 'SDDKIT_TEST_MYSQL_URL_LIVINGDOCS_MULTI';
+  process.env[ENV_VAR] = 'mysql://user:pass@localhost/db';
+  t.after(() => delete process.env[ENV_VAR]);
+
+  const calls = [];
+  const stubPool = {
+    execute: async (sql, params) => {
+      calls.push({ sql, params });
+      return [[]];
+    },
+    end: async () => {},
+  };
+  const createPool = async () => stubPool;
+
+  const store = await createMysqlStore({ mysql: { urlEnv: ENV_VAR } }, { createPool });
+  t.after(() => store.close());
+
+  calls.length = 0;
+
+  await store.upsertLivingDocs('sistema-z', {
+    inputs: [
+      { text: 'primero', author: 'ana', date: '2026-01-01', commitHash: 'aaa' },
+      { text: 'segundo', author: 'bea', date: '2026-01-02', commitHash: 'bbb' },
+    ],
+    outputs: [],
+    entidades: [],
+    casosDeUso: [],
+  });
+
+  // Diseño: un INSERT por ítem (no multi-row). Si la implementación eligiera
+  // un único INSERT multi-row, este test debería adaptarse a inspeccionar los
+  // params concatenados de esa única llamada.
+  const insertCalls = calls.filter((c) => /INSERT INTO inputs/i.test(c.sql));
+  const allParams = insertCalls.flatMap((c) => c.params);
+
+  assert.ok(allParams.includes('primero'), 'debe incluir el text del primer ítem');
+  assert.ok(allParams.includes('segundo'), 'debe incluir el text del segundo ítem');
+  assert.ok(allParams.includes('ana'), 'debe incluir el author del primer ítem');
+  assert.ok(allParams.includes('bea'), 'debe incluir el author del segundo ítem');
+  assert.ok(allParams.includes('aaa'), 'debe incluir el commitHash del primer ítem');
+  assert.ok(allParams.includes('bbb'), 'debe incluir el commitHash del segundo ítem');
+});

@@ -1,13 +1,11 @@
 import { join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
-import { symlinkSync, unlinkSync, lstatSync } from 'node:fs';
 import { detectAgentEnv, detectStack } from '../lib/detect.js';
 import { walk, write, read, existsSync, listDirs } from '../lib/fsutil.js';
 import { loadCatalog } from '../lib/catalog.js';
 import { upsertAgentsMd } from '../lib/agentsmd.js';
-import { installPreCommit, installPostCommit } from '../lib/hooks.js';
+import { installPreCommit } from '../lib/hooks.js';
 import { ensureBranchingPolicy } from '../lib/branching.js';
-import { CURSOR_RULE } from '../templates.js';
 import { installSkills, availableSkills, globalBase } from '../lib/skills.js';
 import { VERSION } from '../version.js';
 
@@ -77,8 +75,10 @@ export async function init(root, flags = {}) {
     }
   }
 
-  // 2. AGENTS.md (superficie multi-agente)
-  actions.push('AGENTS.md ' + upsertAgentsMd(root, stack, loadCatalog(root), date));
+  // 2. CLAUDE.md (bloque gestionado; migra un bloque legacy de AGENTS.md si existe)
+  const claudeAction = upsertAgentsMd(root, stack, loadCatalog(root), date);
+  if (claudeAction === null) skipped.push('CLAUDE.md al día');
+  else actions.push('CLAUDE.md ' + claudeAction);
 
   // 3. Skills SDD (una carpeta por fase: definición + templates + ejemplos + referencias).
   //    Alcance elegido por el dev: local (este repo, versionadas en git) o global (toda la máquina).
@@ -88,53 +88,19 @@ export async function init(root, flags = {}) {
   const targetBase = scope === 'global' ? globalBase() : root;
   // sdd-bootstrap es global por naturaleza (detección de repos sin configurar): no se duplica en local.
   const names = scope === 'global' ? null : availableSkills().filter((n) => n !== 'sdd-bootstrap');
-  const installed = installSkills(targetBase, names);
-  actions.push(`skills SDD instaladas/actualizadas en alcance ${scope}: ${installed.join(', ')}`);
+  const { updated, unchanged } = installSkills(targetBase, names);
+  if (updated.length) actions.push(`skills SDD actualizadas en alcance ${scope}: ${updated.join(', ')}`);
+  else skipped.push(`skills SDD al día (alcance ${scope})`);
   const others = listDirs(join(root, '.claude', 'skills')).filter((d) => !d.startsWith('sdd-'));
   if (others.length && !flags.silent) console.log(`Skills existentes conservadas (revisá solapamientos): ${others.join(', ')}`);
 
-  // 4. Rule de Cursor
-  const hasCursor = env.some((e) => e.path.startsWith('.cursor'));
-  if (hasCursor || flags.cursor) {
-    const cp = join(root, '.cursor', 'rules', 'sdd.mdc');
-    const curC = read(cp);
-    if (curC !== CURSOR_RULE) {
-      write(cp, CURSOR_RULE);
-      actions.push(curC === null ? '.cursor/rules/sdd.mdc instalada (alwaysApply)' : '.cursor/rules/sdd.mdc actualizada');
-    } else {
-      skipped.push('.cursor/rules/sdd.mdc al día');
-    }
-  }
+  // 4. Hook pre-commit automático (desactivable en config).
+  //    El post-commit (auto-publish) fue retirado: el grafo se publica desde CI/CD (ver ADR-0011).
+  const hook = installPreCommit(root);
+  if (hook.changed) actions.push(hook.msg);
+  else skipped.push(hook.msg);
 
-  // 5. CLAUDE.md: symlink a AGENTS.md para evitar duplicación
-  const cmPath = join(root, 'CLAUDE.md');
-  const agentsMdPath = 'AGENTS.md';
-  try {
-    const stat = lstatSync(cmPath);
-    // Si es un symlink que apunta a AGENTS.md, está al día
-    if (stat.isSymbolicLink()) {
-      skipped.push('CLAUDE.md: symlink a AGENTS.md al día');
-    } else {
-      // Si existe pero no es symlink, migrar a symlink
-      unlinkSync(cmPath);
-      symlinkSync(agentsMdPath, cmPath);
-      actions.push('CLAUDE.md: migrado a symlink a AGENTS.md');
-    }
-  } catch (err) {
-    // No existe, crear symlink
-    if (err.code === 'ENOENT') {
-      symlinkSync(agentsMdPath, cmPath);
-      actions.push('CLAUDE.md: creado como symlink a AGENTS.md');
-    } else {
-      throw err;
-    }
-  }
-
-  // 6. Hooks pre-commit y post-commit automáticos (desactivables en config)
-  actions.push(installPreCommit(root));
-  actions.push(installPostCommit(root));
-
-  // 7. Política de branding (.sdd/branching.md): si no existe, se pregunta
+  // 5. Política de branding (.sdd/branching.md): si no existe, se pregunta
   //    (terminal interactiva) o se usan los defaults de sddkit (modo agente).
   {
     const interactive = process.stdin.isTTY && !flags.agent && !flags.quiet;

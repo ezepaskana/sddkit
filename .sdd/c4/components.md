@@ -8,6 +8,14 @@
 | `src/commands` | 24 | Comandos |
 | `(raíz)` | 3 | ❓ por validar |
 
+```mermaid
+flowchart TD
+  bin["bin/sdd.js<br/>entry point CLI"] --> commands["src/commands/*<br/>init, scan, setup, task,<br/>publish, impact, context, validate…"]
+  commands --> lib["src/lib/*<br/>agentsmd, c4, domain, catalog,<br/>patterns, hooks, llmClient, livingDocs…"]
+  lib --> graphstore["src/lib/graphstore/*<br/>index (wrap), mysql, matching"]
+  graphstore --> mysql[("MySQL<br/>grafo compartido")]
+```
+
 ## ❓ VALIDAR con el equipo
 
 - [ ] ¿Cuál es el rol del módulo `(raíz)`?

@@ -1,88 +1,40 @@
-# Ejemplo: Bootstrap de un repo existente
+# Ejemplo: bootstrap de un repo existente
 
-Escenario: el usuario abre un repo Node.js (`solar-backend`) y pide _"agregame un endpoint de alertas"_. El repo no tiene sddkit.
+El dev abre `solar-backend` (Node, sin sddkit) y pide _"agregame un endpoint de alertas"_.
 
----
+## Detección y aviso
 
-## Detección
+`.sdd/config.json` → no existe. `sdd --version` → 0.3.0 ✓. El agente avisa en una línea: _"Este repo no tiene sddkit configurado — ¿lo configuro? Documenta la arquitectura y fija convenciones para los agentes."_ El dev acepta.
+
+## a. Generar
 
 ```
-¿Existe .sdd/config.json? → NO
-¿Está instalado sdd? → sdd --version → 0.3.0 ✓
-```
-
-El agente avisa:
-
-> Este repo no tiene sddkit configurado — ¿lo configuro? Documenta la arquitectura y fija convenciones para los agentes.
-
-El usuario acepta.
-
----
-
-## Paso a: Generar
-
-```bash
 $ sdd setup --agent
-✓ .sdd/config.json creado
-✓ .sdd/c4/ generados (context, containers, components)
-✓ .sdd/domain.md generado
-✓ AGENTS.md actualizado
-✓ Skills instaladas (local)
-
+✓ .sdd/config.json, .sdd/c4/, .sdd/domain.md creados · CLAUDE.md actualizado · skills instaladas (local)
 Decisiones pendientes:
-  [PENDIENTE] module-system: esm (18 archivos) vs cjs (2 archivos)
-  [PENDIENTE] http-endpoints: express-router (12 archivos)
+  [PENDIENTE] module-system: esm (18 archivos) vs cjs (2)
+  [PENDIENTE] http-endpoints: express-router (12)
 ```
 
----
+## b. Decidir
 
-## Paso b: Decidir
-
-El agente presenta las opciones al usuario:
-
-> **module-system**: 18 archivos usan ESM, 2 usan CJS. ¿Elegís `esm`?
-
-Usuario: "sí, esm"
+> **module-system**: 18 archivos ESM, 2 CJS. ¿Elegís `esm`? — Dev: "sí"
 
 ```bash
-$ sdd decide module-system esm --why="mayoría del repo es ESM"
+sdd decide module-system esm --why="mayoría del repo es ESM"
+sdd decide http-endpoints express-router --why="único framework HTTP del proyecto"
 ```
 
-> **http-endpoints**: 12 archivos usan express-router (es la única variante). ¿Confirmás?
+## c. Completar docs (subagentes, según `references/completar-docs.md`)
 
-Usuario: "sí"
+1 subagente `medio` lee README/docs/ADRs → context, containers, domain. 3 `rapido` en paralelo, uno por entidad (Plant, Meter, Invoice). 4 `rapido` en paralelo, uno por módulo (routes, services, models, middleware). Después: edits mecánicos de los `❓` y `sdd validate` → 0 preguntas abiertas.
+
+## d-e. Cerrar y arrancar la tarea
+
+`models` verificado (rapido=haiku, medio=sonnet, fuerte=opus). Resumen al dev y arranque del pedido original:
 
 ```bash
-$ sdd decide http-endpoints express-router --why="único framework HTTP del proyecto"
+sdd task new "agregar endpoint de alertas"
 ```
 
----
-
-## Paso c: Completar docs
-
-El agente sigue el procedimiento de `references/completar-docs.md`:
-
-1. **Subagente medio** → lee README.md, docs/, ADRs → completa context.md, containers.md, domain.md (glosario, BRs, actores)
-2. **3 subagentes rapido en paralelo** → una entidad cada uno (Plant, Meter, Invoice) → devuelven descripción + ciclo de vida
-3. **4 subagentes rapido en paralelo** → un módulo cada uno (src/routes, src/services, src/models, src/middleware) → devuelven rol en una frase
-4. **Edits mecánicos** → reemplaza `❓` en domain.md y components.md
-5. **Verificación** → `sdd validate` → 0 preguntas abiertas
-
----
-
-## Paso d-e: Verificar modelos y resumir
-
-```
-✓ .sdd/config.json → models: rapido=haiku, medio=sonnet, fuerte=opus (ok)
-```
-
-> Listo. sddkit configurado en solar-backend:
-> - Arquitectura C4 documentada (3 contenedores, 5 módulos, 4 entidades)
-> - Catálogo: module-system=esm, http-endpoints=express-router
-> - Tu pedido original era "agregame un endpoint de alertas" — arranco el flujo SDD.
-
-```bash
-$ sdd task new "agregar endpoint de alertas"
-```
-
-→ Continúa con sdd-task.
+→ sigue con **sdd-task**: clasificar tipo y riesgo, y avanzar con el flujo del tipo.

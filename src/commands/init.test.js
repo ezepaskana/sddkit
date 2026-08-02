@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, lstatSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { init } from './init.js';
@@ -28,7 +28,7 @@ function withCapturedLogs(fn) {
     .finally(() => { console.log = originalLog; });
 }
 
-test('init: config default incluye hooks.autoPublish:true e instala el hook post-commit', async () => {
+test('init: config default incluye hooks.autoPublish:true (flag de config, independiente del hook)', async () => {
   const { root, cleanup } = gitFixture();
   try {
     await withSilencedLogs(() => init(root, { quiet: true }));
@@ -36,11 +36,16 @@ test('init: config default incluye hooks.autoPublish:true e instala el hook post
     const cfg = JSON.parse(readFileSync(join(root, '.sdd', 'config.json'), 'utf8'));
     assert.equal(cfg.hooks.preCommit, true);
     assert.equal(cfg.hooks.autoPublish, true);
+  } finally { cleanup(); }
+});
+
+test('init: YA NO instala el hook post-commit (auto-publish retirado, ver ADR-0011)', async () => {
+  const { root, cleanup } = gitFixture();
+  try {
+    await withSilencedLogs(() => init(root, { quiet: true }));
 
     const postCommitPath = join(root, '.git', 'hooks', 'post-commit');
-    assert.ok(existsSync(postCommitPath), 'post-commit hook debería existir');
-    const content = readFileSync(postCommitPath, 'utf8');
-    assert.ok(content.includes('sdd publish'), 'el hook post-commit debería incluir sdd publish');
+    assert.ok(!existsSync(postCommitPath), 'init() no debería crear el hook post-commit');
   } finally { cleanup(); }
 });
 
@@ -90,5 +95,48 @@ test('init con {quiet:true} (sin silent) sigue imprimiendo línea que empieza co
     const { logs } = await withCapturedLogs(() => init(root, { quiet: true }));
     const hasAcciones = logs.some((line) => line.startsWith('Acciones:'));
     assert.ok(hasAcciones, `Se esperaba una línea que empiece con "Acciones:", pero se imprimieron: ${logs.join(' | ')}`);
+  } finally { cleanup(); }
+});
+
+// --- BR-060 / ADR-0013: Claude-only — sin soporte de Cursor, CLAUDE.md es el archivo real ---
+
+test('init: NO instala .cursor/rules/sdd.mdc aunque se detecte entorno Cursor (soporte multi-agente retirado, ADR-0013)', async () => {
+  const { root, cleanup } = gitFixture();
+  try {
+    mkdirSync(join(root, '.cursor', 'rules'), { recursive: true });
+
+    const r = await withSilencedLogs(() => init(root, { quiet: true }));
+
+    const cursorRulePath = join(root, '.cursor', 'rules', 'sdd.mdc');
+    assert.ok(!existsSync(cursorRulePath), 'init() no debería crear .cursor/rules/sdd.mdc');
+    assert.ok(
+      !r.actions.some((a) => a.toLowerCase().includes('cursor')),
+      `actions no debería mencionar cursor: ${JSON.stringify(r.actions)}`
+    );
+  } finally { cleanup(); }
+});
+
+test('init: NO instala .cursor/rules/sdd.mdc aunque se pase flags.cursor explícito', async () => {
+  const { root, cleanup } = gitFixture();
+  try {
+    await withSilencedLogs(() => init(root, { quiet: true, cursor: true }));
+
+    const cursorRulePath = join(root, '.cursor', 'rules', 'sdd.mdc');
+    assert.ok(!existsSync(cursorRulePath), 'init() no debería crear .cursor/rules/sdd.mdc ni con flags.cursor');
+  } finally { cleanup(); }
+});
+
+test('init: CLAUDE.md queda como archivo real con el bloque gestionado, no como symlink a AGENTS.md', async () => {
+  const { root, cleanup } = gitFixture();
+  try {
+    await withSilencedLogs(() => init(root, { quiet: true }));
+
+    const claudeMdPath = join(root, 'CLAUDE.md');
+    assert.ok(existsSync(claudeMdPath), 'CLAUDE.md debería existir tras init()');
+    const stat = lstatSync(claudeMdPath);
+    assert.ok(!stat.isSymbolicLink(), 'CLAUDE.md no debería ser un symlink a AGENTS.md');
+
+    const claudeMd = readFileSync(claudeMdPath, 'utf8');
+    assert.ok(claudeMd.includes('<!-- sddkit:begin -->'), 'CLAUDE.md debería contener el bloque gestionado por sddkit');
   } finally { cleanup(); }
 });

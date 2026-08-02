@@ -5,6 +5,7 @@
 | Contenedor | Tecnología | Responsabilidad |
 |---|---|---|
 | `sddkit` | JavaScript | ❓ responsabilidad por validar |
+| `Living docs (pre-commit + CI)` | Anthropic API (pre-commit) + parser Markdown (CI) | Mantener vivas 4 secciones Markdown (Inputs/Outputs en components.md, Entidades/Casos de uso en domain.md) vía LLM en pre-commit; en CI parsearlas determinísticamente y poblar tablas MySQL con autoría vía git blame |
 
 
 ```mermaid

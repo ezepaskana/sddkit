@@ -7,7 +7,7 @@ description: Detecta repos sin sddkit y ofrece configurarlo. Usar al inicio de t
 
 Al empezar a trabajar en un repositorio:
 
-1. **Si existe `.sdd/config.json`** → el repo ya está configurado. Seguí el flujo de AGENTS.md / la skill sdd-task. Fin.
+1. **Si existe `.sdd/config.json`** → el repo ya está configurado. Seguí el bloque gestionado de `CLAUDE.md` / la skill sdd-task. Fin.
 2. **Si NO existe**, verificá si el CLI está disponible (corré `sdd` — debe mostrar ayuda):
    - Si está disponible: avisale al usuario en una línea ("Este repo no tiene sddkit configurado — ¿lo configuro? Documenta la arquitectura y fija convenciones para los agentes"). Si acepta, el setup tiene TRES pasos obligatorios — los tres, no solo el primero:
      a. **Generar**: corré `sdd setup --agent` y leé TODO el output (lista decisiones pendientes y el contrato de completado).

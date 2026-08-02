@@ -1,19 +1,32 @@
 import { join } from 'node:path';
 import { execSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { read, readJSON } from '../lib/fsutil.js';
 import { PKG_SKILLS, availableSkills, globalBase } from '../lib/skills.js';
 import { VERSION } from '../version.js';
-import { createRequire } from 'node:module';
-const _req = createRequire(import.meta.url);
 
 const ok = (m) => console.log('  ✓ ' + m);
 const warn = (m) => console.log('  ⚠ ' + m);
 const bad = (m) => console.log('  ✖ ' + m);
 const info = (m) => console.log('  – ' + m);
 
+/**
+ * Heurística: ¿hay algún archivo de CI/CD que corra `sdd publish`?
+ * Busca en .github/workflows/*.yml|yaml, .gitlab-ci.yml y Jenkinsfile (raíz del repo).
+ */
+function hasCiRunningPublish(root) {
+  const candidates = [join(root, '.gitlab-ci.yml'), join(root, '.gitlab-ci.yaml'), join(root, 'Jenkinsfile')];
+  const wfDir = join(root, '.github', 'workflows');
+  try {
+    for (const f of readdirSync(wfDir)) {
+      if (/\.ya?ml$/i.test(f)) candidates.push(join(wfDir, f));
+    }
+  } catch { /* sin .github/workflows */ }
+  return candidates.some((p) => (read(p) || '').includes('sdd publish'));
+}
+
 /** `sdd doctor` — diagnóstico read-only del ecosistema sddkit (no modifica nada). */
-export async function doctor(root, deps = {}) {
+export async function doctor(root) {
   console.log(`\nsddkit doctor v${VERSION} — diagnóstico read-only\n`);
 
   // Entorno
@@ -36,20 +49,13 @@ export async function doctor(root, deps = {}) {
   else if (hook?.includes('sdd validate')) ok('pre-commit hook activo');
   else warn('pre-commit hook ausente — corré `sdd sync`');
 
-  // Post-commit hook (auto-publish)
-  const postCommitHook = read(join(root, '.git', 'hooks', 'post-commit'));
-  if (cfg.hooks?.autoPublish === false) info('post-commit hook (auto-publish) desactivado por config');
-  else if (postCommitHook?.includes('sdd publish')) ok('post-commit hook (auto-publish) activo');
-  else warn('post-commit hook (auto-publish) ausente — corré `sdd sync`');
-
-  // Driver SQLite
+  // Grafo de impacto (ADR-0011: sqlite deprecado; mysql + CI/CD corriendo `sdd publish`)
   if (cfg.graph?.driver === 'sqlite') {
-    try {
-      (deps.requireSqlite || (() => _req('better-sqlite3')))();
-      ok('better-sqlite3 disponible (driver sqlite operativo)');
-    } catch {
-      warn('better-sqlite3 no encontrado — instalalo con: npm i better-sqlite3');
-    }
+    bad('graph.driver: "sqlite" está deprecado (ver ADR-0011) — migrá a "mysql" + CI/CD');
+  } else if (cfg.graph?.driver === 'mysql') {
+    hasCiRunningPublish(root)
+      ? ok('CI/CD detectado corriendo sdd publish')
+      : warn('Sin CI/CD detectado corriendo sdd publish — el grafo puede quedar desactualizado (ver BR-050)');
   }
 
   // Skills

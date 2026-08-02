@@ -71,37 +71,35 @@ Después de actualizar el paquete `sddkit` (`npm update`, nueva versión instala
 
 ## Grafo de impacto
 
-Un grafo central y opcional que conecta los endpoints que expone cada repo con quién los consume — para responder **¿a quién impacto si cambio esto?** (BR-014). Desde esta versión, `sdd setup` activa automáticamente `graph.driver: "sqlite"` (ruta configurable, default `~/.sddkit/graph.db`, BR-035), así que el grafo queda funcionando sin pasos manuales. El modo "degrada en silencio" (`sdd publish` y `sdd impact` muestran una advertencia y no hacen nada, `sdd context` no muestra nada distinto) solo aplica a repos que no corrieron `sdd setup` con esta versión, o que tienen un `.sdd/config.json` editado a mano sin clave `"graph"`.
+Un grafo central y opcional que conecta los endpoints que expone cada repo con quién los consume — para responder **¿a quién impacto si cambio esto?** (BR-014). El grafo requiere un driver `mysql` y un entorno de CI/CD (`sdd setup` ya NO configura ningún driver por default — si no hay `graph` configurado, informa que hace falta `mysql` + CI/CD).
 
-**Configuración:** normalmente no hace falta tocar esto a mano — `sdd setup` ya lo configura (SQLite, con la ruta que elegiste o el default). Esta sección queda como referencia para entender qué generó `sdd setup`, cambiar a MySQL manualmente (BR-015, sigue sin wizard) o ajustar el path de SQLite después. La clave `"graph"` en `.sdd/config.json` admite uno de estos drivers:
+**Configuración:** la clave `"graph"` en `.sdd/config.json` requiere el driver `mysql` (el único soportado):
 
-- **SQLite local** (default):
-  ```json
-  {
-    "graph": {
-      "driver": "sqlite",
-      "sqlite": { "path": "~/.sddkit/graph.db" }
-    }
+```json
+{
+  "graph": {
+    "driver": "mysql",
+    "mysql": { "urlEnv": "SDDKIT_GRAPH_DB_URL" }
   }
-  ```
-  Omitir `"sqlite"` usa el default.
+}
+```
 
-- **MySQL compartido por el equipo** _(experimental — ver nota abajo):_
-  ```json
-  {
-    "graph": {
-      "driver": "mysql",
-      "mysql": { "urlEnv": "SDDKIT_GRAPH_DB_URL" }
-    }
-  }
-  ```
-  La connection string se lee de la variable de entorno indicada, nunca va literal en el config versionado (BR-015).
+La connection string se lee de la variable de entorno indicada, nunca va literal en el config versionado (BR-015). Si la configuración no existe o `driver` es otra cosa, los comandos de grafo fallan con un mensaje claro indicando que falta configurar `mysql`.
 
-  > ⚠️ **El driver MySQL es experimental y aún no está soportado.** Su contrato asíncrono no está completo y no hay tests de integración contra un MySQL real, por lo que las consultas pueden devolver resultados incorrectos. Usá el driver **SQLite** (default) hasta que se cierre. Seguimiento en el ADR-0002 / BR-015.
+**Living docs (Inputs/Outputs/Entidades/Casos de uso):** el LLM mantiene vivas 4 secciones de Markdown en el pre-commit hook (comando `sdd docs --hook`, instalado automáticamente por `sdd setup`/`sdd sync`):
+
+- **Inputs** (disparadores de proceso: endpoints HTTP, listeners de queue, jobs programados) en `.sdd/c4/components.md`
+- **Outputs** (clientes de salida: llamadas HTTP, escrituras a S3/FTP, mensajes a queues, escrituras a BD) en `.sdd/c4/components.md`
+- **Entidades principales** en `.sdd/domain.md`
+- **Casos de uso** (nuevo) en `.sdd/domain.md`
+
+Corre en **todos los commits** sin filtrar por relevancia y es no-bloqueante: si el LLM falla (sin red, sin API key, timeout), el commit sigue, las secciones quedan en su última versión válida y se loguea una advertencia. En CI (`sdd publish --ci`), un parser Markdown determinístico extrae esas 4 secciones (un ítem por bullet) y usa `git blame` por línea para calcular autoría (quién/cuándo/commit), poblando 4 tablas separadas en el graphstore MySQL (`inputs`, `outputs`, `entidades`, `casos_de_uso`), relacionadas por el nombre canónico del sistema.
+
+**Detección de endpoints y consumos (HTTP):** sigue vigente sin cambios — es un mecanismo aparte de los living docs. Detectados vía JSON en `.patterns.json`, usados por `sdd publish`/`sdd impact`/`sdd context` para el grafo de impacto.
 
 **Comandos:**
 
-- **`sdd publish`** — sube un snapshot del repo actual (arquitectura C1, endpoints, consumos detectados, hash de commit + timestamp) al grafo. Rechaza si quedan preguntas sin responder en `.sdd/c4/`.
+- **`sdd publish`** — sube un snapshot del repo actual (arquitectura C1, endpoints/consumos HTTP, living docs, hash de commit + timestamp) al grafo. Rechaza si quedan preguntas sin responder en `.sdd/c4/`. En CI/CD (con `--ci` o `CI=true`), además parsea los living docs determinísticamente y puebla 4 tablas relacionadas por sistema usando autoría vía git blame.
 - **`sdd impact <MÉTODO> <ruta>`**, **`sdd impact <sistema>`** o **`sdd impact <ARN-o-nombre-de-recurso>`** — ¿quién consume esto? Las dos primeras formas reportan sistemas consumidores con nivel de confianza `exacto`/`posible` (BR-014). La 3ra forma busca el argumento entre los recursos de infraestructura publicados (`infraResources`/`infraEdges`) y reporta las aristas que lo mencionan, con su `type` y `confidence` (`confirmado`/`potencial`) (BR-021). Si ninguna de las 3 interpretaciones matchea, lo informa explícitamente. Informativo, nunca bloquea (ADR-0004).
 - **`sdd context`** — si el repo está publicado, muestra fecha y hash del último `sdd publish`; si no, sugiere correrlo.
 
@@ -124,16 +122,11 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: npx sdd publish
+      - run: npx sdd publish --ci
         env:
           SDDKIT_GRAPH_DB_URL: ${{ secrets.SDDKIT_GRAPH_DB_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
-
-(Este snippet es documentación/ejemplo — no se aplica a CI real en esta tarea.)
-
-**Auto-publish local (SQLite) vs CI (MySQL):**
-
-Con `"graph": { "driver": "sqlite" }`, `sdd setup`/`sdd init` instalan automáticamente un hook post-commit que ejecuta `sdd publish --hook` tras cada commit — sin mensajes salvo confirmación de éxito (`✓ grafo local actualizado (sqlite) → commit <hash> @ <timestamp>`). Esto mantiene el snapshot del grafo siempre sincronizado con tu arquitectura local, sin requerir comandos manuales. El hook puede desactivarse agregando `"hooks": { "autoPublish": false }` a `.sdd/config.json` (es `true` por default cuando el driver es SQLite). Con `"graph": { "driver": "mysql" }`, el comportamiento no cambia — el hook post-commit no hace nada, y la publicación sigue el flujo de CI sobre la rama `main` descrito en ADR-0003.
 
 ## Cómo lo ven los agentes
 

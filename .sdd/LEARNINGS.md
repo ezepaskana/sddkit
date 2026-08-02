@@ -39,6 +39,7 @@
 - **Triggers de skills por lista cerrada de keywords son frágiles en español**: incluir siempre un fallback de "preguntar al usuario" cuando el clasificador no esté seguro. _(tarea 002-triggers)_
 - **Nunca commitear un `.npmrc` de proyecto con `prefix=<ruta absoluta>`**: rompe en otra máquina y npm moderno lo prohíbe. El prefix va en config de usuario/máquina. _(tarea 008)_
 - **`createRequire(import.meta.url)` es el fix canónico para `optionalDependencies` en paquetes ESM globales**: la resolución CJS traversa donde `import()` ESM no llega. _(tarea 008)_
+- **El gate de `sdd task status done` rechaza retro.md con `…`**: no copies el título truncado de la tarea al encabezado de la retro — usá un título propio sin puntos suspensivos. _(tarea 016)_
 
 ## Decisiones de producto/dominio aprendidas
 

@@ -66,6 +66,9 @@ _(no se detectaron candidatos automáticamente — completar desde el código y 
 - **BR-065** — "En modo standalone (sin tarea) el análisis extendido se persiste en `.sdd/notes/<slug>.md` para poder cortar la sesión y retomarla después: si ya existe una nota del mismo tema, el agente la lee y la continúa en vez de crear otra. Esta escritura es la ÚNICA excepción a la restricción read-only de `sdd-analyze` standalone — código, artefactos de tarea y cualquier otro archivo siguen intocables". Fuente: tarea 017.
 - **BR-066** — "El bloque gestionado de CLAUDE.md (`buildBlock`, `src/lib/agentsmd.js`, sección `## Preferencias de respuesta`) instruye el contrato de BR-064 para toda respuesta del agente, no solo para las skills SDD". Fuente: tarea 017.
 
+- **BR-067** — "El resumen al dev (BR-064) es AUTOCONTENIDO: todo código interno del agente — identificadores de roadmap (`Z3`), reglas numeradas (`BR-004`, `ADR-0013`), nombres de entidad propuestos — se traduce en 3-4 palabras la primera vez que aparece, o no aparece. No aplica al vocabulario técnico del dominio ni a rutas de archivo reales: la regla ataca la jerga que el agente inventó, no la que el dev ya usa". Fuente: tarea 018.
+- **BR-068** — "El resumen al dev CIERRA con una pregunta explícita y respondible (\"¿cuál arranco?\", \"¿dale?\"), y cada opción declara el RESULTADO que produce elegirla (`→ podés ver plazas por barrio en la app`), no el nombre técnico de la tarea. Una lista de ítems sin pregunta de cierre no satisface BR-064". Fuente: tarea 018.
+
 ## Flujos clave del negocio
 
 > Los recorridos que explican el sistema (qué pasa cuándo, en términos de negocio — no de código).

@@ -12,15 +12,20 @@ El análisis produce **dos salidas** (BR-064): la respuesta corta al dev y la no
 >
 > Tres formas de arreglarlo:
 >
-> 1. **3-way merge** — preserva ediciones arbitrarias, pero hay que guardar la versión base y los conflictos en Markdown son ruidosos.
-> 2. **Bloques protegidos** `<!-- user:start/end -->` — simple y sin estado extra, pero solo customizás donde upstream marcó.
-> 3. **Overlay `SKILL.local.md`** ← recomendada. Única con garantía en ambos sentidos, y el repo ya usa base+overlay en `settings.json`.
+> 1. **Fusionar los dos textos**, como hace git al mergear
+>    → conservás cualquier edición tuya, pero vas a resolver conflictos a mano
+> 2. **Marcar zonas protegidas** dentro del archivo
+>    → simple y sin sorpresas, pero solo podés editar donde upstream te dejó
+> 3. **Un archivo aparte tuyo** que se suma al de sddkit ← la que recomiendo
+>    → nunca perdés nada de ningún lado, y ya lo hacemos así con la config
 >
-> Antes de decidir necesito saber una cosa: ¿las skills las lee Claude Code directo de `.claude/skills/`, o hay loader nuestro? Si es lo primero, la 3 no es implementable y queda la 2.
+> Antes de decidir necesito saber una cosa: ¿las skills las lee Claude Code directo de `.claude/skills/`, o las carga algo nuestro? Si es lo primero, la 3 no se puede y queda la 2.
 >
-> Detalle completo en `.sdd/notes/sync-skills-customizaciones.md`.
+> **¿Me lo confirmás y arranco con esa?** Detalle completo en `.sdd/notes/sync-skills-customizaciones.md`.
 
-**112 palabras.** Hallazgo + 3 opciones + la pregunta que destraba. Y ahí **frena**.
+**131 palabras.** Hallazgo + 3 opciones **con lo que gana cada una** + la pregunta que destraba. Y ahí **frena**.
+
+Fijate lo que NO aparece en el chat: `3-way merge`, `<!-- user:start/end -->`, `SKILL.local.md`, "base+overlay". Todo eso está en la nota. Al dev le llega lo que cada opción le da (BR-067).
 
 ---
 
@@ -60,6 +65,10 @@ Hoy la única protección es no correr sync, lo que anula el valor del comando.
 
 ---
 
-## Anti-ejemplo
+## Anti-ejemplos
 
-Volcar las tres opciones **con sus pros y contras completos** en el chat, más la recomendación argumentada, más la pregunta: 300+ palabras que el dev no puede contestar de un saque. Eso va a la nota. Al chat va el titular y el menú.
+**Por volumen:** volcar las tres opciones **con sus pros y contras completos**, más la recomendación argumentada, más la pregunta: 300+ palabras que el dev no puede contestar de un saque.
+
+**Por jerga:** _"Opción C (overlay `SKILL.local.md`) es la única compatible con BR-032 sin romper el mirror de `installSkills`."_ — 15 palabras, y el dev no entiende ninguna. Corto no es lo mismo que claro (BR-067).
+
+**Por cierre:** terminar con una lista de cuatro tareas y ningún signo de pregunta. El dev no sabe si tiene que elegir, aprobar o solo leer (BR-068).

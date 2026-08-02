@@ -166,3 +166,29 @@ test('buildBlock: Preferencias de respuesta incluye BR-064/BR-066 (resumen corto
     'La sección debería indicar que el detalle va a un archivo, no al chat (BR-064)'
   );
 });
+
+test('buildBlock: Preferencias de respuesta incluye BR-067/BR-068 (traducir jerga, opciones con resultado, pregunta de cierre)', () => {
+  const result = buildBlock({ name: 'demo' }, { decisions: [] }, '2026-08-02');
+
+  const preferencesStart = result.indexOf('## Preferencias de respuesta');
+  const nextSectionStart = result.indexOf('\n## ', preferencesStart + 1);
+  const preferencesSection = nextSectionStart !== -1
+    ? result.substring(preferencesStart, nextSectionStart)
+    : result.substring(preferencesStart);
+
+  assert.match(
+    preferencesSection,
+    /traduc/i,
+    'La sección debería exigir traducir los códigos internos del agente (BR-067)'
+  );
+  assert.match(
+    preferencesSection,
+    /resultado/i,
+    'Cada opción debería declarar el resultado que produce elegirla (BR-068)'
+  );
+  assert.match(
+    preferencesSection,
+    /pregunta/i,
+    'La sección debería exigir cerrar con una pregunta respondible (BR-068)'
+  );
+});

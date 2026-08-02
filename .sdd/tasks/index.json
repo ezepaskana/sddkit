@@ -1,5 +1,5 @@
 {
-  "nextId": 18,
+  "nextId": 19,
   "tasks": [
     {
       "id": "010",
@@ -71,6 +71,16 @@
       "id": "017",
       "dir": "017-necesito-que-siempre-me-responda-en",
       "title": "necesito que siempre me responda en pocas palabras simples, …",
+      "status": "done",
+      "createdAt": "2026-08-02",
+      "updatedAt": "2026-08-02",
+      "tipo": "feature",
+      "riesgo": "bajo"
+    },
+    {
+      "id": "018",
+      "dir": "018-se-puede-seguir-afinando-las-respuestas",
+      "title": "se puede seguir afinando las respuestas: el agente usa códig…",
       "status": "planned",
       "createdAt": "2026-08-02",
       "updatedAt": "2026-08-02",

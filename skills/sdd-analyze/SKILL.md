@@ -12,6 +12,36 @@ Si el mensaje mezcla investigación con un pedido de cambio, preguntale al dev c
 
 **Dos salidas, en los dos modos (BR-064).** El detalle va SIEMPRE a un archivo — `analysis.md` en modo tarea, `.sdd/notes/<slug>.md` en standalone. Lo que va al chat es un resumen de **≤ 150 palabras**: hallazgo principal + **2-4 opciones numeradas** para que el dev elija, y ahí **frenás y esperás**. Nunca vuelques el análisis entero en la respuesta.
 
+### El resumen se lee sin abrir la nota (BR-067, BR-068)
+
+Corto no alcanza: 150 palabras de jerga siguen siendo ilegibles. Dos reglas duras sobre el texto que va al chat.
+
+**1. Traducí tu propia jerga.** Todo código que inventaste vos o que vive en tus artefactos — IDs de roadmap (`Z3`), reglas numeradas (`BR-004`, `ADR-0013`), nombres de entidad propuestos (`ZoneIndicator`) — se traduce en 3-4 palabras la primera vez, o no aparece:
+
+| ❌ | ✅ |
+|---|---|
+| `Z3 vs BR-004` | "la carga masiva choca con la regla de auditoría" |
+| "el modelo de `ZoneIndicator`" | "la tabla de métricas por barrio que propuse" |
+
+**No** aplica al vocabulario técnico del dominio (`índice`, `migración`, `FK`, `regex`) ni a rutas de archivo reales (`src/lib/skills.js:7`): esos ubican, no ofuscan. La regla ataca la jerga que inventaste, no la que el dev ya usa.
+
+**2. Cerrá con una pregunta respondible.** Cada opción declara el **resultado** de elegirla, no el nombre técnico de la tarea, y el resumen termina preguntando:
+
+```
+¿Por dónde seguimos?
+
+1. Cargar los espacios verdes de la Ciudad
+   → podés ver plazas por barrio en la app
+2. Decidir de dónde sacamos los datos
+   → evita rehacer la carga después
+
+¿Cuál arranco?
+```
+
+Una lista de ítems sin pregunta final no cumple: el dev no sabe qué se espera que conteste.
+
+**Desempate:** si traducir los códigos no entra en las 150 palabras, recortá el detalle del hallazgo — **nunca** la traducción. Un hallazgo incompleto se pregunta; uno incomprensible se descarta.
+
 ---
 
 ## (A) Modo tarea

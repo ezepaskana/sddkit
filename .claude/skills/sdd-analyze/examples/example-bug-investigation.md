@@ -8,17 +8,22 @@
 
 > `stepBlock` (`src/commands/task.js`) recorta el paso siguiendo el regex `/^\s+(-|\d+\.) /`. Con cualquier otro marcador de sub-lista (`a)`, `b)`) el bloque se **trunca antes** de llegar a `**Verificación:**` — por eso falla solo en algunos pasos. `sdd task brief` tiene el mismo síntoma: le entrega el paso cortado al subagente.
 >
-> `.sdd/LEARNINGS.md` ya registra este modo de falla en la tarea 004: el fix de entonces fue extender el regex para `N. `. Reapareció con un formato nuevo.
+> Ya nos pasó: quedó anotado en los aprendizajes de la tarea 004 y se arregló agregando otro formato. Volvió con uno nuevo.
 >
 > ¿Qué querés ver?
 >
-> 1. El fix que propongo (3 pasos, con test de regresión)
+> 1. El arreglo que propongo, con su test
+>    → sabés cuánto trabajo es antes de decidir
 > 2. Cómo reproducirlo
-> 3. Qué otros consumidores de `stepBlock` pueden estar afectados
+>    → lo confirmás vos en dos minutos
+> 3. Qué más usa esa misma función
+>    → te enterás si hay otros comandos rotos en silencio
 >
-> Detalle en `.sdd/notes/stepblock-truncado.md`.
+> **¿Con cuál sigo?** Detalle en `.sdd/notes/stepblock-truncado.md`.
 
-**118 palabras.** Causa raíz con `archivo:línea` + menú. No adelanta el fix hasta que el dev lo pide.
+**126 palabras.** Causa raíz con `archivo:línea`, opciones con lo que dan, y una pregunta al final. No adelanta el arreglo hasta que el dev lo pide.
+
+Las rutas y nombres de función reales (`stepBlock`, `src/commands/task.js`) **se quedan**: ubican al dev en su propio código. Lo que se tradujo fue "regresión en el regex de sub-listas" → "volvió con un formato nuevo" (BR-067).
 
 ---
 

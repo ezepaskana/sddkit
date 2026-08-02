@@ -43,9 +43,16 @@ ${entities.length
 
 ## Flujos clave del negocio
 
-> Los 3-5 recorridos que explican el sistema (qué pasa cuándo, en términos de negocio — no de código).
+> Los 3-5 recorridos que explican el sistema (qué pasa cuándo, en términos de negocio — no de código). Si el flujo tiene 3+ actores/pasos, preferí el diagrama a la prosa.
 
-- [ ] ❓ ¿Cuáles son los flujos principales? (p.ej. alta de cliente → activación → primera medición → facturación)
+\`\`\`mermaid
+flowchart LR
+  paso1["❓ paso 1 (p.ej. alta de cliente)"] --> paso2["❓ paso 2 (p.ej. activación)"]
+  paso2 --> paso3["❓ paso 3 (p.ej. primera medición)"]
+  paso3 --> paso4["❓ paso 4 (p.ej. facturación)"]
+\`\`\`
+
+- [ ] ❓ ¿Cuáles son los flujos principales? (completar el diagrama de arriba o listar en prosa si es un único paso)
 
 ## ❓ VALIDAR con el equipo
 

@@ -12,6 +12,7 @@ import { doctor } from '../src/commands/doctor.js';
 import { sync } from '../src/commands/sync.js';
 import { publish } from '../src/commands/publish.js';
 import { impact } from '../src/commands/impact.js';
+import { docs } from '../src/commands/docs.js';
 import { VERSION } from '../src/version.js';
 
 const [, , cmd, ...args] = process.argv;
@@ -43,7 +44,9 @@ Uso: sdd <comando> [opciones]
 
 Comandos internos (los usan el agente y el pre-commit hook, no vos):
   task       Tareas SDD con artefactos persistentes y reanudables:
-             task new "<requisito>"  → crea requirement.md + spec.md + plan.md
+             task new "<requisito>"  → captura el requisito verbatim (solo requirement.md)
+             task type <id> <tipo>   → simple|bug|feature|refactor [--riesgo=alto]:
+                                       registra el tipo y crea SOLO sus artefactos
              task list / show <id>   → progreso y próximo paso (retomar)
              task status <id> <e>    → draft|specified|planned|in-progress|paused|done
              task brief <id> [paso]  → contexto mínimo del paso para el subagente
@@ -76,6 +79,7 @@ Comandos internos (los usan el agente y el pre-commit hook, no vos):
              (pide confirmación; quita SOLO lo que sddkit instaló).
 
 Opciones: --dir=<path>  --force  --why=<texto>  --agent  --update  --repo  --yes
+          --riesgo=alto  (sdd task type: nivel de riesgo, default bajo)
           --local  --global  (sdd setup: alcance de instalación de skills)
           --terraform=<path>  (sdd scan: ruta a un \`terraform show -json\`)
 `;
@@ -96,6 +100,7 @@ try {
   else if (cmd === 'sync') await sync(root, flags);
   else if (cmd === 'publish') await publish(root, flags);
   else if (cmd === 'impact') await impact(root, pos, flags);
+  else if (cmd === 'docs') await docs(root, flags);
   else {
     console.log(HELP);
     // Comando desconocido (no vacío) es un error de uso: salir ≠0 para que

@@ -13,7 +13,7 @@
     "_nota": "Aliases de Claude Code para delegar pasos del plan via subagentes (Task tool). El agente debe verificar en su primer arranque que estos modelos existan en su runtime y ajustarlos si no."
   },
   "skills": "local",
-  "graph": {
-    "driver": "sqlite"
+  "ui": {
+    "opener": "open -a \"Sublime Text\""
   }
 }

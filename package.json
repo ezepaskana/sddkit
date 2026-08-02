@@ -1,7 +1,7 @@
 {
   "name": "sddkit",
   "version": "0.0.1",
-  "description": "Spec-driven development para agentes de IA: documentación C4 viva, catálogo de convenciones validadas y flujo SDD auto-disparado. Multi-agente (Claude Code, Cursor, cualquier lector de AGENTS.md).",
+  "description": "Spec-driven development para Claude: documentación C4 viva, catálogo de convenciones validadas y flujo SDD auto-disparado.",
   "type": "module",
   "bin": {
     "sdd": "bin/sdd.js"
@@ -35,7 +35,6 @@
     "url": "https://github.com/ezepaskana/sddkit/issues"
   },
   "optionalDependencies": {
-    "better-sqlite3": "^13.0.1",
     "mysql2": "^3.23.1"
   },
   "devDependencies": {
@@ -50,5 +49,8 @@
     "SECURITY.md",
     "CHANGELOG.md",
     "LICENSE"
-  ]
+  ],
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0"
+  }
 }

@@ -1,107 +1,23 @@
-# Formatos de respuesta por tipo de pregunta
+# Guías de respuesta por tipo de pregunta (modo standalone)
 
-Cada tipo de pregunta tiene un formato de salida definido. Usá estas secciones exactas — no inventés secciones extras ni omitas ninguna.
+No son formularios: son el orden que hace útil la respuesta. Adaptá las secciones al caso, sacá las que no aporten y citá siempre `archivo:línea` en vez de describir de memoria. Cerrá con handoff (`/sdd-task`) solo si el dev quiere actuar.
 
 ## Bug / comportamiento inesperado
 
-### Qué está pasando
-Descripción concisa del comportamiento observado vs. el esperado.
-
-### Por qué sucede
-Causa raíz con referencias concretas a `archivo:línea`. Si hay más de una causa contribuyente, listalas en orden de impacto.
-
-### Archivos involucrados
-Lista con el rol de cada archivo en el problema:
-- `src/lib/foo.js` — donde se origina el error (línea N)
-- `src/commands/bar.js` — donde se manifiesta el síntoma
-
-### Fix sugerido
-Describí la corrección sin implementarla. Incluí qué cambiar y por qué, pero NO escribas el código.
-
-### Handoff
-> ¿Querés implementar el fix? Corré `/sdd-task` con: _"<requisito verbatim sugerido>"_
-
----
+Observado vs esperado → causa raíz con `archivo:línea` (varias causas: en orden de impacto) → archivos involucrados con su rol → fix **descrito, no aplicado**.
 
 ## Comprensión (¿cómo funciona X?)
 
-### Resumen de alto nivel
-2-3 oraciones que expliquen qué hace el componente/flujo y por qué existe.
-
-### Flujo paso a paso
-1. `archivo.js:función()` — qué hace este paso
-2. `otro.js:método()` — siguiente paso
-3. ...
-
-### Archivos clave y sus roles
-
-| Archivo | Rol |
-|---|---|
-| `src/lib/foo.js` | Lógica principal de X |
-| `src/commands/bar.js` | Entry point del comando |
-
-### Detalles no obvios o gotchas
-Cosas que no son evidentes al leer el código por primera vez: side effects, dependencias implícitas, orden de ejecución importante, variables de entorno requeridas.
-
----
+Resumen de 2-3 oraciones → flujo paso a paso (`archivo.js:función()` por paso) → archivos clave y su rol → gotchas no evidentes (side effects, orden de ejecución, env vars, dependencias implícitas).
 
 ## Brainstorm (¿cómo podríamos hacer X?)
 
-### Contexto actual
-Cómo funciona hoy la parte relevante, con archivos clave. Si no existe funcionalidad previa, decilo explícitamente.
-
-### Opciones
-
-**Opción A: _nombre descriptivo_**
-- Pros: ...
-- Contras: ...
-
-**Opción B: _nombre descriptivo_**
-- Pros: ...
-- Contras: ...
-
-(2-4 opciones; más de 4 diluye la discusión)
-
-### Recomendación
-Cuál elegirías y por qué, citando trade-offs concretos del proyecto.
-
-### Pregunta de cierre
-> ¿Alguna de estas opciones te convence, o hay constraints que no estoy viendo?
-
----
+Cómo funciona hoy (con archivos; si no existe, decilo) → 2-4 opciones con pros y contras concretos del proyecto → recomendación con su razón → pregunta de cierre al dev. Más de 4 opciones diluye la discusión.
 
 ## Revisión (¿está bien cómo está X?)
 
-### Qué está bien
-Patrones, decisiones o prácticas que vale la pena mantener. Sé específico — no "el código es limpio" sino "el manejo de errores en `validate.js` cubre los 3 casos borde documentados en BR-004".
-
-### Qué preocupa
-Gaps, riesgos o deuda técnica encontrada. Cada item con referencia a archivo y descripción del riesgo.
-
-### Sugerencias priorizadas
-
-| Prioridad | Sugerencia | Archivo(s) | Razón |
-|---|---|---|---|
-| High | Descripción del cambio | `foo.js` | Por qué importa |
-| Medium | Descripción del cambio | `bar.js` | Por qué importa |
-| Low | Descripción del cambio | `baz.js` | Por qué importa |
-
-Las sugerencias se describen, NO se implementan.
-
----
+Qué está bien (específico: no "es limpio" sino "el manejo de errores en `validate.js` cubre los 3 casos de BR-004") → qué preocupa, con archivo y riesgo → sugerencias priorizadas (alto/medio/bajo), descritas, no implementadas.
 
 ## Análisis de impacto (¿qué se rompe si cambio X?)
 
-### Dependientes directos
-Archivos que importan o usan directamente lo que se va a tocar:
-- `src/commands/init.js` — usa `createConfig()` de este módulo
-- `tests/init.test.js` — testea la función afectada
-
-### Efectos indirectos
-Cambios de comportamiento que no son imports directos: contratos de API, formatos de output que otros consumen, side effects en filesystem o estado global.
-
-### Estimación de esfuerzo de migración
-Cuántos archivos hay que tocar, si requiere migración de datos, si hay tests que actualizar. Expresalo en magnitud (1 archivo trivial / 5-10 archivos moderado / refactor amplio).
-
-### Riesgo neto
-**Alto / Medio / Bajo** — con justificación en una oración que cite la evidencia encontrada.
+Dependientes directos (usá `sdd impact` si hay grafo) → efectos indirectos (contratos de API, formato de output que otros consumen, side effects en filesystem o estado global) → esfuerzo de migración en magnitud (1 archivo trivial / 5-10 moderado / refactor amplio) → riesgo neto alto/medio/bajo con una oración de justificación.

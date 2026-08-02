@@ -1,6 +1,6 @@
 {
-  "scannedAt": "2026-06-22",
-  "filesScanned": 102,
+  "scannedAt": "2026-08-01",
+  "filesScanned": 122,
   "patterns": [
     {
       "topic": "http-endpoints",
@@ -32,11 +32,11 @@
         {
           "id": "esm",
           "label": "ES Modules (import/export)",
-          "count": 61,
+          "count": 71,
           "examples": [
             "eslint.config.js",
-            "src/templates.js",
-            "src/version.js"
+            "src/version.js",
+            "src/version.test.js"
           ]
         },
         {
@@ -44,7 +44,7 @@
           "label": "CommonJS (require/module.exports)",
           "count": 1,
           "examples": [
-            "src/lib/patterns.js"
+            "src/lib/graphstore/mysql.js"
           ]
         }
       ],
@@ -57,7 +57,7 @@
         {
           "id": "dot-test",
           "label": "archivo.test.*",
-          "count": 25,
+          "count": 32,
           "examples": [
             "src/version.test.js",
             "src/lib/agentsmd.test.js",

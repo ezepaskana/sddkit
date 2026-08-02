@@ -143,6 +143,14 @@ export function genComponents(root, files, date) {
     .sort((a, b) => b[1] - a[1])
     .map(([d, n]) => `| \`${srcRoot && d !== '(raíz)' ? srcRoot + '/' + d : d}\` | ${n} | ${ROLES[d] || '❓ por validar'} |`);
   const pending = Object.keys(groups).filter((d) => !ROLES[d]);
+  const moduleNames = Object.keys(groups);
+  const diagram = moduleNames.length
+    ? `\n\`\`\`mermaid
+flowchart LR
+${moduleNames.map((d) => `  mod_${sanitizeId(d)}["${mermaidSafe(d)}<br/>${groups[d]} archivo(s)"]`).join('\n')}
+\`\`\`
+`
+    : '';
   return `# C4 — Nivel 3: Componentes
 
 > Generado por sddkit el ${date}. Base: \`${srcRoot || '(raíz del repo)'}\`.
@@ -150,7 +158,7 @@ export function genComponents(root, files, date) {
 | Módulo | Archivos | Rol |
 |---|---|---|
 ${rows.join('\n')}
-
+${diagram}
 ## ❓ VALIDAR con el equipo
 
 ${pending.length

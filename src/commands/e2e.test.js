@@ -48,12 +48,19 @@ test('e2e flow complete: init → task new → task plan → task execute → ta
     assert.ok(existsSync(branchingPath), '.sdd/branching.md debería existir tras `sdd init`');
     assert.match(rInit.stdout, /branching\.md creado/);
 
-    // 2. `sdd task new 001` → crea requirement.md + spec.md + plan.md
+    // 2. `sdd task new 001` → crea SOLO requirement.md (flujo adaptativo, BR-057/058)
     const rNew = run(['task', 'new', 'Test task for e2e flow'], root);
     assert.equal(rNew.status, 0, rNew.stderr);
     assert.match(rNew.stdout, /Tarea 001 creada/);
     const taskDir = join(root, '.sdd', 'tasks', '001-test-task-for-e2e-flow');
-    assert.ok(existsSync(join(taskDir, 'plan.md')), 'plan.md debería existir tras `sdd task new`');
+    assert.ok(existsSync(join(taskDir, 'requirement.md')), 'requirement.md debería existir tras `sdd task new`');
+    assert.ok(!existsSync(join(taskDir, 'plan.md')), 'plan.md NO debería existir todavía tras `sdd task new`');
+
+    // 2b. `sdd task type 001 feature` → clasifica y crea analysis.md/spec.md/plan.md
+    const rType = run(['task', 'type', '001', 'feature'], root);
+    assert.equal(rType.status, 0, rType.stderr);
+    assert.match(rType.stdout, /tipo: feature/);
+    assert.ok(existsSync(join(taskDir, 'plan.md')), 'plan.md debería existir tras `sdd task type`');
 
     // 3. `sdd task plan 001` → plan con sección "Rama de trabajo" + Paso 1 (git checkout -b)
     const rPlan = run(['task', 'plan', '001', '--no-open'], root);

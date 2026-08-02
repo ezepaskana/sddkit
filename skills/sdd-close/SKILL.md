@@ -1,57 +1,31 @@
 ---
 name: sdd-close
-description: Fase de cierre de una tarea SDD. Usar al completar todos los pasos del plan para hacer la retro, medir la métrica y cosechar aprendizajes al framework.
+description: Fase de cierre de una tarea SDD. Usar al completar todos los pasos del plan para autogenerar la retro, medir la métrica y cosechar aprendizajes al framework.
 ---
 
-# sdd-close — cierre con retro (alimenta el aprendizaje — no es opcional)
+# sdd-close — cierre sin fricción
 
-`sdd task status <id> done` exige una retro completa (`retro.md`; el comando crea la plantilla — formato canónico en `templates/retro.md`).
+**La retro la AUTOGENERÁS vos, con datos que ya tenés. Cero preguntas al dev**: los desvíos ya quedaron registrados en el plan/nota durante la ejecución, la métrica se mide con su `cmd:`, y los checkboxes cuentan el resto. El dev la lee recién en el PR — si le falta algo, te lo dice ahí. `sdd task status <id> done` exige `retro.md` (formato en `templates/retro.md`).
 
-## Retro completa (`retro.md`)
+## Retro proporcional al tipo
 
-1. **Métrica**: medí el "después" y compará contra el baseline de analysis.md. Si no se cumplió lo esperado, decilo — un resultado negativo también es aprendizaje.
-2. **Desvíos**: qué anticipó mal la spec, qué pasos se replanificaron y por qué.
-3. **Cosecha**: los aprendizajes que apliquen a futuras tareas van a `.sdd/LEARNINGS.md` — reglas de curado en `references/curado.md`.
-4. **Promoción** (cada conocimiento a su destino):
-   - Convención nueva → `sdd decide`
-   - Regla de negocio nueva/cambiada → `.sdd/domain.md` (numerada BR-NNN)
-   - Decisión de arquitectura → ADR en `.sdd/decisions/`
-   - Cambio estructural → `.sdd/c4/`
-   - Pregunta de clarificación que ya apareció en otra tarea → respondela permanentemente en los docs
-5. Verificá que el pre-commit pase.
+- **`simple` / `bug` riesgo bajo → 1 línea autogenerada.** Qué se hizo + cómo se verificó. Aprendizajes solo si hubo una sorpresa real; si no, nada (ni siquiera N/A).
+- **`feature` / `refactor` (o riesgo alto) → retro completa, ≤ 150 palabras:**
+  1. **Métrica vs baseline**: medí el "después" con el `cmd:` definido y compará contra analysis.md. Resultado negativo también es aprendizaje. Sin métrica: `N/A: <motivo>` (en `refactor`: "mismos tests verdes antes y después").
+  2. **Desvíos**: copiá/condensá los ya registrados en plan.md — no los re-descubras.
+  3. **Aprendizajes accionables**, solo los que superen el umbral "otro agente tropezaría con esto", cada uno a su destino: general → `.sdd/LEARNINGS.md` (≤ 200 chars, tope ~30, reglas en `references/curado.md`) · convención → `sdd decide` · regla → BR-NNN en `.sdd/domain.md` · arquitectura → ADR · estructura → `.sdd/c4/` (diagrama de components al día).
 
-## Commit de cierre
+`N/A: <motivo>` satisface el gate; un `…` sin reemplazar no.
 
-Una vez completada la retro, commitea `retro.md` junto con los archivos de promoción que hayas tocado (`.sdd/LEARNINGS.md`, `.sdd/domain.md`, `.sdd/c4/`, `.sdd/decisions/`, o lo que correspondiera):
+## Cierre
 
-```bash
-git add retro.md .sdd/LEARNINGS.md [otros archivos de promoción]
-git commit -m "[tarea <id>] Cierre: retro + aprendizajes"
-```
-
-Esto cierra el trabajo local antes del push. Los archivos de promoción quedan en la rama de la tarea.
-
-## Push y Pull Request
-
-Los cambios commiteados (incluyendo la retro) están listos para pushear. Ahora `sdd task close <id>` ejecuta automáticamente:
-
-1. **Pushea la rama** — si no está pusheada en `origin`, corre `git push -u origin <rama>`.
-2. **Detecta plataforma git** — GitHub, Azure DevOps, GitLab (u otra).
-3. **Construye PR** — automáticamente crea un PR en draft con:
-   - Título: `[tarea <id>] <título>`
-   - Body: resumen de cambios + link a la tarea + checklist de validación
-   - Rama: la rama de la tarea
-   - Base: `main` (o `develop` si usas Git Flow)
-4. **Crea PR o instrucciones manuales**:
-   - Si `gh` (GitHub CLI) está disponible → `gh pr create --draft ...`
-   - Si `az` (Azure CLI) está disponible → `az repos pr create ...`
-   - Si `gl` (GitLab CLI) está disponible → `gl mr create ...`
-   - Si **NO** hay tool disponible → imprime instrucciones copy-paste para crear manual
-
-**Próximo paso:** Cerrá la tarea con `sdd task status <id> done`.
+1. Verificá `sdd validate` en verde.
+2. `git add` de la retro + archivos de promoción, commit `[tarea <id>] Cierre: retro + aprendizajes`.
+3. `sdd task close <id>` → push + PR draft (GitHub/Azure/GitLab; sin CLI imprime instrucciones). Título `[tarea <id>] <título>`, base según `.sdd/branching.md`.
+4. `sdd task status <id> done`.
 
 ## Additional Resources
 
-- `examples/retro-ejemplo.md` — Ejemplo de retro completa con datos reales (tarea sdd sync).
-- `references/curado.md` — Reglas de curado para LEARNINGS.md (accionable, fusionar, podar, tope ~30).
-- `templates/retro.md` — Template canónico de retro.md.
+- `templates/retro.md` — Artefacto canónico y su presupuesto.
+- `references/curado.md` — Reglas de curado de LEARNINGS.md.
+- `examples/retro-ejemplo.md` — Retro real dentro del presupuesto.

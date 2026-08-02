@@ -76,7 +76,7 @@ test('sync: con .sdd/config.json en version 0.0.0 → migra a VERSION, sincroniz
   } finally { cleanup(); }
 });
 
-test('sync: corrido dos veces → la 2da corrida loguea "ya estás al día" y VERSION', async () => {
+test('sync: misma versión → lista las acciones reales, sin "ya estás al día" ni AGENTS.md', async () => {
   const { root, cleanup } = gitFixture();
   try {
     setupRepoWithConfig(root, { version: VERSION, skills: 'local' });
@@ -84,12 +84,15 @@ test('sync: corrido dos veces → la 2da corrida loguea "ya estás al día" y VE
     // 1ra corrida (deja todo sincronizado/al día)
     await withCapturedLogs(() => sync(root, {}));
 
-    // 2da corrida
+    // 2da corrida: aunque la versión no cambie, el mensaje lista lo que tocó
     const { logs } = await withCapturedLogs(() => sync(root, {}));
     const full = logs.join('\n');
 
-    assert.ok(full.includes('ya estás al día'), `Se esperaba "ya estás al día" en la 2da corrida, salida: ${full}`);
+    assert.ok(!full.includes('ya estás al día'), `No se esperaba "ya estás al día", salida: ${full}`);
     assert.ok(full.includes(VERSION), `Se esperaba que el log incluya "${VERSION}", salida: ${full}`);
+    assert.ok(/skills SDD/.test(full), `Se esperaba la acción de skills en el listado, salida: ${full}`);
+    assert.ok(/CLAUDE\.md/.test(full), `Se esperaba la acción de CLAUDE.md en el listado, salida: ${full}`);
+    assert.ok(!full.includes('AGENTS.md'), `El mensaje no debe mencionar AGENTS.md, salida: ${full}`);
   } finally { cleanup(); }
 });
 
@@ -131,4 +134,57 @@ test('sync: con skills:"global" → avisa de skills GLOBALES y muestra <HOME>/.c
     rmSync(tmpHome, { recursive: true, force: true });
     cleanup();
   }
+});
+
+test('sync: 2da corrida consecutiva sin cambios → reporta al día, no actualizado', async () => {
+  const { root, cleanup } = gitFixture();
+  try {
+    setupRepoWithConfig(root, { version: VERSION, skills: 'local' });
+
+    // 1ra corrida: deja CLAUDE.md y las skills instaladas/sincronizadas
+    await withCapturedLogs(() => sync(root, {}));
+
+    // 2da corrida: nada cambió, no debería reportar "actualizado"/"instaladas/actualizadas"
+    const { logs } = await withCapturedLogs(() => sync(root, {}));
+    const full = logs.join('\n');
+
+    assert.ok(
+      !full.includes('bloque gestionado actualizado'),
+      `No se esperaba "bloque gestionado actualizado", salida: ${full}`,
+    );
+    assert.ok(
+      !full.includes('instaladas/actualizadas'),
+      `No se esperaba "instaladas/actualizadas", salida: ${full}`,
+    );
+    assert.ok(full.includes('al día'), `Se esperaba que el log incluya "al día", salida: ${full}`);
+  } finally { cleanup(); }
+});
+
+test('sync: skill instalada modificada a mano → sync la reporta como actualizada', async () => {
+  const { root, cleanup } = gitFixture();
+  try {
+    setupRepoWithConfig(root, { version: VERSION, skills: 'local' });
+
+    // 1ra corrida: instala las skills
+    await withCapturedLogs(() => sync(root, {}));
+
+    // Modificación manual de una skill instalada
+    const installedSkillPath = join(root, '.claude', 'skills', 'sdd-task', 'SKILL.md');
+    const original = readFileSync(installedSkillPath, 'utf8');
+    writeFileSync(installedSkillPath, original + '\nlínea agregada a mano\n');
+
+    // 2da corrida: debería detectar la diferencia y reportarla como actualizada
+    const { logs } = await withCapturedLogs(() => sync(root, {}));
+    const full = logs.join('\n');
+
+    assert.ok(
+      full.includes('skills SDD actualizadas'),
+      `Se esperaba que el log incluya "skills SDD actualizadas", salida: ${full}`,
+    );
+    assert.ok(full.includes('sdd-task'), `Se esperaba que el log incluya "sdd-task", salida: ${full}`);
+    assert.ok(
+      !full.includes('skills SDD al día'),
+      `No se esperaba "skills SDD al día", salida: ${full}`,
+    );
+  } finally { cleanup(); }
 });

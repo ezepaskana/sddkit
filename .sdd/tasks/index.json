@@ -1,77 +1,71 @@
 {
-  "nextId": 10,
+  "nextId": 17,
   "tasks": [
     {
-      "id": "001",
-      "dir": "001-ci-falla-porque-los-tests-importan",
-      "title": "CI falla porque los tests importan better-sqlite3 (optionalD…",
-      "status": "done",
-      "createdAt": "2026-06-16",
-      "updatedAt": "2026-06-16"
+      "id": "010",
+      "dir": "010-quisiera-que-esto-se-resuelva-de",
+      "title": "Quisiera que esto se resuelva de una manera mucho mas inteli…",
+      "status": "paused",
+      "createdAt": "2026-07-27",
+      "updatedAt": "2026-07-30"
     },
     {
-      "id": "002",
-      "dir": "002-agregar-fallback-de-3-opciones-en",
-      "title": "Agregar fallback de 3 opciones en los triggers de skills SDD…",
+      "id": "011",
+      "dir": "011-actualmente-con-el-framework-sdd-que",
+      "title": "Actualmente con el framework sdd que tenemos en sddkit se ge…",
       "status": "done",
-      "createdAt": "2026-06-17",
-      "updatedAt": "2026-06-17"
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-01"
     },
     {
-      "id": "003",
-      "dir": "003-implementar-las-3-propuestas-de-mejora",
-      "title": "Implementar las 3 propuestas de mejora de alta prioridad par…",
+      "id": "012",
+      "dir": "012-la-etapa-de-cierre-es-molesta",
+      "title": "La etapa de cierre es molesta; mejorarla para que no sea una…",
+      "status": "done",
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-01",
+      "tipo": "simple",
+      "riesgo": "bajo"
+    },
+    {
+      "id": "013",
+      "dir": "013-cuando-se-genera-un-documento-para",
+      "title": "Cuando se genera un documento para que el dev lo lea se abre…",
+      "status": "done",
+      "createdAt": "2026-08-01",
+      "updatedAt": "2026-08-01",
+      "tipo": "simple",
+      "riesgo": "bajo"
+    },
+    {
+      "id": "014",
+      "dir": "014-el-mensaje-de-sdd-sync-dice",
+      "title": "El mensaje de sdd sync dice 'ya estás al día' comparando sol…",
+      "status": "done",
+      "createdAt": "2026-08-02",
+      "updatedAt": "2026-08-02",
+      "tipo": "simple",
+      "riesgo": "bajo"
+    },
+    {
+      "id": "015",
+      "dir": "015-que-el-bloque-generado-por-sdd",
+      "title": "Que el bloque generado por sdd scan o las skills instruyan a…",
       "status": "in-progress",
-      "createdAt": "2026-06-22",
-      "updatedAt": "2026-06-22"
+      "createdAt": "2026-08-02",
+      "updatedAt": "2026-08-02",
+      "tipo": "feature",
+      "riesgo": "bajo"
     },
     {
-      "id": "004",
-      "dir": "004-fusionar-sdd-think-con-sdd-analyze",
-      "title": "Fusionar sdd-think con sdd-analyze: eliminar sdd-think como …",
-      "status": "done",
-      "createdAt": "2026-06-22",
-      "updatedAt": "2026-06-22"
-    },
-    {
-      "id": "005",
-      "dir": "005-ajustar-sdd-analyze-y-sdd-specify",
-      "title": "Ajustar sdd-analyze y sdd-specify para separar outputs y res…",
-      "status": "done",
-      "createdAt": "2026-06-22",
-      "updatedAt": "2026-06-22"
-    },
-    {
-      "id": "006",
-      "dir": "006-ajustar-el-flujo-post-ejecucion-sdd",
-      "title": "Ajustar el flujo post-ejecución SDD para que: (1) los worker…",
-      "status": "done",
-      "createdAt": "2026-06-24",
-      "updatedAt": "2026-06-25"
-    },
-    {
-      "id": "007",
-      "dir": "007-invertir-el-orden-en-sdd-close",
-      "title": "Invertir el orden en sdd-close: la retro (retro.md, LEARNING…",
+      "id": "016",
+      "dir": "016-ejecuto-sdd-sync-de-forma-consecutiva",
+      "title": "Ejecuto sdd sync de forma consecutiva en el mismo repo y me …",
       "status": "in-progress",
-      "createdAt": "2026-06-25",
-      "updatedAt": "2026-06-25"
-    },
-    {
-      "id": "008",
-      "dir": "008-bug-sdd-publish-no-encuentra-better",
-      "title": "Bug: sdd publish no encuentra better-sqlite3 instalado globa…",
-      "status": "done",
-      "createdAt": "2026-06-25",
-      "updatedAt": "2026-06-25"
-    },
-    {
-      "id": "009",
-      "dir": "008-bug-sdd-validate-reporta-falsos-positivos",
-      "title": "Bug: sdd validate reporta falsos positivos de drift para pro…",
-      "status": "done",
-      "createdAt": "2026-06-28",
-      "updatedAt": "2026-06-30"
+      "createdAt": "2026-08-02",
+      "updatedAt": "2026-08-02",
+      "tipo": "bug",
+      "riesgo": "bajo"
     }
   ]
 }

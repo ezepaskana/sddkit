@@ -13,6 +13,29 @@ const CREATE_TABLE = `
   )
 `;
 
+/**
+ * Tablas de living docs (tarea 010): una por categoría, con la misma forma.
+ * La clave del objeto en JS es camelCase (`casosDeUso`) pero la tabla es
+ * snake_case (`casos_de_uso`) — ver LIVING_DOCS_TABLES.
+ */
+const LIVING_DOCS_TABLES = [
+  { key: 'inputs', table: 'inputs' },
+  { key: 'outputs', table: 'outputs' },
+  { key: 'entidades', table: 'entidades' },
+  { key: 'casosDeUso', table: 'casos_de_uso' },
+];
+
+const createLivingDocsTable = (table) => `
+  CREATE TABLE IF NOT EXISTS ${table} (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    canonical_name VARCHAR(255) NOT NULL,
+    text TEXT,
+    added_by VARCHAR(255),
+    added_at VARCHAR(32),
+    commit_hash VARCHAR(64)
+  )
+`;
+
 const UPSERT = `
   INSERT INTO systems (canonical_name, repo_path, c1, endpoints, consumptions, infra_resources, infra_edges, commit_hash, published_at)
   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -45,7 +68,7 @@ function rowToSystem(row) {
 /**
  * Store de bajo nivel sobre MySQL (driver `mysql`). `config` es el `cfg.graph`
  * de `.sdd/config.json`. `deps.createPool` es inyectable para tests (default
- * `() => import('mysql2/promise').then((m) => m.createPool(connectionString))`).
+ * `() => import('mysql2/promise').then((m) => (m.default ?? m).createPool(connectionString))`).
  *
  * BR-015: la connection string se resuelve vía la env var nombrada en
  * `config.mysql.urlEnv` — nunca se loguea ni se incluye su valor en ningún
@@ -64,9 +87,16 @@ export async function createMysqlStore(config, deps = {}) {
     return { ok: false, reason: 'missing-env', envVar: urlEnv };
   }
 
-  const createPool = deps.createPool || (() => import('mysql2/promise').then((m) => m.createPool(connectionString)));
+  // `mysql2/promise` es CJS: sus named exports en ESM (`m.createPool`) son un
+  // snapshot congelado en el primer import del proceso, mientras que `m.default`
+  // ES el `module.exports` vivo. Usamos `m.default` para leer siempre el valor
+  // actual (los tests parchean `createPool` sobre el objeto CJS).
+  const createPool = deps.createPool || (() => import('mysql2/promise').then((m) => (m.default ?? m).createPool(connectionString)));
   const pool = await createPool();
   await pool.execute(CREATE_TABLE);
+  for (const { table } of LIVING_DOCS_TABLES) {
+    await pool.execute(createLivingDocsTable(table));
+  }
 
   // Migración de DBs existentes (tarea 002, sin las columnas de infra): MySQL no
   // permite DEFAULT en columnas TEXT/LONGTEXT (<8.0.13), así que las agregamos
@@ -97,6 +127,28 @@ export async function createMysqlStore(config, deps = {}) {
         commitHash ?? null,
         publishedAt,
       ]);
+    },
+    /**
+     * Reemplaza (delete + insert) los living docs de un sistema. El DELETE corre
+     * siempre para las 4 categorías, aunque el array venga vacío: así una
+     * categoría que se vació queda vacía también en la DB.
+     */
+    async upsertLivingDocs(canonicalName, docs = {}) {
+      for (const { key, table } of LIVING_DOCS_TABLES) {
+        await pool.execute(`DELETE FROM ${table} WHERE canonical_name = ?`, [canonicalName]);
+        for (const item of docs?.[key] ?? []) {
+          await pool.execute(
+            `INSERT INTO ${table} (canonical_name, text, added_by, added_at, commit_hash) VALUES (?, ?, ?, ?, ?)`,
+            [
+              canonicalName,
+              item.text ?? null,
+              item.author ?? null,
+              item.date ?? null,
+              item.commitHash ?? null,
+            ],
+          );
+        }
+      }
     },
     async querySystem(canonicalName) {
       const [rows] = await pool.execute('SELECT * FROM systems WHERE canonical_name = ?', [canonicalName]);

@@ -4,10 +4,16 @@ import { createGraphStore } from '../lib/graphstore/index.js';
 
 const grab = (txt, re) => (txt.match(re) || []);
 
+/** Extrae todos los bloques ```mermaid ... ``` de un markdown (arreglo de strings, sin las fences). */
+function grabMermaidBlocks(txt) {
+  return [...txt.matchAll(/```mermaid\n[\s\S]*?```/g)].map((m) => m[0]);
+}
+
 /**
  * `sdd context` — one-pager destilado para arrancar una tarea.
- * Extracción determinística: solo las líneas con señal (sin diagramas,
- * checkboxes abiertos ni prosa). Un archivo corto en vez de seis largos.
+ * Extracción determinística: líneas con señal (sin checkboxes abiertos ni
+ * prosa) más los bloques Mermaid de los docs C4/domain (BR-061/BR-062):
+ * son contenido de primera clase y el agente debe verlos, no solo el humano.
  */
 export async function context(root) {
   const out = [];
@@ -28,13 +34,13 @@ export async function context(root) {
   if (cfg?.graph?.driver && canonicalName) {
     const store = await createGraphStore(cfg);
     if (store.ok === true) {
-      const sys = store.querySystem(canonicalName);
+      const sys = await store.querySystem(canonicalName);
       if (sys) {
         out.push(`Publicado: ${sys.publishedAt} (${sys.commitHash ? sys.commitHash.slice(0, 7) : '(sin git)'})`);
       } else {
         out.push('Sin publicar — correr `sdd publish`');
       }
-      store.close();
+      await store.close();
     }
   }
 
@@ -49,6 +55,14 @@ export async function context(root) {
   const dom = read(join(root, '.sdd', 'domain.md')) || '';
   const brs = grab(dom, /^- \*\*BR-\d+\*\*.+$/gm).filter((l) => !l.includes('❓'));
   if (brs.length) out.push('\n## Reglas de negocio (vinculantes)\n' + brs.join('\n'));
+
+  const diagrams = [
+    ...grabMermaidBlocks(ctx),
+    ...grabMermaidBlocks(cont),
+    ...grabMermaidBlocks(comp),
+    ...grabMermaidBlocks(dom),
+  ];
+  if (diagrams.length) out.push('\n## Diagramas\n' + diagrams.join('\n\n'));
 
   const cat = readJSON(join(root, '.sdd', 'catalog.json'));
   if (cat?.decisions?.length) {

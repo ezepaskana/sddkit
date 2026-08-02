@@ -14,17 +14,13 @@ export async function sync(root, flags = {}) {
   const before = cfg.version || '(desconocida)';
   const scope = cfg.skills || 'local';
 
-  const { actions } = await init(root, { ...flags, quiet: true, silent: true });
-  const configChanged = actions.some((a) => a.startsWith('.sdd/config.json'));
+  const { actions, skipped } = await init(root, { ...flags, quiet: true, silent: true });
 
   console.log('━━━ sddkit sync ━━━');
-  if (before !== VERSION) {
-    console.log(`v${before} → v${VERSION}: skills, config, AGENTS.md y hooks actualizados.`);
-  } else if (configChanged) {
-    console.log(`v${VERSION}: config migrado (campos nuevos) — skills, AGENTS.md y hooks revisados.`);
-  } else {
-    console.log(`ya estás al día en v${VERSION} (skills, config, AGENTS.md y hooks revisados).`);
-  }
+  console.log(before !== VERSION ? `v${before} → v${VERSION}:` : `v${VERSION} (sin cambio de versión):`);
+  for (const a of actions) console.log(`  · ${a}`);
+  if (actions.length === 0) console.log('  sin cambios — todo ya estaba al día');
+  for (const s of skipped) console.log(`  – ${s}`);
 
   if (scope === 'global') {
     console.log(`⚠ Skills GLOBALES actualizadas en ${join(globalBase(), '.claude', 'skills')} — afecta a todos los repos de esta máquina.`);

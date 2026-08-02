@@ -5,22 +5,28 @@ description: Fase de especificación de una tarea SDD. Usar después del anális
 
 # sdd-specify — la spec refinada
 
-**Input**: `analysis.md` de la tarea (ya escrito y aprobado por el dev en la fase sdd-analyze). Leelo primero — contiene el análisis crítico, las respuestas de clarificación y la recomendación. Usá esos hallazgos como base para escribir la spec.
+**Solo para tareas tipo `feature`** (BR-058). Las otras no llevan spec: `simple` → `nota.md`; `bug` → `reproduccion.md` (el test de regresión ES el criterio de aceptación); `refactor` → `analysis.md` + plan, sin EARS. Si estás acá con otro tipo, volvé al flujo del tipo o re-clasificá.
 
-Completá spec.md (el template ya está en la carpeta de la tarea; el formato canónico vive en `templates/spec.md` de esta skill). spec.md es la spec formal — ya NO contiene secciones de análisis:
+**Input:** `analysis.md` aprobado. Leelo primero: la spec traduce sus hallazgos y clarificaciones a comportamiento observable, no los repite.
 
-1. **Historia**: como _(rol)_ quiero _(capacidad)_ para _(beneficio)_.
-2. **Criterios de aceptación en formato EARS** — ver `references/ears.md`. Cubrí el caso feliz, los casos borde que salieron de la clarificación y el comportamiento en error.
-3. **Reglas de negocio afectadas**: citá por ID (BR-NNN de `.sdd/domain.md`). Si la tarea introduce una regla nueva, agregala allí PRIMERO con su número y citala.
-4. **Fuera de alcance**: explícito — lo que NO se hace en esta tarea.
-5. **Impacto en arquitectura/catálogo**: módulos de components.md afectados, convenciones que aplican, si requiere ADR.
+**Presupuesto: `spec.md` ≤ 300 palabras.** Las secciones ya están en `templates/spec.md` — completalas, no las re-expliques.
+
+## Qué hace buena a una spec
+
+- **Un criterio por comportamiento observable**, en EARS (`references/ears.md`): verbos verificables (responder, registrar, excluir), nunca "manejar" o "soportar". Cubrí caso feliz, los bordes que salieron de la clarificación y el error.
+- **Riesgo `alto`** → criterios explícitos para error, concurrencia y migración. **Riesgo `bajo`** → los mínimos que definen "terminado".
+- **Reglas de negocio por ID** (BR-NNN de `.sdd/domain.md`). Si la tarea introduce una regla nueva, escribila PRIMERO allí con su número y citala acá.
+- **Fuera de alcance explícito**: lo que NO se hace es lo que evita el scope creep en la ejecución.
+- **Impacto**: módulos de `components.md`, convenciones del catálogo que aplican, si requiere ADR o tocar C4.
+- `N/A: <motivo>` es válido en cualquier sección que no aplique y satisface el gate.
+- **Diagrama**: solo si REEMPLAZA prosa (3+ actores o pasos con bifurcaciones). Si no, borrá la sección. Si lo incluís, la primera línea del bloque `mermaid` debe declarar el tipo (`flowchart LR`, `sequenceDiagram`, `stateDiagram-v2`) o `sdd validate` falla.
 
 ## El gate
 
-Corré `sdd task status <id> specified` — **le abre spec.md al dev en su editor**. Avisale que la tiene abierta, esperá su aprobación en el chat, y marcá la línea de aprobación en spec.md. Recién entonces seguí con la skill **sdd-plan**.
+`sdd task status <id> specified` **le abre spec.md al dev**. Avisale, esperá su aprobación en el chat, marcá la línea de aprobación en spec.md y seguí con **sdd-plan**.
 
 ## Additional Resources
 
-- `examples/spec-ejemplo.md` — Ejemplo de spec EARS completa para el comando sdd sync.
-- `references/ears.md` — Patrones y reglas del formato EARS.
-- `templates/spec.md` — Template de spec con todas las secciones.
+- `templates/spec.md` — Artefacto canónico con sus secciones y su presupuesto.
+- `references/ears.md` — Patrones EARS y reglas de escritura.
+- `examples/spec-ejemplo.md` — Spec real dentro del presupuesto.

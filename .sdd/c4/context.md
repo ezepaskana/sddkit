@@ -3,13 +3,13 @@
 > Generado por sddkit el 2026-06-15. Regenerado por `sdd scan` — escribí tus notas debajo de la marca manual.
 
 **Sistema:** sddkit
-**Descripción:** Spec-driven development para agentes de IA: documentación C4 viva, catálogo de convenciones validadas y flujo SDD auto-disparado. Multi-agente (Claude Code, Cursor, cualquier lector de AGENTS.md).
+**Descripción:** Spec-driven development para Claude: documentación C4 viva, catálogo de convenciones validadas y flujo SDD auto-disparado. Target único: Claude (ADR-0013) — el bloque gestionado vive en `CLAUDE.md`.
 **Stack detectado:** JavaScript (52)
 
 ```mermaid
 flowchart LR
   user(["Usuario<br/><i>rol por validar</i>"])
-  sys["<b>sddkit</b><br/>Spec-driven development para agentes de IA: documentación C4 viva, catálogo de convenciones validadas y flujo SDD auto-d"]
+  sys["<b>sddkit</b><br/>Spec-driven development para Claude: documentación C4 viva, catálogo de convenciones validadas y flujo SDD auto-disparado."]
   user -- usa --> sys
 ```
 
@@ -25,3 +25,9 @@ flowchart LR
 ## Notas del equipo
 
 _(esta sección no se pisa al regenerar)_
+
+## Integraciones externas
+
+| Sistema | Responsabilidad | Modo |
+|---|---|---|
+| Anthropic API (Messages API) | Mantener vivas 4 secciones Markdown (Inputs/Outputs, Entidades/Casos de uso) vía análisis LLM incremental | En el pre-commit de cada dev (todos los commits); no bloqueante si falla (última versión válida se preserva) |

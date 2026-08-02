@@ -1,25 +1,19 @@
-# Ejemplo de análisis crítico (nivel de profundidad esperado)
+# Ejemplo de análisis crítico (nivel de profundidad esperado — 190 palabras)
 
-**Requisito**: "agregar un cache Redis para el endpoint de plantas porque está lento"
+**Requisito:** _"agregar un cache Redis para el endpoint de plantas porque está lento"_. Tipo `feature`, riesgo alto (dependencia nueva).
 
-**¿Qué problema real resuelve?** Latencia alta en GET /plants (el dev reporta ~2s).
+## Análisis crítico
 
-**¿Ya existe algo?** No hay cache, pero `plantService.list()` hace N+1 queries (una por medidor). El problema probablemente no es la falta de cache.
+- **Problema real:** latencia de GET /plants ~2s reportada por el dev.
+- **¿Ya existe?** No hay cache, pero `plantService.list()` (`src/services/plantService.js:41`) hace N+1 queries, una por medidor.
+- **Alternativa más simple:** un JOIN elimina el N+1 — 1 paso vs 6 (Redis suma dependencia, invalidación y deploy).
+- **Supuestos cuestionados:** que la lentitud es por volumen de lectura; con 200 plantas el N+1 la explica entera.
+- **Riesgos:** invalidar cache sobre datos de facturación viola BR-003 (facturación usa siempre la última medición).
+- **¿Si no se hace?** El endpoint sigue lento; nada se rompe.
+- **Detección y manejo de fallas:** si Redis cae, `cache.plants.hit_rate` va a 0 y la latencia vuelve a ~2s; el endpoint debe hacer fallback a la query directa y loguear warning, nunca romper.
 
-**¿Alternativa más simple?** Sí: un JOIN en la query elimina el N+1. Estimado: 1 paso vs 6 (Redis = dependencia nueva, invalidación, deploy).
+**Recomendación:** `reconsiderar` — arreglar el N+1 y medir; si la latencia sigue sobre el objetivo, el cache se evalúa con ADR.
 
-**Supuestos del dev cuestionados:** que la lentitud es por volumen de lectura (no hay evidencia; con 200 plantas el N+1 explica todo).
+## Métrica de impacto
 
-**Riesgos de la propuesta original:** invalidación de cache con datos de facturación = bugs sutiles que violan BR-003 (la facturación usa siempre la última medición).
-
-**¿Qué pasa si no se hace?** El endpoint sigue lento; nada se rompe.
-
-**Recomendación: reconsiderar** — propongo arreglar el N+1 primero y medir (la métrica de impacto lo confirma o refuta). Si después de eso la latencia sigue > objetivo, el cache se evalúa con un ADR.
-
-## Pregunta 7 (ejemplo de respuesta)
-
-Pensando en la propuesta original del dev (cache Redis para GET /plants):
-
-**Detección (cómo nos enteraríamos):** si Redis se cae o se desconfigura el TTL, el hit-rate del cache cae a 0% (métrica `cache.plants.hit_rate`) y la latencia de GET /plants vuelve a subir a ~2s, visible en el dashboard de latencia del endpoint. Si Redis no responde, los logs muestran errores de conexión tipo `ECONNREFUSED` o timeouts del cliente Redis al hacer `get`/`set`.
-
-**Reacción:** el endpoint no debe romperse — ante un error de Redis, el código debe hacer fallback a la query directa (la misma que ya existe sin cache) y responder igual, aunque más lento. El error de conexión a Redis se loguea como warning (no error crítico, porque el endpoint sigue funcionando) para que el equipo lo note sin que dispare una alerta de incidente.
+- **Baseline:** P95 de GET /plants = 2,1s (20 requests, log de `timing.js`). **Esperado:** < 400ms. **Cómo se mide después:** el mismo log.

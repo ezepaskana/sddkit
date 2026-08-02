@@ -1,4 +1,3 @@
-import { createSqliteStore } from './sqlite.js';
 import { createMysqlStore } from './mysql.js';
 import { queryCapability, queryImpact, queryInfraImpact } from './matching.js';
 
@@ -12,11 +11,12 @@ function wrap(store) {
   return {
     ok: true,
     publishSystem: store.publishSystem,
+    upsertLivingDocs: store.upsertLivingDocs,
     querySystem: store.querySystem,
     close: store.close,
-    queryCapability: (method, normalizedPath) => queryCapability(store.listSystems(), method, normalizedPath),
-    queryImpact: (query) => queryImpact(store.listSystems(), query),
-    queryInfraImpact: (resource) => queryInfraImpact(store.listSystems(), resource),
+    queryCapability: async (method, normalizedPath) => queryCapability(await store.listSystems(), method, normalizedPath),
+    queryImpact: async (query) => queryImpact(await store.listSystems(), query),
+    queryInfraImpact: async (resource) => queryInfraImpact(await store.listSystems(), resource),
   };
 }
 
@@ -24,27 +24,20 @@ function wrap(store) {
  * Factory del graphstore (Fase 2). `cfg` es el `.sdd/config.json` parseado completo
  * (puede ser `null`/`undefined`). Según `cfg.graph.driver`:
  * - sin driver / driver desconocido → `{ok:false, reason:'not-configured'}` (BR-012).
- * - `sqlite` → store SQLite; si el módulo no está instalado → `missing-dependency`.
+ * - `sqlite` → ya no soportado (ver ADR-0011); `{ok:false, reason:'unsupported-driver'}`.
  * - `mysql` → store MySQL (BR-015); sin `config.mysql.urlEnv`/env var seteada →
  *   `missing-env`; si el módulo no está instalado → `missing-dependency`.
- *
- * ⚠️ EXPERIMENTAL: el driver `mysql` aún no está soportado. Su contrato asíncrono
- * está incompleto (`wrap()` consume `store.listSystems()` sin await) y no hay tests
- * de integración contra un MySQL real, por lo que las consultas pueden devolver
- * resultados incorrectos. Usar `sqlite` (default) en producción. Ver README → grafo.
  */
 export async function createGraphStore(cfg, deps = {}) {
   const driver = cfg?.graph?.driver;
   if (!driver) return { ok: false, reason: 'not-configured' };
 
   if (driver === 'sqlite') {
-    try {
-      const store = await createSqliteStore(cfg.graph, deps);
-      return wrap(store);
-    } catch (err) {
-      if (!isModuleNotFound(err)) throw err;
-      return { ok: false, reason: 'missing-dependency', install: 'npm i better-sqlite3' };
-    }
+    return {
+      ok: false,
+      reason: 'unsupported-driver',
+      message: 'graph.driver: "sqlite" no está soportado (ver ADR-0011) — migrá a "mysql" + CI/CD',
+    };
   }
 
   if (driver === 'mysql') {

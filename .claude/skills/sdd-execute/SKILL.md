@@ -5,33 +5,38 @@ description: Fase de ejecución de una tarea SDD con patrón orquestador/workers
 
 # sdd-execute — orquestador/workers
 
-**Vos sos el ORQUESTADOR: NO implementás ningún paso vos mismo.** Tu contexto queda limpio (spec, plan, coordinación); la implementación contamina solo contextos descartables de subagentes. El protocolo completo está en `references/protocolo-subagentes.md`.
+**Sos el ORQUESTADOR: no implementás ningún paso vos mismo** (tampoco los `(fuerte)`). Tu contexto queda limpio; la implementación contamina contextos descartables. Protocolo completo en `references/protocolo-subagentes.md`.
 
-## Paso 1 es BLOQUEANTE: rama de trabajo
+Aplica a todos los tipos. En `simple` no hay plan: con el ok del dev sobre `nota.md`, implementás con tests en un solo paso (delegá igual si toca más de un archivo).
 
-**ANTES de lanzar ningún subagente:** El Paso 1 (auto-generado) es `git checkout -b <rama>`. Este paso es **bloqueante**:
-- Verifica que el repo tiene `.git` (si no, instrucción clara para `git init`).
-- Ejecuta el comando de checkout.
-- Valida que la rama activa es la esperada.
-- **Si falla:** STOP. No continúa con Paso 2+.
+## Paso 1 — bloqueante: rama de trabajo
 
-Esto asegura que todos los commits van a la rama correcta. El orquestador ejecuta Paso 1 automáticamente cuando corrés `sdd task execute <id>` (antes de lanzar workers para Paso 2+).
+Antes de lanzar ningún subagente, ejecutá el Paso 1 auto-generado (`git checkout -b <rama>`): verificá que existe `.git`, corré el checkout y validá que la rama activa es la esperada. **Si falla, STOP** — no sigas con el Paso 2.
 
-Resumen del ciclo por paso (incluidos los `(fuerte)`):
+**Nadie commitea durante la ejecución** (ni workers ni vos): los cambios quedan como modificaciones locales hasta la prueba local.
 
-1. **Paso 1 ya se ejecutó** (rama creada, validada). Partir de Paso 2.
-2. Generá el contexto mínimo del paso: `sdd task brief <id> <paso>` — el CLI recorta determinísticamente (el paso + spec refinada + solo las BR citadas + catálogo). NO le digas al worker "leé spec.md y plan.md completos": el brief reemplaza esas lecturas y se paga una sola vez por paso.
-3. Lanzá un subagente con el modelo del nivel del paso (`.sdd/config.json → models`) cuyo prompt sea el output del brief (ver protocolo).
-4. Cuando reporta, **verificá VOS**: `sdd task verify <id> <paso>` — si la verificación es `cmd:` se ejecuta literal (exit 0 = pasó; exit 3 = verificación manual, ahí sí juzgá vos). Tests sueltos: `sdd test` / `sdd check`. Solo con verificación en verde marcá el checkbox en plan.md.
-5. Subagente bloqueado → te devuelve la pregunta; resolvela con el dev, registrá la respuesta en analysis.md, relanzá.
-6. Pasos `[P]` sin dependencias cruzadas: subagentes paralelos.
-7. Si un paso falla o revela un problema de la spec: frená y consultá al dev antes de improvisar.
+## Ciclo por paso (desde el Paso 2)
 
-Sin subagentes disponibles (p.ej. Cursor): ejecutá secuencial, pero releé analysis.md, spec.md y plan.md antes de cada paso en vez de confiar en tu memoria de la conversación.
+1. `sdd task brief <id> <paso>` — recorte determinístico (paso + spec + BR citadas + catálogo). **No le digas al worker "leé spec.md y plan.md completos"**: el brief reemplaza esas lecturas y se paga una vez por paso.
+2. Lanzá un subagente con el modelo del nivel del paso (`.sdd/config.json → models`) y el output del brief como prompt.
+3. **Verificá VOS**: `sdd task verify <id> <paso>` (exit 0 = pasó; exit 3 = verificación manual, ahí juzgá vos). El reporte del worker es un claim, no una prueba. Solo con verde marcás el checkbox en plan.md.
+4. Worker bloqueado → te devuelve la pregunta: resolvela con el dev, registrala en `analysis.md` (o `reproduccion.md` en `bug`) y relanzá con el brief actualizado.
+5. Pasos `[P]` sin dependencias cruzadas: subagentes en paralelo.
+6. Si un paso falla o revela un problema de la spec: frená y consultá al dev, no improvises. Si el alcance mutó, re-clasificá (`sdd task type <id> <tipo>`) y avisá.
 
-Pausar: `sdd task status <id> paused`. Retomar (cualquier sesión/agente): `sdd task show <id>`. Al completar todos los pasos: skill **sdd-close**.
+Específicos: **`bug`** → el paso del test rojo se verifica con el test fallando por el motivo correcto, no por otro error. **`refactor`** → la corrida verde de baseline se registra antes del primer cambio y la misma corrida debe quedar verde al final.
+
+Sin subagentes disponibles: ejecutá secuencial, releyendo los artefactos de la tarea antes de cada paso en vez de confiar en tu memoria de la conversación.
+
+Pausar: `sdd task status <id> paused`. Retomar (cualquier sesión): `sdd task show <id>`.
+
+## Prueba local (cuando todos los checkboxes están verificados)
+
+1. Presentale al dev una instrucción concreta según el cambio: comando CLI → "corré `<comando>` y mirá la salida"; función → "usala y verificá el retorno"; config/docs → "revisá `git diff`"; skill → "probá el flujo en una tarea de prueba".
+2. **Esperá su confirmación.** Si reporta problemas, corregí sin commitear y volvé a pedirla.
+3. Recién con la confirmación: commiteá con mensaje convencional (`.sdd/branching.md`) y pasá a **sdd-close**.
 
 ## Additional Resources
 
-- `examples/ejecucion-ejemplo.md` — Ejemplo completo de ejecución con bloqueo, clarificación y reintento.
-- `references/protocolo-subagentes.md` — Protocolo de prompt, verificación y modelo por nivel para workers.
+- `references/protocolo-subagentes.md` — Prompt del worker, verificación y modelo por nivel.
+- `examples/ejecucion-ejemplo.md` — Ejecución real con bloqueo, clarificación y reintento.

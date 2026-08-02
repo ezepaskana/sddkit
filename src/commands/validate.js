@@ -1,8 +1,42 @@
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
+import { readdirSync } from 'node:fs';
 import { walk, read, readJSON } from '../lib/fsutil.js';
 import { detectPatterns } from '../lib/patterns.js';
 import { loadCatalog, saveCatalog } from '../lib/catalog.js';
 import { componentGroups } from '../lib/c4.js';
+
+const VALID_MERMAID_TYPES = [
+  'flowchart', 'graph', 'sequenceDiagram', 'classDiagram', 'stateDiagram',
+  'erDiagram', 'journey', 'gantt', 'pie', 'mindmap', 'timeline',
+];
+
+/** Recorre un directorio buscando archivos .md (sin ignorar dot-dirs: se usa solo bajo .sdd/). */
+function walkMarkdown(dir) {
+  let out = [];
+  let entries;
+  try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return out; }
+  for (const e of entries) {
+    const full = join(dir, e.name);
+    if (e.isDirectory()) out = out.concat(walkMarkdown(full));
+    else if (e.isFile() && e.name.endsWith('.md')) out.push(full);
+  }
+  return out;
+}
+
+/** Extrae el contenido de cada bloque ```mermaid ...``` de un texto markdown. */
+function extractMermaidBlocks(text) {
+  const blocks = [];
+  const re = /```mermaid\r?\n([\s\S]*?)```/g;
+  let m;
+  while ((m = re.exec(text))) blocks.push(m[1]);
+  return blocks;
+}
+
+/** La primera línea no vacía del bloque debe declarar uno de los tipos válidos de diagrama Mermaid. */
+function mermaidDeclaresValidType(block) {
+  const firstLine = (block.split('\n').find((l) => l.trim().length > 0) || '').trim();
+  return VALID_MERMAID_TYPES.some((t) => firstLine === t || firstLine.startsWith(`${t} `) || firstLine.startsWith(`${t}-`));
+}
 
 export async function validate(root, flags) {
   if (flags.hook) {
@@ -69,6 +103,34 @@ export async function validate(root, flags) {
   // 2c. Tareas SDD activas (recordatorio de reanudación, informativo).
   const tidx = readJSON(join(root, '.sdd', 'tasks', 'index.json'));
   const active = (tidx?.tasks || []).filter((t) => ['in-progress', 'paused'].includes(t.status));
+
+  // 2d. Concisión de LEARNINGS.md: bullets ≤ 200 caracteres (BR-062).
+  const learnings = read(join(root, '.sdd', 'LEARNINGS.md'));
+  if (learnings) {
+    for (const line of learnings.split('\n')) {
+      const bullet = line.trim();
+      if (!bullet.startsWith('- ')) continue;
+      if (bullet.length > 200) {
+        violations.push(
+          `LEARNINGS.md: bullet de ${bullet.length} caracteres supera el límite de 200 (BR-062): "${bullet.slice(0, 60)}…"`
+        );
+      }
+    }
+  }
+
+  // 2e. Sintaxis Mermaid: la primera línea de cada bloque debe declarar un tipo válido (BR-062).
+  for (const f of walkMarkdown(join(root, '.sdd'))) {
+    const content = read(f) || '';
+    for (const block of extractMermaidBlocks(content)) {
+      if (!mermaidDeclaresValidType(block)) {
+        const rel = relative(root, f).split('\\').join('/');
+        violations.push(
+          `Mermaid inválido en ${rel}: la primera línea del bloque debe declarar un tipo válido de diagrama ` +
+          `(${VALID_MERMAID_TYPES.join(', ')}).`
+        );
+      }
+    }
+  }
 
   // 3. Reporte
   console.log(`\nsddkit validate — ${files.length} archivos\n`);

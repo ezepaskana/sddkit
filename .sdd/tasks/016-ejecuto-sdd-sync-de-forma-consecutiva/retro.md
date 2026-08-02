@@ -1,4 +1,4 @@
-# Retro — tarea 016: Ejecuto sdd sync de forma consecutiva en el mismo repo y me …
+# Retro — tarea 016: sdd sync consecutivo debe reflejar si realmente hay cambios
 
 > La AUTOGENERA el agente al cerrar, con datos que ya tiene — sin preguntarle nada al dev, que la lee en el PR. Creada el 2026-08-02.
 

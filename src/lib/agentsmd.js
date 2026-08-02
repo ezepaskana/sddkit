@@ -17,6 +17,8 @@ Ejecutá \`/sdd-task\` ante pedidos de cambio (agregar, crear, implementar, arre
 
 Responde siempre de forma breve y directa. Evitá explicaciones largas o preámbulos salvo que se pidan explícitamente. Priorizá código y respuestas cortas sobre prosa extensa.
 
+Entregá el hallazgo en ≤ 150 palabras y 2-4 opciones numeradas; esperá que el dev elija antes de seguir. El detalle largo va a un archivo, nunca al chat: expandí de a un tema, a pedido.
+
 Para mostrarle un archivo al dev, mirá el contexto de terminal: si es la terminal embebida de un IDE (\`TERMINAL_EMULATOR=JetBrains-JediTerm\` o \`TERM_PROGRAM=vscode\`), mostralo en ese mismo IDE; si es una terminal standalone, abrilo con el comando de \`.sdd/config.json → ui.opener\` si está configurado (\`<opener> "<ruta>"\`); sin \`ui.opener\`, usá tu comportamiento default.
 
 ## Ante dudas o incongruencias: preguntale al dev

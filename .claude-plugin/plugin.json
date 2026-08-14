@@ -16,6 +16,7 @@
     "ai-agents",
     "claude-code"
   ],
-  "skills": "./skills",
-  "hooks": "./hooks/hooks.json"
+  "metadata": {
+    "nota": "NO declarar `skills` ni `hooks` acá: `skills/` y `hooks/hooks.json` se cargan automáticamente por convención, y declararlos los registra dos veces (el plugin falla con 'Duplicate hooks file detected'). Esos campos son solo para directorios o archivos ADICIONALES."
+  }
 }

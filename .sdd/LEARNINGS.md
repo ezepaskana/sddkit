@@ -24,6 +24,9 @@
 
 ## Sobre la arquitectura del plugin
 
+- **No declares `skills` ni `hooks` en `plugin.json`**: `skills/` y `hooks/hooks.json` se cargan por convención y declararlos los duplica ("Duplicate hooks file detected"). _(tarea 021)_
+- **`claude plugin validate <dir>` valida el marketplace si hay ambos manifiestos**: para validar el plugin, copiá `plugin.json` solo a otro directorio. _(tarea 021)_
+- **En hooks, la variable va como `"${CLAUDE_PLUGIN_ROOT}"`** — con llaves y entre comillas. Sin llaves puede no sustituirse. _(tarea 021)_
 - **Un plugin de Claude Code no puede instalar dependencias**: es markdown y JSON, y su único punto de ejecución es el one-liner de un hook. Todo lo demás lo ejecuta el dev. _(tarea 021)_
 - **Degradación elegante > error bloqueante**: para herramientas externas opcionales (`gh`/`glab`/`az`, `termaid`), detectá disponibilidad, usá si existe, degradá si no. _(tareas 010, 021)_
 - **Persistí también la respuesta negativa**: un ofrecimiento que solo recuerda el "sí" vuelve a molestar en cada sesión. _(tarea 021)_

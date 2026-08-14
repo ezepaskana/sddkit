@@ -5,11 +5,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "test -f .sdd/config.json || cat \"$CLAUDE_PLUGIN_ROOT/hooks/bootstrap.md\""
+            "command": "test -f .sdd/config.json || cat \"${CLAUDE_PLUGIN_ROOT}/hooks/bootstrap.md\""
           },
           {
             "type": "command",
-            "command": "test ! -f .sdd/config.json || command -v termaid >/dev/null 2>&1 || grep -q '\"termaid\"' .sdd/config.json || cat \"$CLAUDE_PLUGIN_ROOT/hooks/termaid.md\""
+            "command": "test ! -f .sdd/config.json || command -v termaid >/dev/null 2>&1 || grep -q '\"termaid\"' .sdd/config.json || cat \"${CLAUDE_PLUGIN_ROOT}/hooks/termaid.md\""
           }
         ]
       }

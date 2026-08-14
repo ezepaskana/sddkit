@@ -1,35 +1,46 @@
-# Ejemplo: flujo completo de una tarea `feature`
+# Ejemplo: flujo completo de una tarea
 
 Mensaje del dev: _"quiero que el listado de facturas se pueda filtrar por rango de fechas"_ → "quiero que" es keyword de cambio → se dispara `/sdd-task`.
 
 ## 1-2. Capturar y clasificar
 
-Creo `.sdd/tasks/004-quiero-que-el-listado-de-facturas/requirement.md` con el texto verbatim, agrego la entrada al índice en `draft`, y al clasificar como `feature` copio los tres templates (`analysis.md`, `spec.md`, `plan.md`) desde el plugin.
+Creo `.sdd/tasks/004-quiero-que-el-listado-de-facturas/requirement.md` con el texto verbatim y agrego la entrada al índice en `draft`.
 
 Anuncio: _"Lo trato como `feature` (riesgo bajo): comportamiento nuevo en el listado, pero el patrón de filtros ya existe. Decime si preferís otro tipo."_
 
-## 3. Analizar (`/sdd-analyze`) — ≤ 350 palabras
+Las señales son claras (un pedido, un alcance evidente), así que **no pregunto la expectativa**: clasifico y sigo. Si el pedido admitiera lecturas de tamaño muy distinto, ahí sí preguntaría antes de clasificar (BR-057).
 
-- **¿Ya existe?** `buildInvoiceQuery()` en `src/services/invoices.js:44` ya filtra por estado; el rango de fechas se agrega ahí, no en un endpoint nuevo.
-- **Alternativa más simple:** parametrizar el filtro existente en vez de duplicar la query.
-- **Riesgos:** ninguno — es lectura. **Métrica:** el dev deja de exportar a Excel para filtrar a mano (hoy ~3 veces por semana).
-- **Recomendación:** `proceder con cambios` (parametrizar, no duplicar).
+**Riesgo bajo → dos artefactos**: `analysis.md` y `plan.md`. Sin spec ni design.
 
-Paso el estado a `analyzed`, le muestro `analysis.md` al dev → aprueba.
+## 3. Analizar (`/sdd-analyze`) — ≤ 45 líneas
 
-## 4. Especificar (`/sdd-specify`) — ≤ 300 palabras
+```markdown
+## Entendimiento
+`buildInvoiceQuery()` (`src/services/invoices.js:44`) ya filtra por estado: el rango
+de fechas se agrega ahí parametrizando el filtro existente, no en un endpoint nuevo.
 
-- CUANDO se pide el listado con `desde` y `hasta`, EL SISTEMA DEBE devolver solo las facturas emitidas dentro de ese rango, incluyendo ambos extremos.
-- SI `desde` es posterior a `hasta`, EL SISTEMA DEBE responder 400 con código `INVALID_DATE_RANGE` (BR-027).
+## Huecos
+- [ ] H1: ¿Los extremos del rango se incluyen? — sugerido: sí, ambos inclusive.
+  - Respuesta: sí
+```
 
-Paso a `specified`, le muestro `spec.md` → aprueba.
+Sin diagrama: se explica en dos líneas. Paso el estado a `analyzed`, **vuelco `analysis.md` en la terminal** → el dev aprueba.
 
-## 5. Planificar (`/sdd-plan`) — ≤ 3 sub-ítems por paso
+## 4. Planificar (`/sdd-plan`) — ≤ 45 líneas
 
-Paso 1 rama de trabajo · Paso 2 tests del rango y del borde invertido _(rapido)_ · Paso 3 parametrizar `buildInvoiceQuery()` _(medio)_ · Paso 4 actualizar `.sdd/c4/components.md` _(rapido)_.
+Sin spec (riesgo bajo), así que los criterios de aceptación van en el plan:
 
-Paso a `planned`, le muestro `plan.md` → aprueba → `in-progress`.
+```markdown
+- [ ] **1. Rama de trabajo** — `cmd: test "$(git branch --show-current)" = task/004-filtro-fechas`
+- [ ] **2. Tests del rango y del borde invertido** `[P]` — `cmd: npm test -- invoices` (rojo)
+- [ ] **3. Parametrizar `buildInvoiceQuery()`** — ambos extremos inclusive; `desde > hasta` responde 400 `INVALID_DATE_RANGE` (BR-027). Depende de 2. `cmd: npm test -- invoices`
+- [ ] **4. Actualizar `.sdd/c4/components.md`** `[P]` — `cmd: grep -q 'filtro por rango' .sdd/c4/components.md`
+```
 
-## 6. Ejecutar y cerrar
+Paso a `planned`, lo vuelco → aprueba → `in-progress`.
 
-`/sdd-execute`: un subagente por paso con el brief que armás vos, y **corrés la verificación del paso antes de marcar su checkbox** — el reporte del worker es un claim, no una prueba. `/sdd-close`: retro ≤ 150 palabras (métrica cumplida, sin desvíos, un aprendizaje cosechado) y estado `done`.
+## 5. Ejecutar y cerrar
+
+`/sdd-execute`: un subagente por paso con el brief que armás vos, y **corrés la verificación antes de marcar el checkbox** — el reporte del worker es un claim, no una prueba.
+
+`/sdd-close`: sin documento de retro. Si hubo un aprendizaje que haría tropezar a otro agente, va directo a `.sdd/LEARNINGS.md`; después, commit, PR draft y estado `done`.

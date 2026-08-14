@@ -5,8 +5,8 @@
 Antes lo armaba el CLI; ahora **lo componés vos** (ADR-0016), siempre con las mismas cinco partes y nada más:
 
 1. **El paso**, copiado literal de `plan.md`: título, nivel, qué hace, archivos y su `cmd:` de verificación.
-2. **El contexto de la tarea**: id, tipo, riesgo y el objetivo en una línea (de `spec.md`, `nota.md` o `reproduccion.md`).
-3. **Solo las secciones de la spec que ese paso toca** — criterios EARS y fuera de alcance relevantes, no la spec entera. En `bug`, la reproducción; en `refactor`, los dependientes mapeados.
+2. **El contexto de la tarea**: id, tipo, riesgo y el objetivo en una línea (del entendimiento del `analysis.md`).
+3. **Solo lo que ese paso toca**: los criterios de aceptación involucrados (`CA-N` de `spec.md`, o los del propio plan si la tarea no lleva spec) y el fuera de alcance relevante — no la spec entera. Si hay `design.md`, sumá **solo** la fila de archivos y la dependencia que aplican a ese paso.
 4. **Las reglas BR citadas por esas secciones**, transcritas de `.sdd/domain.md`, más el catálogo de `.sdd/catalog.json`. Transcribilas: el worker no debería tener que abrir domain.md.
 5. **Las reglas de conducta**: no commitear (ver abajo), no salirse de los archivos del paso, y devolver la pregunta en vez de suponer si algo no está definido.
 

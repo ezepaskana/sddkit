@@ -12,7 +12,7 @@ Los agentes de código escriben código que funciona pero ignora tu arquitectura
 
 1. **Arquitectura C4 viva** (`.sdd/c4/`) — derivada del código real, mantenida en cada cambio, con preguntas explícitas (❓ VALIDAR) que el agente responde o te pregunta.
 2. **Catálogo de convenciones** — si hay 3 formas de escribir endpoints en tu repo, el agente las detecta, vos elegís la canónica, y todos los agentes la respetan. El código legacy queda como deuda tolerada que solo puede bajar (ratchet).
-3. **Flujo SDD por tarea con artefactos persistentes** — para cada tarea no trivial el agente crea `.sdd/tasks/<id>/` con el requisito original verbatim, la spec refinada (preguntas de clarificación + criterios EARS, con aprobación del dev) y un plan en pasos chicos trackeables. Se puede pausar y retomar en otra sesión, y cada paso lleva un hint de modelo (`rapido`/`medio`/`fuerte`) para delegar lo mecánico a un modelo barato. Inspirado en GitHub Spec Kit y Kiro.
+3. **Flujo SDD por tarea con artefactos persistentes** — para cada tarea no trivial el agente crea `.sdd/tasks/<id>/` con el requisito original verbatim, el entendimiento del pedido y un plan en pasos chicos trackeables. Se puede pausar y retomar en otra sesión, y cada paso lleva un hint de modelo (`rapido`/`medio`/`fuerte`) para delegar lo mecánico a un modelo barato. **Todo artefacto entra en una pantalla de terminal**: si no entra, es señal de que la tarea es demasiado grande. Inspirado en GitHub Spec Kit y Kiro.
 4. **Reglas de negocio y decisiones citables** — BR-NNN en `.sdd/domain.md` y ADRs en `.sdd/decisions/`, vinculantes para el agente.
 
 ## Instalación
@@ -25,6 +25,8 @@ En Claude Code:
 ```
 
 Eso es todo. **No hay más pasos**: no se instala nada en tu repo, no hay comando que correr, no hay hooks de git que aceptar. La próxima vez que abras una sesión en un repo sin configurar, el agente lo detecta y te ofrece configurarlo, preguntándote solo lo que no puede deducir del código.
+
+**Opcional:** [termaid](https://github.com/fasouto/termaid) (`pip install termaid`) renderiza los diagramas Mermaid en la terminal, para que se lean cuando el agente te vuelca un artefacto. Sin él todo funciona igual: el diagrama se muestra como texto crudo. El agente te lo ofrece una vez y respeta tu respuesta (ADR-0017).
 
 ## Cómo se usa
 
@@ -54,22 +56,28 @@ flowchart TD
   hook --> task
   boot -- sí --> task["sdd-task<br/>captura + clasificación"]
 
-  task --> analyze["sdd-analyze<br/>análisis crítico + clarificación"]
-  analyze --> specify["sdd-specify<br/>spec.md + criterios EARS"]
+  task --> analyze["sdd-analyze<br/>entendimiento + diagrama + huecos"]
+  analyze --> gateAn{"Gate: dev aprueba analysis.md?"}
+  gateAn -- ajustar --> analyze
+  gateAn -- ok --> riesgo{"¿riesgo alto?"}
+
+  riesgo -- sí --> specify["sdd-specify<br/>criterios CA-N + supuestos"]
   specify --> gateSpec{"Gate: dev aprueba spec.md?"}
-  gateSpec -- ajustar --> analyze
-  gateSpec -- ok --> plan["sdd-plan<br/>plan.md en pasos chicos"]
+  gateSpec -- ok --> plan
+  riesgo -- no --> plan["sdd-plan<br/>lista de pasos (+ design si riesgo alto)"]
+
   plan --> gatePlan{"Gate: dev aprueba plan.md?"}
   gatePlan -- ajustar --> plan
   gatePlan -- ok --> execute["sdd-execute<br/>orquestador/workers por paso"]
 
-  execute -- "todos los pasos ✓" --> close["sdd-close<br/>retro + métrica + cosecha"]
+  execute -- "todos los pasos ✓" --> close["sdd-close<br/>aprendizajes + PR"]
   close --> done(["done → LEARNINGS / catálogo / ADRs / C4"])
 ```
 
-- El **tipo** de tarea (`simple`/`bug`/`feature`/`refactor`) decide qué fases se recorren: una tarea simple no escribe spec.
+- **Un solo camino, más profundo según el riesgo**: toda tarea escribe entendimiento y plan; solo la de riesgo alto agrega criterios de aceptación y diseño técnico. El tipo (`simple`/`bug`/`feature`/`refactor`) decide el contenido, no la lista de archivos.
+- El **análisis** tiene tres secciones y nada más: qué entendí, un diagrama si aplica, y hasta **5 huecos** preguntados de a uno con respuesta sugerida. Pasado el quinto, el agente asume y lo declara.
 - Cada paso del plan lleva una **verificación ejecutable** (`cmd: <comando>`) que el orquestador corre antes de marcar el checkbox — el reporte del subagente es un claim, no una prueba.
-- Lo que **sdd-close** cosecha (LEARNINGS, catálogo, ADRs, C4) alimenta el contexto de las tareas siguientes.
+- Al cerrar, los aprendizajes van **directo** a `LEARNINGS.md` y alimentan las tareas siguientes. No hay documento de retro.
 
 ## Estructura que crea en tu repo
 
@@ -88,10 +96,10 @@ flowchart TD
     index.json     # estado y progreso de cada tarea SDD
     <id>-<slug>/
       requirement.md  # el pedido original del dev, verbatim (no se edita)
-      analysis.md     # análisis crítico + clarificaciones (feature/refactor)
-      spec.md         # spec refinada con criterios EARS (feature)
-      plan.md         # pasos chicos: archivos, dependencias, modelo, verificación
-      retro.md        # retro y métrica al cerrar
+      analysis.md     # entendimiento del pedido + diagrama + huecos (siempre)
+      plan.md         # lista de pasos, cada uno con su verificación (siempre)
+      spec.md         # criterios de aceptación numerados (solo riesgo alto)
+      design.md       # arquitectura, archivos y dependencias (solo riesgo alto)
   c4/
     context.md     # C4 nivel 1 + preguntas ❓ VALIDAR
     containers.md  # C4 nivel 2

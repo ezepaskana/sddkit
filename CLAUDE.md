@@ -3,7 +3,7 @@
 Spec-driven development para Claude: documentación C4 viva, catálogo de convenciones validadas y flujo SDD auto-disparado.
 
 <!-- sddkit:begin -->
-<!-- Bloque gestionado por sddkit (lo mantiene el agente al escanear el repo). Todo lo de afuera del bloque es del equipo y nunca se toca. Última actualización: 2026-08-11 -->
+<!-- Bloque gestionado por sddkit (lo mantiene el agente al escanear el repo). Todo lo de afuera del bloque es del equipo y nunca se toca. Última actualización: 2026-08-14 -->
 
 ## Triggers automáticos de skills
 
@@ -13,7 +13,7 @@ Ejecutá `/sdd-task` ante pedidos de cambio (crear, implementar, arreglar, mejor
 
 Respondé breve y directo, sin preámbulos: código y respuestas cortas antes que prosa. Entregá el hallazgo en ≤ 150 palabras + 2-4 opciones numeradas, cada una con el resultado que da; cerrá con una pregunta respondible y esperá. Traducí en 3-4 palabras todo código tuyo (`Z3`, `BR-004`) o no lo uses. El detalle largo va a un archivo, nunca al chat.
 
-Para mostrarle un archivo al dev: en terminal embebida de un IDE (`TERMINAL_EMULATOR=JetBrains-JediTerm` o `TERM_PROGRAM=vscode`) mostralo en ese IDE; en terminal standalone usá `.sdd/config.json → ui.opener` (`<opener> "<ruta>"`) si está configurado, y sin él tu default.
+Para mostrarle un archivo al dev: **volcá su contenido en la terminal, nunca abras una aplicación externa**. Si pasa de 45 líneas, avisá que es largo, volcá lo esencial y decí la ruta. Si tiene un diagrama Mermaid y `termaid` está disponible, renderizalo.
 
 ## Ante dudas o incongruencias: preguntale al dev
 

@@ -6,7 +6,7 @@
 |---|---|---|
 | `.claude-plugin/` | `plugin.json`, `marketplace.json` | Manifiesto del plugin y marketplace propio: qué se instala y de dónde |
 | `skills/` | 7 skills `sdd-*`, cada una con `SKILL.md` + `references/`, `templates/`, `examples/` | El comportamiento: lo que el agente lee y ejecuta en cada fase del flujo SDD |
-| `hooks/` | `hooks.json`, `bootstrap.md` | Único disparo automático: el `SessionStart` que detecta un repo sin configurar |
+| `hooks/` | `hooks.json`, `bootstrap.md`, `termaid.md` | Los dos disparos automáticos del `SessionStart`: repo sin configurar, y termaid ausente sin respuesta previa del dev |
 | `.sdd/` | C4, `domain.md`, ADRs, catálogo, tareas, LEARNINGS | Estado del propio repo como usuario de sddkit (dogfooding), no parte del plugin |
 
 ```mermaid
@@ -14,7 +14,9 @@ flowchart TD
   manifest[".claude-plugin/plugin.json<br/>declara skills + hooks"] --> skills["skills/sdd-*<br/>task, analyze, specify, plan,<br/>execute, close, improve-skill"]
   manifest --> hooks["hooks/hooks.json<br/>SessionStart"]
   hooks --> boot["hooks/bootstrap.md<br/>se vuelca al contexto solo si<br/>falta .sdd/config.json (BR-080)"]
+  hooks --> term["hooks/termaid.md<br/>solo si falta termaid y el dev<br/>no respondió todavía (BR-087)"]
   boot --> agente["el agente investiga el repo<br/>y escribe .sdd/"]
+  term --> agente
   skills --> agente
   agente --> estado[".sdd/ del repo del dev<br/>C4 + domain + catálogo + tareas"]
 ```

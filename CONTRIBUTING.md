@@ -2,19 +2,19 @@
 
 Gracias por tu interés en mejorar sddkit. Las contribuciones son bienvenidas.
 
-## Ejecutar los tests
+## Probar un cambio
 
-```bash
-npm test
-```
+Este repo **no tiene código ni tests**: es un plugin de Claude Code hecho de markdown y JSON (ADR-0016). Un cambio se prueba usándolo:
 
-Corre `node --test` y verifica 210 tests. Necesita Node ≥ 18.
+1. Instalá el plugin desde tu clon local (`/plugin marketplace add /ruta/a/tu/clon`, después `/plugin install sddkit@sddkit`).
+2. Abrí una sesión en un repo de prueba y recorré el flujo que tocaste, de punta a punta.
+3. Contá lo que observaste en el PR — es la única verificación que existe.
 
 ## Flujo de trabajo
 
-Este repo usa **spec-driven development (SDD)** — para cualquier tarea no trivial (feature, bug, refactor), el agente crea `.sdd/tasks/<id>/` con el requisito original, la spec refinada y un plan en pasos trackeables.
+Este repo usa **spec-driven development (SDD)** sobre sí mismo — para cualquier tarea no trivial (feature, bug, refactor), el agente crea `.sdd/tasks/<id>/` con el requisito original, la spec refinada y un plan en pasos trackeables.
 
-Mirá [AGENTS.md](AGENTS.md) para entender los triggers automáticos de skills, cómo funciona el flujo y qué artefactos deja en tu repo.
+Mirá [CLAUDE.md](CLAUDE.md) para entender los triggers automáticos de skills, cómo funciona el flujo y qué artefactos deja en tu repo.
 
 ## Commits y ramas
 

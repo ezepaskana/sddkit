@@ -17,6 +17,6 @@ _(condensá los ya registrados en plan.md — pasos que fallaron, se replanifica
 
 ## Aprendizajes accionables
 
-_(solo los que superen el umbral "otro agente tropezaría con esto". Generales → `.sdd/LEARNINGS.md` (bullets ≤ 200 chars) · convención nueva → `sdd decide` · regla de negocio → `.sdd/domain.md` · decisión de arquitectura → ADR en `.sdd/decisions/`)_
+_(solo los que superen el umbral "otro agente tropezaría con esto". Generales → `.sdd/LEARNINGS.md` (bullets ≤ 200 chars) · convención nueva → `.sdd/catalog.json` · regla de negocio → `.sdd/domain.md` · decisión de arquitectura → ADR en `.sdd/decisions/`)_
 
 …

@@ -7,4 +7,4 @@ LEARNINGS.md es contexto que se inyecta en CADA tarea futura: su valor depende d
 3. **Podar**: si una entrada ya está cubierta por el catálogo, domain.md o un ADR, borrala de acá (ya vive en su lugar correcto).
 4. **Tope ~30 entradas**: si entrás la 31, la menos valiosa sale.
 5. **Nunca genérico**: nada que aplique a cualquier repo del mundo ("escribir tests es bueno").
-6. **Bullets ≤ 200 caracteres** (BR-062): `sdd validate` falla si te pasás. Si no entra, es que hay dos aprendizajes en uno — partilo o mandá el detalle al ADR/domain que corresponda.
+6. **Bullets ≤ 200 caracteres** (BR-062): contalos vos antes de escribir. Si no entra, es que hay dos aprendizajes en uno — partilo o mandá el detalle al ADR/domain que corresponda.

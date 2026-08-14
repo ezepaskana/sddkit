@@ -1,0 +1,14 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "test -f .sdd/config.json || cat \"$CLAUDE_PLUGIN_ROOT/hooks/bootstrap.md\""
+          }
+        ]
+      }
+    ]
+  }
+}

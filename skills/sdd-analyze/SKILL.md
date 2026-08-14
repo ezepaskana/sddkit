@@ -1,6 +1,6 @@
 ---
 name: sdd-analyze
-description: Análisis crítico e investigación read-only. Usar como fase 2 del flujo SDD (tras sdd task new) o automáticamente cuando el usuario haga preguntas sin pedir cambios (investigar, debuggear, brainstorm).
+description: Análisis crítico e investigación read-only. Usar como fase 2 del flujo SDD (tras capturar el requisito) o automáticamente cuando el usuario haga preguntas sin pedir cambios (investigar, debuggear, brainstorm).
 ---
 
 # sdd-analyze — análisis crítico (modo dual)
@@ -52,9 +52,9 @@ Una lista de ítems sin pregunta final no cumple: el dev no sabe qué se espera 
 
 ### Cómo investigar (barato primero)
 
-1. `sdd context` — destilado de BR, catálogo, módulos, ADRs y aprendizajes.
-2. `sdd find <término>` para "¿ya existe?" — busca en el índice sin recorrer el repo. Explorá a mano solo si no alcanza.
-3. `sdd impact <archivo|símbolo>` si el repo tiene grafo (`.sdd/config.json → graph`): quién depende de lo que vas a tocar. **Obligatorio en `refactor`**; sin grafo, `N/A`. Detalle en `references/impacto-grafo.md`.
+1. **Los docs de `.sdd/` primero**: `LEARNINGS.md`, las reglas BR de `domain.md`, `catalog.json` y la tabla de módulos de `c4/components.md`. Son un destilado ya escrito — leerlos cuesta menos que explorar el repo.
+2. **"¿Ya existe?" con Grep sobre `.sdd/`** antes que sobre el código: `components.md` (módulos), `domain.md` (entidades y reglas), `LEARNINGS.md` (gotchas). Explorá el código solo si eso no alcanza.
+3. **Quién depende de lo que vas a tocar**: `grep -rn "<símbolo>" src/` o el equivalente del repo. **Obligatorio en `refactor`** — el número de dependientes va en el análisis, con el comando que lo produjo.
 
 ### Específico de `refactor`
 
@@ -73,7 +73,7 @@ Preguntá lo que cambie el alcance o invalide el enfoque, en tandas (no de a una
 
 ### Gate
 
-`sdd task status <id> analyzed` le abre analysis.md al dev. Con su ok: **sdd-specify** si es `feature`, **sdd-plan** si es `refactor`.
+Pasá la tarea a `analyzed` en `.sdd/tasks/index.json` y mostrale `analysis.md` al dev (cómo: `sdd-task/references/artefactos.md`). Con su ok: **sdd-specify** si es `feature`, **sdd-plan** si es `refactor`.
 
 ---
 
@@ -81,7 +81,7 @@ Preguntá lo que cambie el alcance o invalide el enfoque, en tandas (no de a una
 
 Investigás y conversás; tu salida es entendimiento, no diffs. Sirve para: entender un módulo o flujo, debuggear, brainstormear diseño, revisar código o estimar impacto.
 
-1. Arrancá por `sdd context` y `sdd find <término>`; después leé los archivos y seguí la cadena de dependencias.
+1. Arrancá por los docs de `.sdd/` (LEARNINGS, reglas BR, catálogo, módulos); después leé los archivos y seguí la cadena de dependencias.
 2. **Escribí el detalle en la nota**, no en el chat: `.sdd/notes/<slug>.md` (BR-065). Si ya existe una del mismo tema, leela y continuala — es lo que te deja cortar la sesión y retomar después. Cómo: `references/notas-persistentes.md`.
 3. **Contestá corto** (BR-064): hallazgo principal en **≤ 150 palabras** + **2-4 opciones numeradas**, y **esperá que el dev elija** antes de seguir. Formatos por tipo de pregunta: `references/formatos-respuesta.md`.
 4. Cuando elige una opción, expandí **solo ese tema** con el mismo presupuesto y volvé a ofrecer los que queden abiertos. Si el dev pide el análisis completo, dáselo sin recortar.
@@ -104,6 +104,5 @@ Respondé en el idioma del usuario. Términos técnicos en inglés (`stepBlock`,
 - `templates/analysis.md` — Artefacto canónico con sus secciones y su presupuesto.
 - `references/formatos-respuesta.md` — Guías de respuesta por tipo de pregunta (standalone).
 - `references/notas-persistentes.md` — Estructura de `.sdd/notes/<slug>.md` y cómo retomar una investigación.
-- `references/impacto-grafo.md` — Cómo usar `sdd impact`.
 - `examples/analisis-ejemplo.md` — Nivel de profundidad esperado (modo tarea).
 - `examples/example-brainstorm.md`, `examples/example-bug-investigation.md` — Standalone.

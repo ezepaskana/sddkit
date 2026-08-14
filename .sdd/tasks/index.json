@@ -1,5 +1,5 @@
 {
-  "nextId": 19,
+  "nextId": 22,
   "tasks": [
     {
       "id": "010",
@@ -86,6 +86,36 @@
       "updatedAt": "2026-08-02",
       "tipo": "feature",
       "riesgo": "bajo"
+    },
+    {
+      "id": "019",
+      "dir": "019-vamos-a-actualizar-esto-ya-que",
+      "title": "Vamos a actualizar esto ya que no se esta aprovechando el pr…",
+      "status": "in-progress",
+      "createdAt": "2026-08-05",
+      "updatedAt": "2026-08-05",
+      "tipo": "feature",
+      "riesgo": "alto"
+    },
+    {
+      "id": "020",
+      "dir": "020-actualmente-el-dev-tiene-que-instalar",
+      "title": "Actualmente el dev tiene que instalar sddkit, yo lo hago con…",
+      "status": "in-progress",
+      "createdAt": "2026-08-09",
+      "updatedAt": "2026-08-11",
+      "tipo": "feature",
+      "riesgo": "alto"
+    },
+    {
+      "id": "021",
+      "dir": "021-antes-de-hacer-la-prueba-necesito",
+      "title": "Antes de hacer la prueba necesito hacer una modificacion má…",
+      "status": "specified",
+      "createdAt": "2026-08-11",
+      "updatedAt": "2026-08-11",
+      "tipo": "feature",
+      "riesgo": "alto"
     }
   ]
 }

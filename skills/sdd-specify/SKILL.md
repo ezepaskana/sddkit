@@ -19,11 +19,11 @@ description: Fase de especificación de una tarea SDD. Usar después del anális
 - **Fuera de alcance explícito**: lo que NO se hace es lo que evita el scope creep en la ejecución.
 - **Impacto**: módulos de `components.md`, convenciones del catálogo que aplican, si requiere ADR o tocar C4.
 - `N/A: <motivo>` es válido en cualquier sección que no aplique y satisface el gate.
-- **Diagrama**: solo si REEMPLAZA prosa (3+ actores o pasos con bifurcaciones). Si no, borrá la sección. Si lo incluís, la primera línea del bloque `mermaid` debe declarar el tipo (`flowchart LR`, `sequenceDiagram`, `stateDiagram-v2`) o `sdd validate` falla.
+- **Diagrama**: solo si REEMPLAZA prosa (3+ actores o pasos con bifurcaciones). Si no, borrá la sección. Si lo incluís, la primera línea del bloque `mermaid` debe declarar el tipo (`flowchart LR`, `sequenceDiagram`, `stateDiagram-v2`) — sin eso el diagrama no renderiza.
 
 ## El gate
 
-`sdd task status <id> specified` **le abre spec.md al dev**. Avisale, esperá su aprobación en el chat, marcá la línea de aprobación en spec.md y seguí con **sdd-plan**.
+Pasá la tarea a `specified` en `.sdd/tasks/index.json` y **mostrale spec.md al dev** (cómo: `sdd-task/references/artefactos.md`). Esperá su aprobación en el chat, marcá la línea de aprobación en spec.md y seguí con **sdd-plan**.
 
 ## Additional Resources
 

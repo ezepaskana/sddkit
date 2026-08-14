@@ -23,7 +23,7 @@
 
 > Incluilo SOLO si REEMPLAZA prosa: flujos de 3+ actores o 3+ pasos con bifurcaciones. Si el flujo se explica en dos líneas, no hay diagrama: **borrá esta sección**. Un diagrama que se suma a la explicación en prosa no cumple el criterio.
 >
-> Si lo incluís: bloque ` ```mermaid ` con un tipo válido en la primera línea (`flowchart LR`, `sequenceDiagram`, `stateDiagram-v2`) — `sdd validate` falla si no lo declara.
+> Si lo incluís: bloque ` ```mermaid ` con un tipo válido en la primera línea (`flowchart LR`, `sequenceDiagram`, `stateDiagram-v2`) — sin eso el diagrama no renderiza.
 
 ---
 _Aprobación del dev: pendiente_

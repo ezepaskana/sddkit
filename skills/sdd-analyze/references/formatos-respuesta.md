@@ -31,7 +31,7 @@ Tres reglas que valen para todos los formatos:
 ## Análisis de impacto (¿qué se rompe si cambio X?)
 
 - **Chat:** riesgo neto (alto/medio/bajo) + esfuerzo en magnitud (1 archivo trivial / 5-10 moderado / refactor amplio) → opciones: (1) los dependientes → sabés qué tocar · (2) los efectos indirectos → evitás la sorpresa en producción · (3) el orden de migración → lo hacés sin romper nada. **¿Qué necesitás ver?**
-- **Nota:** dependientes directos (`sdd impact` si hay grafo), efectos indirectos (contratos de API, formato de output que otros consumen, side effects en filesystem o estado global), justificación del riesgo.
+- **Nota:** dependientes directos (con el `grep` que los produjo), efectos indirectos (contratos de API, formato de output que otros consumen, side effects en filesystem o estado global), justificación del riesgo.
 
 ## Roadmap o análisis de varios temas
 

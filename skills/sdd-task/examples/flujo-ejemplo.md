@@ -1,38 +1,35 @@
 # Ejemplo: flujo completo de una tarea `feature`
 
-Mensaje del dev: _"quiero que sdd doctor muestre el estado de los hooks post-commit"_ → "quiero que" es keyword de cambio → se dispara `/sdd-task`.
+Mensaje del dev: _"quiero que el listado de facturas se pueda filtrar por rango de fechas"_ → "quiero que" es keyword de cambio → se dispara `/sdd-task`.
 
 ## 1-2. Capturar y clasificar
 
-```bash
-sdd task new "quiero que sdd doctor muestre el estado de los hooks post-commit"   # → 004, requirement.md
-sdd task type 004 feature      # crea analysis.md, spec.md y plan.md
-```
+Creo `.sdd/tasks/004-quiero-que-el-listado-de-facturas/requirement.md` con el texto verbatim, agrego la entrada al índice en `draft`, y al clasificar como `feature` copio los tres templates (`analysis.md`, `spec.md`, `plan.md`) desde el plugin.
 
-Anuncio: _"Lo trato como `feature` (riesgo bajo): comportamiento nuevo en el reporte, pero el patrón de pre-commit ya existe. Decime si preferís otro tipo."_
+Anuncio: _"Lo trato como `feature` (riesgo bajo): comportamiento nuevo en el listado, pero el patrón de filtros ya existe. Decime si preferís otro tipo."_
 
 ## 3. Analizar (`/sdd-analyze`) — ≤ 350 palabras
 
-- **¿Ya existe?** `checkHooks()` en `src/commands/doctor.js` cubre pre-commit, no post-commit.
-- **Alternativa más simple:** parametrizar el check existente en vez de duplicarlo.
-- **Riesgos:** ninguno — es lectura de filesystem. **Métrica:** doctor reporta 0 → 1 tipo de hook post-commit.
+- **¿Ya existe?** `buildInvoiceQuery()` en `src/services/invoices.js:44` ya filtra por estado; el rango de fechas se agrega ahí, no en un endpoint nuevo.
+- **Alternativa más simple:** parametrizar el filtro existente en vez de duplicar la query.
+- **Riesgos:** ninguno — es lectura. **Métrica:** el dev deja de exportar a Excel para filtrar a mano (hoy ~3 veces por semana).
 - **Recomendación:** `proceder con cambios` (parametrizar, no duplicar).
 
-`sdd task status 004 analyzed` → el dev aprueba.
+Paso el estado a `analyzed`, le muestro `analysis.md` al dev → aprueba.
 
 ## 4. Especificar (`/sdd-specify`) — ≤ 300 palabras
 
-- CUANDO se corre `sdd doctor`, EL SISTEMA DEBE incluir el estado del hook post-commit.
-- SI no existe el hook post-commit, EL SISTEMA DEBE reportar "missing" sin error (BR-027).
+- CUANDO se pide el listado con `desde` y `hasta`, EL SISTEMA DEBE devolver solo las facturas emitidas dentro de ese rango, incluyendo ambos extremos.
+- SI `desde` es posterior a `hasta`, EL SISTEMA DEBE responder 400 con código `INVALID_DATE_RANGE` (BR-027).
 
-`sdd task status 004 specified` → el dev aprueba.
+Paso a `specified`, le muestro `spec.md` → aprueba.
 
 ## 5. Planificar (`/sdd-plan`) — ≤ 3 sub-ítems por paso
 
-Paso 2 test de `checkHook('post-commit')` _(rapido)_ · Paso 3 parametrizar `checkHooks()` _(medio)_ · Paso 4 actualizar `.sdd/c4/components.md` _(rapido)_. El Paso 1 (rama) lo genera `sdd task plan`.
+Paso 1 rama de trabajo · Paso 2 tests del rango y del borde invertido _(rapido)_ · Paso 3 parametrizar `buildInvoiceQuery()` _(medio)_ · Paso 4 actualizar `.sdd/c4/components.md` _(rapido)_.
 
-`sdd task status 004 planned` → el dev aprueba → `in-progress`.
+Paso a `planned`, le muestro `plan.md` → aprueba → `in-progress`.
 
 ## 6. Ejecutar y cerrar
 
-`/sdd-execute`: un subagente por paso con `sdd task brief 004 <n>`, verificación con `sdd task verify` antes de marcar cada checkbox. `/sdd-close`: retro ≤ 150 palabras (métrica cumplida, sin desvíos, un aprendizaje cosechado) y `sdd task status 004 done`.
+`/sdd-execute`: un subagente por paso con el brief que armás vos, y **corrés la verificación del paso antes de marcar su checkbox** — el reporte del worker es un claim, no una prueba. `/sdd-close`: retro ≤ 150 palabras (métrica cumplida, sin desvíos, un aprendizaje cosechado) y estado `done`.

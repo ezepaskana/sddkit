@@ -7,9 +7,27 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased]
 
-### Added
+### Changed
 
-- Aún sin cambios registrados.
+- **sddkit se distribuye solo como plugin de Claude Code.** Se instala con
+  `/plugin marketplace add` + `/plugin install`: no hay paquete npm, ni comando
+  `sdd`, ni pasos de instalación en el repo. Un repo sin configurar lo detecta un
+  hook `SessionStart` y el agente lo configura solo (ADR-0016, BR-079/BR-080).
+
+### Removed
+
+- **El CLI completo** (`bin/`, `src/`, `package.json`, CI): todos los comandos
+  (`setup`, `init`, `scan`, `validate`, `sync`, `decide`, `doctor`, `publish`,
+  `impact`, `context`, `uninstall` y el flujo `task`). Lo que hacían ahora lo hace
+  el agente siguiendo las skills.
+- **Las skills `sdd-test` y `sdd-bootstrap`**: la primera dependía de scripts del
+  paquete, la segunda quedó reemplazada por el hook de arranque.
+- **Los tres gates deterministas** que solo un exit code podía dar: conteo de
+  variantes del catálogo, validación bloqueante en pre-commit y verificación de
+  paso por exit code. Ahora los sostiene el agente (la condición de reversión está
+  en ADR-0016).
+- **El grafo de impacto** y los living docs por LLM en pre-commit, junto con las
+  reglas que los definían (BR-044 a BR-050, BR-055/056 derogadas).
 
 ## [0.0.1] - 2026-06-15
 

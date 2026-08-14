@@ -2,7 +2,7 @@
 
 > Tarea de tipo `simple`: este es el ÚNICO artefacto (no hay analysis/spec/plan). Su presupuesto es de **≤ 100 palabras**. Un solo gate: el dev lee esto, da el ok, y recién ahí implementás con tests. `N/A: <motivo>` es válido donde no aplique.
 >
-> Si durante la ejecución el alcance se complejiza, anuncialo y re-clasificá: `sdd task type __ID__ <tipo>`.
+> Si durante la ejecución el alcance se complejiza, anuncialo y re-clasificá: actualizá `tipo` en `.sdd/tasks/index.json` y creá los artefactos que falten, sin pisar lo hecho.
 
 - **Qué entendí:** …
 - **Qué voy a hacer:** … _(archivos entre backticks: `ruta/uno`)_

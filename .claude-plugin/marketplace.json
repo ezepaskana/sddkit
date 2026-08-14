@@ -1,0 +1,32 @@
+{
+  "name": "sddkit",
+  "owner": {
+    "name": "Eze Paskana",
+    "email": "eze.paskana@gmail.com"
+  },
+  "metadata": {
+    "description": "Marketplace de sddkit — spec-driven development para Claude Code.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "sddkit",
+      "source": "./",
+      "description": "Spec-driven development para Claude: documentación C4 viva, catálogo de convenciones validadas y flujo SDD auto-disparado.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Eze Paskana",
+        "email": "eze.paskana@gmail.com"
+      },
+      "homepage": "https://github.com/ezepaskana/sddkit#readme",
+      "license": "MIT",
+      "keywords": [
+        "sdd",
+        "spec-driven",
+        "c4-model",
+        "ai-agents",
+        "claude-code"
+      ]
+    }
+  ]
+}

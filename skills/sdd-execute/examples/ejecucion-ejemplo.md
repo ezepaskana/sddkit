@@ -1,37 +1,38 @@
 # Ejemplo: ejecución orquestador/workers
 
-Tarea 003 (`feature`, riesgo bajo), plan de 4 pasos aprobado. El Paso 1 (rama) ya corrió y validó.
+Tarea 003 (`feature`, riesgo bajo): validar el archivo de configuración al arrancar la app. Plan de 4 pasos aprobado; el Paso 1 (rama) ya corrió y validó.
 
-## Paso 2 — tests de `sdd doctor` _(rapido)_
+## Paso 2 — tests de la validación _(rapido)_
+
+El orquestador arma el brief del paso (el paso literal del plan + el objetivo + los dos criterios EARS que ese paso cubre + BR-012 transcrita + las reglas de conducta) y lo pasa como prompt:
 
 ```
-$ sdd task brief 003 2
-Agent({ description: "Paso 2: tests sdd doctor", model: "haiku", prompt: "<output del brief>" })
+Agent({ description: "Paso 2: tests de validación de config", model: "haiku", prompt: "<el brief>" })
 ```
 
-El worker reporta "3 tests escritos". El orquestador **no confía en el reporte**: `sdd task verify 003 2` → `cmd: sdd test` → 3 tests en rojo (esperado: el comando no existe aún) → exit 0 → marca `- [x] **2. Tests de sdd doctor** _(rapido)_`.
+El worker reporta "3 tests escritos". El orquestador **no confía en el reporte**: corre el `cmd:` del paso → 3 tests en rojo (esperado: la validación no existe todavía) → exit 0 → marca `- [x] **2. Tests de la validación** _(rapido)_`.
 
 ## Paso 3 — implementar _(fuerte)_ — worker bloqueado
 
 El worker devuelve una pregunta en vez de código:
 
-> "La spec dice 'dependencias opcionales' pero no lista cuáles. ¿Solo better-sqlite3, o también gh/az/glab?"
+> "La spec dice 'campos obligatorios' pero no lista cuáles. ¿Solo `apiUrl`, o también `timeout` y `retries`?"
 
-El orquestador **no decide solo**, se la pasa al dev. Dev: _"better-sqlite3, gh y glab. az no."_ Lo registra en `analysis.md`:
+El orquestador **no decide solo**, se la pasa al dev. Dev: _"apiUrl y timeout. retries tiene default, no es obligatorio."_ Lo registra en `analysis.md`:
 
 ```
 ## Clarificación paso 3 (2026-06-22)
-P: ¿Qué dependencias opcionales chequea sdd doctor? — R: better-sqlite3, gh y glab; az excluido.
+P: ¿Qué campos son obligatorios en la config? — R: apiUrl y timeout; retries tiene default.
 ```
 
-Relanza con el brief actualizado (ya incluye la clarificación) → `sdd task verify 003 3` → los tests del paso 2 en verde → checkbox.
+Relanza con el brief actualizado (ya incluye la clarificación) → corre el `cmd:` → los tests del paso 2 en verde → checkbox.
 
 ## Paso 4 — docs _(rapido)_
 
-`sdd task verify 003 4` → `cmd: grep -q "sdd doctor" .sdd/c4/components.md` → exit 0 → checkbox.
+`cmd: grep -q "validación de config" .sdd/c4/components.md` → exit 0 → checkbox.
 
 ## Prueba local y cierre
 
-> **Orquestador → Dev:** Todos los pasos verificados. Probá: `sdd doctor` — debe listar hooks, dependencias (better-sqlite3, gh, glab) y config.
+> **Orquestador → Dev:** Todos los pasos verificados. Probá: arrancá la app con `timeout` borrado del config — debe fallar con un mensaje que nombre el campo faltante.
 
-Dev: _"Funciona, glab lo instalo después. Dale."_ → commit convencional (`feat(doctor): reportar estado de hooks y dependencias`) → **sdd-close**.
+Dev: _"Funciona, el mensaje es claro. Dale."_ → commit convencional (`feat(config): validar campos obligatorios al arrancar`) → **sdd-close**.

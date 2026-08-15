@@ -1,42 +1,37 @@
 # C4 — Nivel 3: Componentes
 
-> Actualizado a mano en la tarea 020 (2026-08-11). Base: la raíz del repo. **Este repo ya no tiene código**: es un plugin de Claude Code hecho de markdown y JSON (ADR-0016).
+> Repo de **un solo módulo**: el detalle vive acá, sin `CLAUDE.md` anidados (BR-089). Sin código: markdown y JSON (ADR-0016).
 
-| Módulo | Contenido | Rol |
+## Qué hay y dónde
+
+| Componente | Ruta | Qué hace |
 |---|---|---|
-| `.claude-plugin/` | `plugin.json`, `marketplace.json` | Manifiesto del plugin y marketplace propio: qué se instala y de dónde |
-| `skills/` | 7 skills `sdd-*`, cada una con `SKILL.md` + `references/`, `templates/`, `examples/` | El comportamiento: lo que el agente lee y ejecuta en cada fase del flujo SDD |
-| `hooks/` | `hooks.json`, `bootstrap.md`, `termaid.md` | Los dos disparos automáticos del `SessionStart`: repo sin configurar, y termaid ausente sin respuesta previa del dev |
-| `.sdd/` | C4, `domain.md`, ADRs, catálogo, tareas, LEARNINGS | Estado del propio repo como usuario de sddkit (dogfooding), no parte del plugin |
+| Manifiesto | `.claude-plugin/plugin.json` | Identidad del plugin. **No declara `skills` ni `hooks`**: se cargan por convención y declararlos los duplica |
+| Marketplace | `.claude-plugin/marketplace.json` | Hace el repo instalable por terceros (`source: "./"`) |
+| Arranque | `hooks/hooks.json` | Dos hooks `SessionStart`, mutuamente excluyentes |
+| ↳ repo sin configurar | `hooks/bootstrap.md` | Se vuelca si falta `.sdd/config.json` (BR-080) |
+| ↳ termaid ausente | `hooks/termaid.md` | Se vuelca si el repo YA está configurado y no hay respuesta en `ui.termaid` (BR-087) |
+| Router del flujo | `skills/sdd-task/SKILL.md` | Captura, clasifica y decide profundidad por riesgo (BR-057, BR-058) |
+| ↳ formato de artefactos | `skills/sdd-task/references/artefactos.md` | **Fuente única**: índice, estados, gates, volcado en terminal, termaid |
+| ↳ estructura del C4 | `skills/sdd-task/references/estructura-c4.md` | Formato máquina, índice vs detalle, frontera capa/módulo (BR-088 a BR-090) |
+| Fases | `skills/sdd-{analyze,specify,plan,execute,close}/` | Un `SKILL.md` por fase + sus templates y ejemplos |
+| Templates | `skills/sdd-analyze/templates/analysis.md`, `skills/sdd-specify/templates/spec.md`, `skills/sdd-plan/templates/{plan,design}.md` | Los 4 artefactos vigentes |
+| Mejora de skills | `skills/sdd-improve-skill/SKILL.md` | Auditoría de una skill contra las best practices |
+
+## Cómo se conecta
 
 ```mermaid
 flowchart TD
-  manifest[".claude-plugin/plugin.json<br/>declara skills + hooks"] --> skills["skills/sdd-*<br/>task, analyze, specify, plan,<br/>execute, close, improve-skill"]
-  manifest --> hooks["hooks/hooks.json<br/>SessionStart"]
-  hooks --> boot["hooks/bootstrap.md<br/>se vuelca al contexto solo si<br/>falta .sdd/config.json (BR-080)"]
-  hooks --> term["hooks/termaid.md<br/>solo si falta termaid y el dev<br/>no respondió todavía (BR-087)"]
-  boot --> agente["el agente investiga el repo<br/>y escribe .sdd/"]
+  manifest[".claude-plugin/plugin.json"] --> skills["skills/sdd-*"]
+  hooks["hooks/hooks.json"] --> boot["bootstrap.md<br/>si falta .sdd/config.json"]
+  hooks --> term["termaid.md<br/>si falta termaid"]
+  boot --> agente["el agente"]
   term --> agente
   skills --> agente
-  agente --> estado[".sdd/ del repo del dev<br/>C4 + domain + catálogo + tareas"]
+  agente --> estado[".sdd/ del repo del dev"]
 ```
 
-**No hay proceso, binario ni runtime**: nada se ejecuta salvo el one-liner del hook. El agente es el único intérprete, y por eso ninguna garantía del flujo es determinística (ADR-0016).
-
-## Documentación que el agente genera fuera de `.sdd/` (ADR-0015)
-
-Al configurar o re-escanear un repo, el agente escribe también los docs que Claude Code carga bajo demanda (BR-069 a BR-074):
-
-```mermaid
-flowchart TD
-  scan["el agente escanea el repo"] --> layers["detecta módulos → capas<br/>(BR-069, BR-070)"]
-  layers --> rules[".claude/rules/sdd-layer-&lt;capa&gt;.md<br/>frontmatter paths: globs de la capa<br/>en todos los módulos"]
-  layers --> modmd["&lt;módulo&gt;/CLAUDE.md<br/>solo en monorepo (2+ módulos)"]
-  rules --> carga["Claude los carga solo al leer<br/>un archivo de esa capa/módulo"]
-  modmd --> carga
-```
-
-El bloque gestionado de la raíz declara dónde viven (BR-077); una rule cuyo glob no matchea nada está muerta y el agente lo avisa al tocarla (BR-076).
+**No hay proceso ni runtime**: lo único que se ejecuta es el one-liner de cada hook. El agente es el único intérprete, y por eso ninguna garantía del flujo es determinística (ADR-0016).
 
 ## ❓ VALIDAR con el equipo
 

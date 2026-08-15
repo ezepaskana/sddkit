@@ -1,5 +1,5 @@
 {
-  "nextId": 22,
+  "nextId": 23,
   "tasks": [
     {
       "id": "010",
@@ -111,9 +111,19 @@
       "id": "021",
       "dir": "021-antes-de-hacer-la-prueba-necesito",
       "title": "Antes de hacer la prueba necesito hacer una modificacion má…",
-      "status": "specified",
+      "status": "in-progress",
       "createdAt": "2026-08-11",
-      "updatedAt": "2026-08-11",
+      "updatedAt": "2026-08-14",
+      "tipo": "feature",
+      "riesgo": "alto"
+    },
+    {
+      "id": "022",
+      "dir": "022-como-podemos-mejorar-la-documentacion",
+      "title": "Como podemos mejorar la documentacion de C4 teniendo en cu…",
+      "status": "specified",
+      "createdAt": "2026-08-14",
+      "updatedAt": "2026-08-14",
       "tipo": "feature",
       "riesgo": "alto"
     }

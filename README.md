@@ -114,9 +114,13 @@ CLAUDE.md          # bloque gestionado (tu contenido nunca se toca)
 El bloque de `CLAUDE.md` de la raíz se lee en cada sesión, así que solo lleva lo transversal. Lo específico se escribe aparte y Claude Code lo carga **solo cuando toca esos archivos** (ADR-0015):
 
 - **Por capa** — el agente detecta los directorios de capa (controllers, services, repositories… a cualquier profundidad) y escribe una rule por capa en `.claude/rules/sdd-layer-<capa>.md`, con un frontmatter `paths:` que lista los globs de esa capa **en todos los módulos** donde aparece. Cada rule trae responsabilidad, dependencias permitidas (marcadas `❓ VALIDAR`) y un hueco para tus convenciones locales.
-- **Por módulo** — en un monorepo (npm/pnpm workspaces, Maven, Gradle, `go.work`), cada módulo recibe un `CLAUDE.md` en su raíz con su responsabilidad, las capas que contiene y su relación con los otros módulos.
+- **Por módulo** — en un monorepo (npm/pnpm workspaces, Maven, Gradle, `go.work`), cada módulo recibe un `CLAUDE.md` en su raíz con su responsabilidad, las capas que contiene, su relación con los otros módulos y sus **símbolos de entrada**: qué expone y quién lo consume.
 
-Ambos se actualizan de forma quirúrgica: se toca lo que tiene que seguir al código y se preserva todo lo que escribas (BR-074).
+Con dos o más módulos, `.sdd/c4/components.md` queda como **índice de módulos** —una fila por módulo con su ruta, responsabilidad y dependencias— y el detalle vive en cada `CLAUDE.md`, que se carga solo al tocar ese módulo. Con un módulo único, el detalle se queda en `components.md` y no se genera nada anidado.
+
+La frontera entre los dos: **la capa dice cómo se escribe el código, el módulo dice qué hace y de quién depende.** Ninguno repite lo del otro.
+
+Todo esto se escribe para el agente, no para un lector humano: tablas con rutas y símbolos reales en vez de prosa, y un tope de 45 líneas por archivo. Se actualiza de forma quirúrgica: se toca lo que tiene que seguir al código y se preserva todo lo que escribas.
 
 ## Cómo probarlo
 

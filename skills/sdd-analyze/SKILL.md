@@ -58,7 +58,7 @@ Las preguntas del template son una **guía, no un formulario**: no hay que respo
 
 ### Cómo investigar (barato primero)
 
-1. **Los docs de `.sdd/` primero**: `LEARNINGS.md`, las reglas BR de `domain.md`, `catalog.json` y la tabla de módulos de `c4/components.md`. Son un destilado ya escrito — leerlos cuesta menos que explorar el repo.
+1. **Los docs de `.sdd/` primero**: `LEARNINGS.md`, las reglas BR de `domain.md`, `catalog.json` y **los tres niveles de `c4/`** — `context.md` (qué es el sistema y con quién habla), `containers.md` (qué se despliega) y `components.md` (módulos). Son un destilado ya escrito y entran en 45 líneas cada uno: leerlos cuesta menos que explorar el repo. En un monorepo, `components.md` es el índice — el detalle de un módulo está en su `CLAUDE.md` y lo cargás al tocarlo (BR-089).
 2. **"¿Ya existe?" con Grep sobre `.sdd/`** antes que sobre el código: `components.md` (módulos), `domain.md` (entidades y reglas), `LEARNINGS.md` (gotchas). Explorá el código solo si eso no alcanza.
 3. **Quién depende de lo que vas a tocar**: `grep -rn "<símbolo>" src/` o el equivalente del repo. **Obligatorio en `refactor`** — el número de dependientes va en el análisis, con el comando que lo produjo.
 

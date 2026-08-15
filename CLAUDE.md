@@ -31,7 +31,7 @@ Este repo no tiene ninguna: dejó de tener código en la tarea 020 (ADR-0016), e
 
 ## Convenciones por capa y módulo
 
-Acá va solo lo transversal; lo específico se carga al tocarlo: convenciones de cada capa en `.claude/rules/sdd-layer-<capa>.md`, responsabilidad de cada módulo en el `CLAUDE.md` de su raíz. Una convención de una sola capa o módulo va ahí, **no** acá.
+Acá va solo lo transversal; lo específico se carga al tocarlo: **cómo se escribe** cada capa en `.claude/rules/sdd-layer-<capa>.md`, **qué hace y de quién depende** cada módulo en el `CLAUDE.md` de su raíz. Ninguno repite lo del otro, y una convención de una sola capa o módulo va ahí, **no** acá.
 
 ## Flujo SDD (spec-driven development)
 

@@ -73,6 +73,7 @@ Si una `simple` se complejiza (o una `feature` resulta trivial): **anuncialo en 
 ## Additional Resources
 
 - `references/artefactos.md` — **Formato canónico**: índice, ids, slugs, templates, estados y gates. Fuente única.
+- `references/estructura-c4.md` — **Documentación de arquitectura**: formato máquina, índice vs detalle por módulo, y la frontera entre rule de capa y `CLAUDE.md` de módulo. Leelo antes de escribir o actualizar cualquier archivo de `.sdd/c4/`, una rule de capa o un `CLAUDE.md` de módulo.
 - `examples/tipos-ejemplo.md` — Clasificación y artefactos reales de los tipos `simple`, `bug` y `refactor`.
 - `examples/flujo-ejemplo.md` — Flujo completo de una tarea `feature`, del trigger al cierre.
 - `references/triggers-delegacion.md` — Triggers de delegación con ejemplos concretos.

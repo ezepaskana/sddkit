@@ -1,29 +1,37 @@
 # Spec — tarea __ID__: __TITLE__
 
-> Estado: borrador. Su presupuesto es de **≤ 300 palabras** — un criterio por comportamiento observable, sin repetir la historia ni el análisis. `N/A: <motivo>` es respuesta válida en cualquier sección que no aplique. El dev debe APROBARLO antes de planificar.
-
-## Spec refinada
+> Tope: **45 líneas** (BR-082). **Solo la escribe una tarea de riesgo alto** (BR-058): en el resto, los criterios van dentro del plan.
+>
+> **Continúa el `analysis.md`, no lo repite**: no reescribas el entendimiento ni los huecos ya respondidos. El dev debe APROBARLA antes de planificar.
 
 **Historia:** Como _(rol)_ quiero _(capacidad)_ para _(beneficio)_.
 
-**Criterios de aceptación (formato EARS):**
+## Criterios de aceptación
 
-- CUANDO _(evento/condición)_, EL SISTEMA DEBE _(comportamiento esperado)_.
-- SI _(condición de error)_, EL SISTEMA DEBE _(manejo)_.
+> **Numerados** (`CA-1`, `CA-2`…) para poder citarlos desde el plan y desde un test. Uno por comportamiento observable. Formato EARS:
+>
+> - `CA-N` — CUANDO _(evento/condición)_, EL SISTEMA DEBE _(comportamiento esperado)_.
+> - `CA-N` — SI _(condición de error)_, EL SISTEMA DEBE _(manejo)_.
+>
+> Agrupalos con subtítulos en negrita si pasan de 6. Nada de detalles de implementación: acá va el **qué**, el cómo está en `design.md`.
 
-**Reglas de negocio afectadas** _(citar por ID desde .sdd/domain.md; las nuevas se agregan allí primero)_: BR-…
+- **CA-1** — …
 
-**Fuera de alcance:**
+## Reglas de negocio afectadas
+
+> Citalas por ID desde `.sdd/domain.md`. Las nuevas se agregan **allí primero**, no acá.
+
+BR-…
+
+## Supuestos
+
+> Los defaults que elegiste sin preguntar — el complemento del tope de 5 huecos (BR-084). Declararlos es lo que le permite al dev corregirte barato.
+
+- **S-1** — …
+
+## Fuera de alcance
 
 - …
-
-**Impacto en arquitectura/catálogo:** _(módulos de components.md afectados; convenciones del catálogo que aplican; ¿requiere actualizar C4 o escribir un ADR?)_
-
-### Diagrama (opcional)
-
-> Incluilo SOLO si REEMPLAZA prosa: flujos de 3+ actores o 3+ pasos con bifurcaciones. Si el flujo se explica en dos líneas, no hay diagrama: **borrá esta sección**. Un diagrama que se suma a la explicación en prosa no cumple el criterio.
->
-> Si lo incluís: bloque ` ```mermaid ` con un tipo válido en la primera línea (`flowchart LR`, `sequenceDiagram`, `stateDiagram-v2`) — `sdd validate` falla si no lo declara.
 
 ---
 _Aprobación del dev: pendiente_

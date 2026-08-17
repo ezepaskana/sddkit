@@ -1,11 +1,11 @@
 ---
 name: sdd-analyze
-description: Análisis crítico e investigación read-only. Usar como fase 2 del flujo SDD (tras sdd task new) o automáticamente cuando el usuario haga preguntas sin pedir cambios (investigar, debuggear, brainstorm).
+description: Análisis crítico e investigación read-only. Usar como fase 2 del flujo SDD (tras capturar el requisito) o automáticamente cuando el usuario haga preguntas sin pedir cambios (investigar, debuggear, brainstorm).
 ---
 
 # sdd-analyze — análisis crítico (modo dual)
 
-- **(A) Modo tarea** — hay una tarea clasificada como `feature` o `refactor` con `analysis.md` pendiente. Escribís ese artefacto y seguís el flujo del tipo. Las tareas `simple` (nota.md) y `bug` (reproduccion.md) **NO pasan por acá**: BR-058.
+- **(A) Modo tarea** — hay una tarea con `analysis.md` pendiente. **Todas pasan por acá**, sea cual sea su tipo (BR-058): el analysis es el primer artefacto que escribe cualquier tarea después del requisito.
 - **(B) Modo standalone** — no hay tarea: el dev quiere investigar, debuggear o brainstormear. **Read-only**: leés, analizás, proponés; nunca escribís. Si converge en un cambio, derivás a `/sdd-task`.
 
 Si el mensaje mezcla investigación con un pedido de cambio, preguntale al dev cuál de los dos quiere.
@@ -46,34 +46,45 @@ Una lista de ítems sin pregunta final no cumple: el dev no sabe qué se espera 
 
 ## (A) Modo tarea
 
-**El requisito del dev es una HIPÓTESIS, no una orden.** El dev puede equivocarse y tu trabajo es detectarlo ANTES de construir. La complacencia acá es un bug, no cortesía.
+**El objetivo es entender el pedido y cubrir los huecos** (BR-084). No es un informe: son tres secciones y ninguna más — entendimiento en pocas palabras, un diagrama si aplica, y los huecos.
 
-**Presupuesto: `analysis.md` ≤ 350 palabras.** Las secciones y sus preguntas ya están en el template — no las repitas acá, completalas: una línea por punto (dos solo con evidencia dura: `archivo:línea`, número medido). `N/A: <motivo>` es válido y satisface el gate.
+**Tope: `analysis.md` ≤ 45 líneas** (BR-082). Si no entra, la tarea es demasiado grande: decilo y proponé partirla.
+
+**El requisito del dev es una HIPÓTESIS, no una orden.** Si algo no cierra, decilo — pero ahora va **como un hueco**, no como una sección de objeciones: _"H2: esto duplica lo que ya hace X, ¿lo integro ahí en vez de crear uno nuevo? — sugerido: sí"_. La complacencia sigue siendo un bug.
+
+### Con qué se hace el análisis
+
+Las preguntas del template son una **guía, no un formulario**: no hay que responderlas una por una en el archivo. El entendimiento se construye con todo lo que tengas a mano — el código, los docs de `.sdd/`, el input del dev, y una búsqueda en internet si el tema lo amerita (una librería que no conocés, un formato, una convención de la industria).
 
 ### Cómo investigar (barato primero)
 
-1. `sdd context` — destilado de BR, catálogo, módulos, ADRs y aprendizajes.
-2. `sdd find <término>` para "¿ya existe?" — busca en el índice sin recorrer el repo. Explorá a mano solo si no alcanza.
-3. `sdd impact <archivo|símbolo>` si el repo tiene grafo (`.sdd/config.json → graph`): quién depende de lo que vas a tocar. **Obligatorio en `refactor`**; sin grafo, `N/A`. Detalle en `references/impacto-grafo.md`.
+1. **Los docs de `.sdd/` primero**: `LEARNINGS.md`, las reglas BR de `domain.md`, `catalog.json` y **los tres niveles de `c4/`** — `context.md` (qué es el sistema y con quién habla), `containers.md` (qué se despliega) y `components.md` (módulos). Son un destilado ya escrito y entran en 45 líneas cada uno: leerlos cuesta menos que explorar el repo. En un monorepo, `components.md` es el índice — el detalle de un módulo está en su `CLAUDE.md` y lo cargás al tocarlo (BR-089).
+2. **"¿Ya existe?" con Grep sobre `.sdd/`** antes que sobre el código: `components.md` (módulos), `domain.md` (entidades y reglas), `LEARNINGS.md` (gotchas). Explorá el código solo si eso no alcanza.
+3. **Quién depende de lo que vas a tocar**: `grep -rn "<símbolo>" src/` o el equivalente del repo. **Obligatorio en `refactor`** — el número de dependientes va en el análisis, con el comando que lo produjo.
 
-### Específico de `refactor`
+### Específico por tipo
 
-Sin criterios EARS: el criterio de aceptación es que **los tests que ya existían sigan verdes**. Dejá registrado en analysis.md el comando exacto y su resultado ANTES del cambio (baseline verde); si el área no tiene tests, cubrirla es el primer paso del plan.
+- **`bug`**: la reproducción va en el entendimiento — pasos, esperado vs observado, con el mensaje literal recortado a lo relevante. El test de regresión no se escribe acá: es el primer paso del plan.
+- **`refactor`**: registrá el comando de tests y su resultado ANTES del cambio (baseline verde). Si el área no tiene tests, cubrirla es el primer paso del plan.
+
+### El diagrama
+
+Es acá donde más rinde: un Mermaid que muestra **lo mismo** que el entendimiento, no algo distinto ni adicional. Si el pedido se explica en dos líneas, no hay diagrama. Primera línea con tipo válido (`flowchart LR`, `sequenceDiagram`, `stateDiagram-v2`) o no renderiza.
+
+### Los huecos (BR-084)
+
+**Máximo 5**, preguntados **de a uno**, cada uno con la respuesta que vos sugerís — confirmar es más rápido para el dev que redactar. Solo lo que cambia el alcance o invalida el enfoque: lo que se deduce del código no es un hueco, es trabajo tuyo.
+
+Pasado el quinto, **dejá de preguntar**: asumí con criterio y declaralo como supuesto en la spec (o en el plan, si la tarea no lleva spec). Un interrogatorio largo hace abandonar el flujo.
 
 ### Qué amerita objeción
 
 - ❌ No objetes por objetar: estilo, micro-optimizaciones, "yo lo haría distinto".
 - ✅ Sí objetá: duplicación de algo existente, violación de una BR-NNN o un ADR, complejidad desproporcionada al valor, supuestos falsos verificables en el código.
 
-Cerrá con una recomendación honesta (`proceder | proceder con cambios | reconsiderar`). Si es "reconsiderar", discutilo con el dev ANTES de seguir.
-
-### Clarificación
-
-Preguntá lo que cambie el alcance o invalide el enfoque, en tandas (no de a una), y registrá cada respuesta en analysis.md. Riesgo `alto` → más preguntas; riesgo `bajo` → las mínimas que destraben.
-
 ### Gate
 
-`sdd task status <id> analyzed` le abre analysis.md al dev. Con su ok: **sdd-specify** si es `feature`, **sdd-plan** si es `refactor`.
+Pasá la tarea a `analyzed` en `.sdd/tasks/index.json` y **volcá `analysis.md` en la terminal** (cómo: `sdd-task/references/artefactos.md`). Con su ok: **sdd-specify** si el riesgo es `alto`, **sdd-plan** si no.
 
 ---
 
@@ -81,7 +92,7 @@ Preguntá lo que cambie el alcance o invalide el enfoque, en tandas (no de a una
 
 Investigás y conversás; tu salida es entendimiento, no diffs. Sirve para: entender un módulo o flujo, debuggear, brainstormear diseño, revisar código o estimar impacto.
 
-1. Arrancá por `sdd context` y `sdd find <término>`; después leé los archivos y seguí la cadena de dependencias.
+1. Arrancá por los docs de `.sdd/` (LEARNINGS, reglas BR, catálogo, módulos); después leé los archivos y seguí la cadena de dependencias.
 2. **Escribí el detalle en la nota**, no en el chat: `.sdd/notes/<slug>.md` (BR-065). Si ya existe una del mismo tema, leela y continuala — es lo que te deja cortar la sesión y retomar después. Cómo: `references/notas-persistentes.md`.
 3. **Contestá corto** (BR-064): hallazgo principal en **≤ 150 palabras** + **2-4 opciones numeradas**, y **esperá que el dev elija** antes de seguir. Formatos por tipo de pregunta: `references/formatos-respuesta.md`.
 4. Cuando elige una opción, expandí **solo ese tema** con el mismo presupuesto y volvé a ofrecer los que queden abiertos. Si el dev pide el análisis completo, dáselo sin recortar.
@@ -104,6 +115,5 @@ Respondé en el idioma del usuario. Términos técnicos en inglés (`stepBlock`,
 - `templates/analysis.md` — Artefacto canónico con sus secciones y su presupuesto.
 - `references/formatos-respuesta.md` — Guías de respuesta por tipo de pregunta (standalone).
 - `references/notas-persistentes.md` — Estructura de `.sdd/notes/<slug>.md` y cómo retomar una investigación.
-- `references/impacto-grafo.md` — Cómo usar `sdd impact`.
 - `examples/analisis-ejemplo.md` — Nivel de profundidad esperado (modo tarea).
 - `examples/example-brainstorm.md`, `examples/example-bug-investigation.md` — Standalone.

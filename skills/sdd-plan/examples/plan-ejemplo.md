@@ -1,16 +1,25 @@
-# Ejemplo de pasos bien descompuestos (≤ 3 sub-ítems cada uno)
+# Ejemplo de plan bien descompuesto
 
-- [ ] **2. Instrumentar latencia de GET /plants** `[P]` _(rapido)_
-  - **Hace:** log de duración por request con percentiles: `src/middleware/timing.js`, `src/app.js`
-  - **Verificación:** `cmd: node scripts/bench-plants.mjs` — imprime el P95 baseline
+El plan es una **lista**: una línea por paso, con su verificación (BR-085). Tope 45 líneas.
 
-- [ ] **3. Tests de contrato de GET /plants con join** `[P]` _(rapido)_
-  - **Hace:** caso feliz, lista vacía y planta sin medidor: `tests/plants.spec.js`
-  - **Verificación:** `cmd: sdd test` — los 3 tests nuevos en rojo
+```markdown
+- [ ] **1. Rama de trabajo** — `git checkout -b task/014-join-plantas`. `cmd: test "$(git branch --show-current)" = task/014-join-plantas`
+- [ ] **2. Tests de contrato de GET /plants con join** `[P]` — caso feliz, lista vacía y planta sin medidor, en `tests/plants.spec.js`. `cmd: npm test -- plants` (3 en rojo)
+- [ ] **3. Reemplazar el N+1 por JOIN en `plantService.list`** _(fuerte)_ — mismo contrato de respuesta. Depende de 2. `cmd: npm test -- plants`
+- [ ] **4. Documentar el cambio en el C4** `[P]` — `cmd: grep -q 'join a medidores' .sdd/c4/components.md`
+```
 
-- [ ] **4. Reemplazar el N+1 por JOIN en `plantService.list`** _(fuerte)_
-  - **Hace:** una sola query con join a medidores, mismo contrato de respuesta: `src/services/plantService.js`
-  - **Depende de:** paso 3
-  - **Verificación:** `cmd: sdd test` — tests del paso 3 en verde
+Cuatro pasos, cuatro líneas, cada uno verificable solo. Los archivos de un paso se nombran en su línea si son uno o dos; si son más, van a `design.md`.
 
-Anti-ejemplo (NO hacer): `- [ ] Implementar la mejora de performance del endpoint` — no es verificable, no dice archivos, mezcla diseño con ejecución. Tampoco: un paso con seis sub-ítems de prosa explicando el diseño (eso es la spec, no el plan).
+## Qué mirar
+
+- **El test va antes que la implementación** (rojo → verde), y eso se ve en el orden de los pasos.
+- **La verificación es un comando**, no una promesa: su exit code decide, sin razonamiento del orquestador.
+- `[P]` marca los que pueden ir en paralelo — los pasos 2 y 4 no comparten archivos con nadie.
+- El nivel de modelo se anota **solo** cuando no es el obvio: el 3 es `(fuerte)` porque toca lógica de negocio; los demás no lo necesitan.
+
+## Anti-ejemplos
+
+- `- [ ] Implementar la mejora de performance del endpoint` — no es verificable ni dice qué toca.
+- Un paso con seis sub-ítems explicando el diseño: eso es `design.md`, no el plan.
+- Un plan de 80 líneas: no es un plan detallado, es una tarea demasiado grande (BR-083). Partila.

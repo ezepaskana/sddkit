@@ -1,92 +1,10 @@
 {
-  "scannedAt": "2026-08-01",
-  "filesScanned": 122,
-  "patterns": [
-    {
-      "topic": "http-endpoints",
-      "question": "¿Cuál es la forma canónica de definir endpoints HTTP?",
-      "variants": [
-        {
-          "id": "spring-mapping",
-          "label": "Spring (@GetMapping/@PostMapping...)",
-          "count": 1,
-          "examples": [
-            "src/lib/patterns.js"
-          ]
-        },
-        {
-          "id": "jaxrs",
-          "label": "JAX-RS (@GET/@POST + @Path)",
-          "count": 1,
-          "examples": [
-            "src/lib/patterns.js"
-          ]
-        }
-      ],
-      "multipleStyles": true
-    },
-    {
-      "topic": "module-system",
-      "question": "¿ESM o CommonJS como sistema de módulos?",
-      "variants": [
-        {
-          "id": "esm",
-          "label": "ES Modules (import/export)",
-          "count": 71,
-          "examples": [
-            "eslint.config.js",
-            "src/version.js",
-            "src/version.test.js"
-          ]
-        },
-        {
-          "id": "cjs",
-          "label": "CommonJS (require/module.exports)",
-          "count": 1,
-          "examples": [
-            "src/lib/graphstore/mysql.js"
-          ]
-        }
-      ],
-      "multipleStyles": true
-    },
-    {
-      "topic": "test-naming",
-      "question": "¿Cómo se nombran los archivos de test?",
-      "variants": [
-        {
-          "id": "dot-test",
-          "label": "archivo.test.*",
-          "count": 32,
-          "examples": [
-            "src/version.test.js",
-            "src/lib/agentsmd.test.js",
-            "src/lib/branching.test.js"
-          ]
-        }
-      ],
-      "multipleStyles": false
-    }
-  ],
+  "scannedAt": "2026-08-11",
+  "filesScanned": 0,
+  "note": "Tarea 020: el CLI fue eliminado (ADR-0016). Este repo ya no tiene código fuente — es markdown y JSON — así que no hay patrones de código que detectar ni convenciones que decidir. Los dos topics anteriores (module-system, http-endpoints) describían archivos borrados y se retiraron del catálogo.",
+  "patterns": [],
   "capabilities": {
-    "endpoints": [
-      {
-        "method": "GET",
-        "path": "/ruta",
-        "file": "src/lib/patterns.js"
-      }
-    ],
-    "consumptions": [
-      {
-        "method": null,
-        "target": "(dynamic)",
-        "file": "src/lib/patterns.js"
-      },
-      {
-        "method": "GET",
-        "target": "(dynamic)",
-        "file": "src/lib/patterns.js"
-      }
-    ]
+    "endpoints": [],
+    "consumptions": []
   }
 }

@@ -1,36 +1,51 @@
-# Ejemplo: clasificación y artefactos por tipo (el estándar de concisión)
+# Ejemplo: clasificación y artefactos (el estándar de concisión)
 
-## `simple` — "el output de `sdd doctor` dice 'hoks' en vez de 'hooks'"
+**Un solo camino** (BR-058): toda tarea escribe `analysis.md` y `plan.md`. Solo el riesgo `alto` agrega `spec.md` y `design.md`. El tipo decide el **contenido**, no la lista de archivos.
 
-Anuncio (una línea): _"Lo trato como `simple` (riesgo bajo): typo en un archivo, lo arreglo con un test que lo fije. Decime si preferís otro tipo."_ → `sdd task type 012 simple`
+## `simple` — "el mail de bienvenida dice 'Bienvenio'"
 
-`nota.md` completa (único artefacto, único gate):
+Anuncio (una línea): _"Lo trato como `simple` (riesgo bajo): typo en un archivo, lo arreglo con un test que lo fije. Decime si preferís otro tipo."_
 
-- **Qué entendí:** el reporte de hooks imprime "hoks", con typo.
-- **Qué voy a hacer:** corregir el literal en `src/commands/doctor.js`.
-- **Cómo se verifica:** `cmd: sdd test`
+`analysis.md` entero — sin diagrama (el pedido se explica en una línea) y sin huecos:
 
-## `bug` — "`sdd task verify` falla en pasos que sí tienen Verificación"
+```markdown
+## Entendimiento
+El template del mail de bienvenida tiene un typo en el saludo: dice "Bienvenio".
 
-Anuncio: _"Lo trato como `bug` (riesgo bajo): reproduzco, test rojo, fix. Decime si preferís otro tipo."_ → `sdd task type 013 bug`
+## Huecos
+Ninguno: el archivo es uno solo y el texto correcto es evidente.
+```
 
-`reproduccion.md` (reemplaza a la spec):
+`plan.md` entero, dos pasos:
 
-1. Escribir un paso cuyos tests estén en sub-lista `a)` / `b)` y correr `sdd task verify 013 2`.
-- **Esperado:** ejecuta la verificación del paso. **Observado:** `Error: el paso 2 no tiene línea de Verificación`.
-- **Test de regresión:** `task.test.js::stepBlock corta en sub-listas alfabéticas` — falla antes del fix. `cmd: sdd test`
+```markdown
+- [ ] **1. Test que fija el saludo correcto** — `cmd: npm test -- emails` (rojo)
+- [ ] **2. Corregir el literal en `src/emails/welcome.hbs`** — `cmd: npm test -- emails` (verde)
+```
 
-## `refactor` — "extraer el parseo de plan.md a su propio módulo"
+## `bug` — "el filtro de fechas ignora la factura del último día del rango"
 
-Anuncio: _"Lo trato como `refactor` (riesgo alto: `task.js` tiene 6 dependientes): corro `sdd impact`, tests verdes antes y después, sin EARS."_ → `sdd task type 014 refactor --riesgo=alto`
+Anuncio: _"Lo trato como `bug` (riesgo bajo): reproduzco, test rojo, fix."_ La reproducción va **en el entendimiento**:
 
-`analysis.md` (extracto — el resto es `N/A` justificado):
+```markdown
+## Entendimiento
+Con `desde=2026-03-01&hasta=2026-03-31`, una factura del `2026-03-31` no aparece
+en el listado. El borde superior se compara como `< hasta` en vez de `<= hasta`.
+```
 
-- **Problema real:** `task.js` mezcla parseo, comandos y salida; 480 líneas, 3 funciones de parseo duplican el skip de fences.
-- **Impacto (`sdd impact src/commands/task.js`):** 6 dependientes, todos internos; sin consumidores externos.
-- **Riesgos:** `stepBlock` tiene semántica sutil (LEARNINGS tarea 004) — se mueve tal cual, sin "mejoras" de paso.
-- **Métrica:** `N/A: refactor sin cambio de comportamiento observable; el criterio son los 213 tests verdes antes y después.`
+Y el test de regresión es el **primer paso del plan**, no un artefacto aparte:
+
+```markdown
+- [ ] **1. Test que captura el borde superior** — `invoices.test.js`. `cmd: npm test -- invoices` (rojo por el motivo correcto)
+- [ ] **2. Comparar con `<=` en el filtro** — `src/services/invoices.js`. `cmd: npm test -- invoices` (verde)
+```
+
+## `refactor` — "extraer el armado de queries a su propio módulo"
+
+Anuncio: _"Lo trato como `refactor` (riesgo alto: `invoices.js` tiene 6 dependientes): mapeo dependientes, tests verdes antes y después."_ → suma `spec.md` y `design.md`.
+
+El `analysis.md` lleva diagrama (el flujo tiene varios actores) y los dependientes medidos con el comando que los produjo. El **primer paso del plan** es la corrida verde de baseline, y el último la misma corrida.
 
 ## Anti-ejemplo
 
-Clasificar `feature` "por las dudas" un cambio de un archivo: genera analysis + spec + plan para tres líneas de código. Si dudás entre `simple` y otro tipo, no es `simple` — pero tampoco infles: elegí el tipo real y ajustá el **riesgo**.
+Clasificar `feature` "por las dudas" un cambio de un archivo: genera cuatro artefactos para tres líneas de código. Si dudás entre `simple` y otro tipo, no es `simple` — pero tampoco infles: elegí el tipo real y ajustá el **riesgo**, que es lo que decide la profundidad.

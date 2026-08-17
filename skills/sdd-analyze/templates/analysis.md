@@ -1,36 +1,29 @@
 # Analysis — tarea __ID__: __TITLE__
 
-> Estado: borrador. Su presupuesto es de **≤ 350 palabras** — densidad, no volumen: una línea por punto (dos solo si hay evidencia dura: `archivo:línea`, número medido). `N/A: <motivo>` es respuesta válida en cualquier sección que no aplique. El dev debe APROBARLO antes de especificar.
+> Tope: **45 líneas** (BR-082). Tres secciones y ninguna más (BR-084). Su objetivo es entender el pedido y cubrir los huecos — no justificar, no narrar. El dev debe APROBARLO antes de seguir.
 
-## Análisis crítico
+## Entendimiento
 
-> El requisito del dev es una HIPÓTESIS, no una orden: cuestionalo antes de refinarlo. El valor de esta sección es el desacuerdo fundado, no la complacencia.
+> En muy pocas palabras: qué te está pidiendo el dev, dicho con tus palabras. Si no lo podés decir corto, no lo entendiste.
+>
+> En un `bug`, acá va la reproducción: pasos, esperado vs observado (mensaje literal recortado a lo relevante).
 
-- **Problema real que resuelve:** …
-- **¿Ya existe?** (algo en el repo o una librería que lo resuelva total/parcialmente) …
-- **Alternativa más simple** (80% del valor con 20% del esfuerzo): …
-- **Supuestos del dev que podrían no ser ciertos:** …
-- **Riesgos y efectos secundarios** (arquitectura, performance, seguridad, mantenimiento): …
-- **¿Qué pasa si NO se hace?** …
-- **Detección y manejo de fallas en uso real:** … _(`N/A: no introduce lógica nueva que pueda fallar` es válido)_
+…
 
-**Recomendación:** `proceder | proceder con cambios | reconsiderar` — motivo en una línea. Si es "reconsiderar", discutilo con el dev ANTES de seguir: no construyas algo que creés incorrecto sin decirlo.
+## Diagrama
 
-## Preguntas de clarificación
+> **Solo si aplica.** Un Mermaid que explica lo mismo que arriba — no algo distinto ni algo adicional. Si el pedido se entiende en dos líneas, **borrá esta sección entera**.
+>
+> Primera línea con tipo válido (`flowchart LR`, `sequenceDiagram`, `stateDiagram-v2`), o no renderiza.
 
-_(solo las que cambian el alcance o invalidan el enfoque, en tandas razonables; la respuesta del dev va al lado de cada una)_
+## Huecos
 
-- [ ] P1: …
+> **Máximo 5** (BR-084), preguntados **de a uno**, cada uno con la respuesta que vos sugerís — el dev confirma o corrige, que es más rápido que redactar. Solo lo que cambia el alcance o invalida el enfoque; lo que se deduce del código no es un hueco, es trabajo tuyo.
+>
+> Pasado el quinto: asumí con criterio y declaralo como supuesto en la spec, no sigas preguntando.
+
+- [ ] **H1:** … — _sugerido:_ …
   - Respuesta: …
-
-## Métrica de impacto
-
-> Si el cambio no admite métrica cuantificable: `N/A: <motivo>` — no forzar una artificial.
-
-- **Métrica:** … _(p.ej. latencia P95, errores/día, tiempo de tarea del usuario)_
-- **Baseline actual:** … _(medir ANTES de implementar; si no existe el dato, instrumentarla es el PRIMER paso del plan)_
-- **Resultado esperado:** … _(número o dirección concreta)_
-- **Cómo se mide después:** … _(query, dashboard, log, test)_
 
 ---
 _Aprobación del dev: pendiente_

@@ -1,24 +1,41 @@
 # C4 — Nivel 3: Componentes
 
-> Generado por sddkit el 2026-06-15. Base: `src`.
+> Repo de **un solo módulo**: el detalle vive acá, sin `CLAUDE.md` anidados (BR-089). Sin código: markdown y JSON (ADR-0016).
 
-| Módulo | Archivos | Rol |
+## Qué hay y dónde
+
+| Componente | Ruta | Qué hace |
 |---|---|---|
-| `src/lib` | 24 | Librería interna |
-| `src/commands` | 24 | Comandos |
-| `(raíz)` | 3 | ❓ por validar |
+| Manifiesto | `.claude-plugin/plugin.json` | Identidad del plugin. **No declara `skills` ni `hooks`**: se cargan por convención y declararlos los duplica |
+| Marketplace | `.claude-plugin/marketplace.json` | Hace el repo instalable por terceros (`source: "./"`) |
+| Arranque | `hooks/hooks.json` | Dos hooks `SessionStart`, mutuamente excluyentes |
+| ↳ repo sin configurar | `hooks/bootstrap.md` | Se vuelca si falta `.sdd/config.json` (BR-080) |
+| ↳ termaid ausente | `hooks/termaid.md` | Se vuelca si el repo YA está configurado y no hay respuesta en `ui.termaid` (BR-087) |
+| Router del flujo | `skills/sdd-task/SKILL.md` | Captura, clasifica y decide profundidad por riesgo (BR-057, BR-058) |
+| ↳ formato de artefactos | `skills/sdd-task/references/artefactos.md` | **Fuente única**: índice, estados, gates, volcado en terminal, termaid |
+| ↳ estructura del C4 | `skills/sdd-task/references/estructura-c4.md` | Formato máquina, índice vs detalle, frontera capa/módulo (BR-088 a BR-090) |
+| Fases | `skills/sdd-{analyze,specify,plan,execute,close}/` | Un `SKILL.md` por fase + sus templates y ejemplos |
+| Templates | `skills/sdd-analyze/templates/analysis.md`, `skills/sdd-specify/templates/spec.md`, `skills/sdd-plan/templates/{plan,design}.md` | Los 4 artefactos vigentes |
+| Mejora de skills | `skills/sdd-improve-skill/SKILL.md` | Auditoría de una skill contra las best practices |
+
+## Cómo se conecta
 
 ```mermaid
 flowchart TD
-  bin["bin/sdd.js<br/>entry point CLI"] --> commands["src/commands/*<br/>init, scan, setup, task,<br/>publish, impact, context, validate…"]
-  commands --> lib["src/lib/*<br/>agentsmd, c4, domain, catalog,<br/>patterns, hooks, llmClient, livingDocs…"]
-  lib --> graphstore["src/lib/graphstore/*<br/>index (wrap), mysql, matching"]
-  graphstore --> mysql[("MySQL<br/>grafo compartido")]
+  manifest[".claude-plugin/plugin.json"] --> skills["skills/sdd-*"]
+  hooks["hooks/hooks.json"] --> boot["bootstrap.md<br/>si falta .sdd/config.json"]
+  hooks --> term["termaid.md<br/>si falta termaid"]
+  boot --> agente["el agente"]
+  term --> agente
+  skills --> agente
+  agente --> estado[".sdd/ del repo del dev"]
 ```
+
+**No hay proceso ni runtime**: lo único que se ejecuta es el one-liner de cada hook. El agente es el único intérprete, y por eso ninguna garantía del flujo es determinística (ADR-0016).
 
 ## ❓ VALIDAR con el equipo
 
-- [ ] ¿Cuál es el rol del módulo `(raíz)`?
+- [ ] ¿Las 7 skills son la partición correcta del flujo, o hay una que siempre se lee junto con otra?
 
 <!-- sdd:manual — todo lo que está debajo de esta línea se preserva en regeneraciones -->
 

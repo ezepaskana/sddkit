@@ -5,25 +5,26 @@ description: Fase de especificación de una tarea SDD. Usar después del anális
 
 # sdd-specify — la spec refinada
 
-**Solo para tareas tipo `feature`** (BR-058). Las otras no llevan spec: `simple` → `nota.md`; `bug` → `reproduccion.md` (el test de regresión ES el criterio de aceptación); `refactor` → `analysis.md` + plan, sin EARS. Si estás acá con otro tipo, volvé al flujo del tipo o re-clasificá.
+**Solo para tareas de riesgo `alto`** (BR-058). Si el riesgo es `bajo`, no hay spec: los criterios de aceptación van dentro del plan y pasás directo a **sdd-plan**. Si estás acá con riesgo bajo, volvé — o re-clasificá si el alcance mutó.
 
-**Input:** `analysis.md` aprobado. Leelo primero: la spec traduce sus hallazgos y clarificaciones a comportamiento observable, no los repite.
+**Input:** `analysis.md` aprobado. **La spec lo CONTINÚA, no lo repite**: no reescribas el entendimiento ni los huecos ya respondidos. Su contenido propio es el contrato — qué tiene que ser cierto para decir que esto terminó.
 
-**Presupuesto: `spec.md` ≤ 300 palabras.** Las secciones ya están en `templates/spec.md` — completalas, no las re-expliques.
+**Tope: `spec.md` ≤ 45 líneas** (BR-082). Las secciones ya están en `templates/spec.md` — completalas, no las re-expliques.
 
 ## Qué hace buena a una spec
 
-- **Un criterio por comportamiento observable**, en EARS (`references/ears.md`): verbos verificables (responder, registrar, excluir), nunca "manejar" o "soportar". Cubrí caso feliz, los bordes que salieron de la clarificación y el error.
-- **Riesgo `alto`** → criterios explícitos para error, concurrencia y migración. **Riesgo `bajo`** → los mínimos que definen "terminado".
+- **Criterios numerados** (`CA-1`, `CA-2`…): el número es lo que permite citarlos desde un paso del plan o desde un test. Sin numerar, el contrato no se puede referenciar.
+- **Un criterio por comportamiento observable**, en EARS (`references/ears.md`): verbos verificables (responder, registrar, excluir), nunca "manejar" o "soportar". Cubrí caso feliz, los bordes que salieron de los huecos y el error.
+- **Nada de implementación**: acá va el **qué**. Librerías, módulos y arquitectura son el **cómo** y viven en `design.md`.
 - **Reglas de negocio por ID** (BR-NNN de `.sdd/domain.md`). Si la tarea introduce una regla nueva, escribila PRIMERO allí con su número y citala acá.
+- **Supuestos declarados**: los defaults que elegiste sin preguntar, tras agotar el tope de 5 huecos (BR-084). Declararlos es lo que le permite al dev corregirte barato.
 - **Fuera de alcance explícito**: lo que NO se hace es lo que evita el scope creep en la ejecución.
-- **Impacto**: módulos de `components.md`, convenciones del catálogo que aplican, si requiere ADR o tocar C4.
 - `N/A: <motivo>` es válido en cualquier sección que no aplique y satisface el gate.
-- **Diagrama**: solo si REEMPLAZA prosa (3+ actores o pasos con bifurcaciones). Si no, borrá la sección. Si lo incluís, la primera línea del bloque `mermaid` debe declarar el tipo (`flowchart LR`, `sequenceDiagram`, `stateDiagram-v2`) o `sdd validate` falla.
+- **Sin diagrama**: el diagrama vive en el `analysis.md`. Si necesitás uno acá, es señal de que el entendimiento quedó incompleto — volvé al analysis.
 
 ## El gate
 
-`sdd task status <id> specified` **le abre spec.md al dev**. Avisale, esperá su aprobación en el chat, marcá la línea de aprobación en spec.md y seguí con **sdd-plan**.
+Pasá la tarea a `specified` en `.sdd/tasks/index.json` y **volcá spec.md en la terminal** (cómo: `sdd-task/references/artefactos.md`). Esperá su aprobación en el chat, marcá la línea de aprobación en spec.md y seguí con **sdd-plan**.
 
 ## Additional Resources
 

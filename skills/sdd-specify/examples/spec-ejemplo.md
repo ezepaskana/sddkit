@@ -1,26 +1,25 @@
-# Ejemplo: spec del comando `sdd sync` (tarea 005 — 270 palabras)
+# Ejemplo: spec de "exportar facturas a CSV" (tarea 005 — 265 palabras)
 
-> Requisito: _"necesito un `sdd sync` que actualice skills, config y hooks tras `npm update sddkit`, sin correr el wizard de scan/convenciones"_. Tipo `feature`, riesgo bajo.
+> Requisito: _"necesito bajarme las facturas del mes en CSV para pasárselas al contador, sin tener que copiar la tabla a mano"_. Tipo `feature`, riesgo bajo.
 
 ## Spec refinada
 
-**Historia:** Como dev con sddkit ya configurado quiero correr `sdd sync` tras actualizar el paquete para que skills, config, bloque gestionado y hooks queden al día sin volver a pasar por el setup completo.
+**Historia:** Como administrativo quiero exportar el listado de facturas filtrado a un archivo CSV para entregárselo al contador sin copiar la tabla a mano.
 
 **Criterios de aceptación (EARS):**
 
-1. CUANDO se corre `sdd sync` con `cfg.version < VERSION`, EL SISTEMA DEBE ejecutar `init` en modo silencioso (sin `scan` ni wizard), actualizar `cfg.version` e imprimir la transición `vANTERIOR → vNUEVA`.
-2. CUANDO `cfg.version === VERSION` pero `init` migró campos de config, EL SISTEMA DEBE reportar "config migrado (campos nuevos)" en vez de "ya estás al día".
-3. CUANDO `cfg.version === VERSION` y no hubo migración, EL SISTEMA DEBE imprimir "ya estás al día en vX.Y.Z" y terminar con exit 0.
-4. CUANDO `installSkills` actualiza una carpeta `sdd-*` existente, EL SISTEMA DEBE reemplazarla completa (mirror: borra y copia), eliminando archivos que ya no existan upstream.
-5. CUANDO `cfg.skills === 'global'`, EL SISTEMA DEBE avisar la ruta global afectada (`~/.claude/skills/sdd-*`) y que impacta a todos los repos.
-6. SI no existe `.sdd/config.json`, EL SISTEMA DEBE informarlo, sugerir `sdd setup`, no modificar nada y terminar sin error.
-7. SI `sdd doctor` detecta versión desactualizada o skills/hooks faltantes, EL SISTEMA DEBE sugerir `sdd sync` (no `sdd setup`).
+1. CUANDO se pide la exportación con filtros activos, EL SISTEMA DEBE generar un CSV con exactamente las facturas que muestra el listado, en el mismo orden.
+2. CUANDO se genera el CSV, EL SISTEMA DEBE incluir una fila de encabezados con los nombres de columna visibles en la interfaz.
+3. CUANDO un campo contiene comas, comillas o saltos de línea, EL SISTEMA DEBE encerrarlo entre comillas y duplicar las comillas internas (RFC 4180).
+4. CUANDO se exportan importes, EL SISTEMA DEBE escribirlos con punto decimal y sin separador de miles, independientemente del idioma de la sesión.
+5. SI el resultado filtrado está vacío, EL SISTEMA DEBE generar igual el archivo con solo la fila de encabezados, sin error.
+6. SI el resultado supera las 50.000 filas, EL SISTEMA DEBE rechazar la exportación con código `EXPORT_TOO_LARGE` y sugerir acotar el rango de fechas (BR-031).
 
 **Reglas de negocio afectadas:** BR-030 a BR-034 (ya escritas en `.sdd/domain.md`).
 
-**Fuera de alcance:** correr `scan`/wizard dentro de `sync`; migración de `graph.*` (es de `setup`, BR-035); auto-detección de versiones nuevas en npm.
+**Fuera de alcance:** exportar a Excel con formato; envío por mail al contador; exportación programada; columnas configurables por usuario.
 
-**Impacto:** `src/commands/sync.js` (nuevo), `src/lib/skills.js` (mirror real), `doctor.js`, `init.js` (flags `quiet`/`silent`). Convención `esm`. Agregar `sync.js` a `components.md`. ADR: no requiere.
+**Impacto:** `src/services/invoices.js` (reutiliza el filtro existente), `src/routes/invoices.js` (endpoint nuevo), `src/lib/csv.js` (nuevo). Convención de módulos del catálogo. Agregar `csv.js` a `components.md`. ADR: no requiere.
 
 ---
 _Aprobación del dev: pendiente_

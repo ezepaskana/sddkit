@@ -14,6 +14,6 @@
   },
   "skills": "local",
   "ui": {
-    "opener": "open -a \"Sublime Text\""
+    "_nota": "El campo `opener` quedó obsoleto en la tarea 021 (BR-063): los artefactos se vuelcan en la terminal, nunca se abren en una app externa. El campo `termaid` (\"si\" | \"no\") guarda la respuesta del dev al ofrecimiento de instalarlo; mientras no exista, el hook de arranque lo ofrece una vez (BR-087)."
   }
 }

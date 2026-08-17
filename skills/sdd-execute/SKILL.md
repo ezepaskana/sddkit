@@ -7,7 +7,7 @@ description: Fase de ejecución de una tarea SDD con patrón orquestador/workers
 
 **Sos el ORQUESTADOR: no implementás ningún paso vos mismo** (tampoco los `(fuerte)`). Tu contexto queda limpio; la implementación contamina contextos descartables. Protocolo completo en `references/protocolo-subagentes.md`.
 
-Aplica a todos los tipos. En `simple` no hay plan: con el ok del dev sobre `nota.md`, implementás con tests en un solo paso (delegá igual si toca más de un archivo).
+Aplica a todos los tipos y riesgos: siempre hay plan, aunque tenga dos pasos (BR-058).
 
 ## Paso 1 — bloqueante: rama de trabajo
 
@@ -17,18 +17,18 @@ Antes de lanzar ningún subagente, ejecutá el Paso 1 auto-generado (`git checko
 
 ## Ciclo por paso (desde el Paso 2)
 
-1. `sdd task brief <id> <paso>` — recorte determinístico (paso + spec + BR citadas + catálogo). **No le digas al worker "leé spec.md y plan.md completos"**: el brief reemplaza esas lecturas y se paga una vez por paso.
-2. Lanzá un subagente con el modelo del nivel del paso (`.sdd/config.json → models`) y el output del brief como prompt.
-3. **Verificá VOS**: `sdd task verify <id> <paso>` (exit 0 = pasó; exit 3 = verificación manual, ahí juzgá vos). El reporte del worker es un claim, no una prueba. Solo con verde marcás el checkbox en plan.md.
-4. Worker bloqueado → te devuelve la pregunta: resolvela con el dev, registrala en `analysis.md` (o `reproduccion.md` en `bug`) y relanzá con el brief actualizado.
+1. **Armá el brief del paso vos** — el recorte mínimo (paso + spec + BR citadas + catálogo); composición exacta en `references/protocolo-subagentes.md`. **No le digas al worker "leé spec.md y plan.md completos"**: el brief reemplaza esas lecturas y se paga una vez por paso.
+2. Lanzá un subagente con el modelo del nivel del paso (`.sdd/config.json → models`) y el brief como prompt.
+3. **Verificá VOS**: corré el `cmd:` del paso y mirá su exit code (sin `cmd:` la verificación es manual, ahí juzgá vos). El reporte del worker es un claim, no una prueba. Solo con verde marcás el checkbox en plan.md.
+4. Worker bloqueado → te devuelve la pregunta: resolvela con el dev, registrala como hueco en `analysis.md` y relanzá con el brief actualizado.
 5. Pasos `[P]` sin dependencias cruzadas: subagentes en paralelo.
-6. Si un paso falla o revela un problema de la spec: frená y consultá al dev, no improvises. Si el alcance mutó, re-clasificá (`sdd task type <id> <tipo>`) y avisá.
+6. Si un paso falla o revela un problema de la spec: frená y consultá al dev, no improvises. Si el alcance mutó, re-clasificá (actualizá `tipo` en `.sdd/tasks/index.json`) y avisá.
 
 Específicos: **`bug`** → el paso del test rojo se verifica con el test fallando por el motivo correcto, no por otro error. **`refactor`** → la corrida verde de baseline se registra antes del primer cambio y la misma corrida debe quedar verde al final.
 
 Sin subagentes disponibles: ejecutá secuencial, releyendo los artefactos de la tarea antes de cada paso en vez de confiar en tu memoria de la conversación.
 
-Pausar: `sdd task status <id> paused`. Retomar (cualquier sesión): `sdd task show <id>`.
+Pausar: poné `paused` en el índice. Retomar (cualquier sesión): leé `.sdd/tasks/index.json`, abrí el `plan.md` de la tarea y seguí desde el primer checkbox sin marcar. Detalle en `sdd-task → references/artefactos.md`.
 
 ## Prueba local (cuando todos los checkboxes están verificados)
 

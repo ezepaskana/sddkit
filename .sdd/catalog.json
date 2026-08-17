@@ -1,23 +1,4 @@
 {
   "version": 1,
-  "decisions": [
-    {
-      "topic": "module-system",
-      "chosen": "esm",
-      "why": "package.json declara type=module y 25/26 archivos son ESM; el único CJS (src/lib/patterns.js) son strings de detectores de patrones, no código real.",
-      "date": "2026-06-12",
-      "legacy": {
-        "cjs": 1
-      }
-    },
-    {
-      "topic": "http-endpoints",
-      "chosen": "jaxrs",
-      "why": "No aplica: sddkit es CLI Node sin servidor HTTP. Ambas variantes son strings literales de ENDPOINT_STYLES en src/lib/patterns.js (detectores para otros repos), no endpoints reales; jaxrs elegido arbitrariamente para resolver el pendiente.",
-      "date": "2026-06-12",
-      "legacy": {
-        "spring-mapping": 1
-      }
-    }
-  ]
+  "decisions": []
 }

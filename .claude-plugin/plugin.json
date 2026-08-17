@@ -1,0 +1,22 @@
+{
+  "name": "sddkit",
+  "description": "Spec-driven development para Claude: documentación C4 viva, catálogo de convenciones validadas y flujo SDD auto-disparado.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Eze Paskana",
+    "email": "eze.paskana@gmail.com"
+  },
+  "homepage": "https://github.com/ezepaskana/sddkit#readme",
+  "repository": "https://github.com/ezepaskana/sddkit",
+  "license": "MIT",
+  "keywords": [
+    "sdd",
+    "spec-driven",
+    "c4-model",
+    "ai-agents",
+    "claude-code"
+  ],
+  "metadata": {
+    "nota": "NO declarar `skills` ni `hooks` acá: `skills/` y `hooks/hooks.json` se cargan automáticamente por convención, y declararlos los registra dos veces (el plugin falla con 'Duplicate hooks file detected'). Esos campos son solo para directorios o archivos ADICIONALES."
+  }
+}

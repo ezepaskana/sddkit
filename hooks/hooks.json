@@ -9,7 +9,7 @@
           },
           {
             "type": "command",
-            "command": "test ! -f .sdd/config.json || command -v termaid >/dev/null 2>&1 || grep -q '\"termaid\"' .sdd/config.json || cat \"${CLAUDE_PLUGIN_ROOT}/hooks/termaid.md\""
+            "command": "test ! -d .sdd || command -v termaid >/dev/null 2>&1 || grep -q '\"termaid\"' .sdd/config.json 2>/dev/null || cat \"${CLAUDE_PLUGIN_ROOT}/hooks/termaid.md\""
           }
         ]
       }

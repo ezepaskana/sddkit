@@ -42,10 +42,12 @@ Los **gates** son tuyos: el agente te muestra el artefacto y espera tu aprobaci�
 | Carpeta | Qué es |
 |---|---|
 | `.claude-plugin/` | manifiesto del plugin y marketplace propio |
-| `skills/` | las 7 skills `sdd-*`: el comportamiento que el agente lee en cada fase |
-| `hooks/` | el único disparo automático: un `SessionStart` que detecta un repo sin configurar |
+| `skills/` | las 7 skills `sdd-*` (el comportamiento que el agente lee en cada fase) más `caveman` |
+| `hooks/` | los disparos automáticos: tres `SessionStart` (repo sin configurar, termaid, caveman) |
 
-Las skills son `sdd-task` (router, auto-trigger), `sdd-analyze`, `sdd-specify`, `sdd-plan`, `sdd-execute`, `sdd-close` y `sdd-improve-skill`. Cada una es una carpeta con `SKILL.md` + `references/`, `templates/` y `examples/`, para que el agente cargue solo lo que necesita.
+Las skills del flujo son `sdd-task` (router, auto-trigger), `sdd-analyze`, `sdd-specify`, `sdd-plan`, `sdd-execute`, `sdd-close` y `sdd-improve-skill`. Cada una es una carpeta con `SKILL.md` + `references/`, `templates/` y `examples/`, para que el agente cargue solo lo que necesita.
+
+Aparte del flujo está **`caveman`**: comprime cómo el agente te habla en la terminal —sin artículos, sin conectores, sin cortesías, fragmentos en vez de oraciones— dejando intacta la sustancia técnica. **Viene activo por default**, solo afecta al chat (nunca a los artefactos, los docs, los commits ni los PR), y se apaga diciendo `basta caveman` en el momento o poniendo `"caveman": "no"` en el bloque `ui` de `.sdd/config.json` para siempre.
 
 ## Flujo SDD: secuencia de skills
 

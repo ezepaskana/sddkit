@@ -1,5 +1,5 @@
 {
-  "nextId": 23,
+  "nextId": 24,
   "tasks": [
     {
       "id": "010",
@@ -126,6 +126,16 @@
       "updatedAt": "2026-08-14",
       "tipo": "feature",
       "riesgo": "alto"
+    },
+    {
+      "id": "023",
+      "dir": "023-necesito-que-como-parte-del-pluging",
+      "title": "Necesito que como parte del pluging de sdd se agregue una sk…",
+      "status": "done",
+      "createdAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "tipo": "feature",
+      "riesgo": "bajo"
     }
   ]
 }

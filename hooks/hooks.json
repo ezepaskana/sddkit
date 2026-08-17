@@ -10,6 +10,10 @@
           {
             "type": "command",
             "command": "test ! -d .sdd || command -v termaid >/dev/null 2>&1 || grep -q '\"termaid\"' .sdd/config.json 2>/dev/null || cat \"${CLAUDE_PLUGIN_ROOT}/hooks/termaid.md\""
+          },
+          {
+            "type": "command",
+            "command": "grep -q '\"caveman\"[[:space:]]*:[[:space:]]*\"no\"' .sdd/config.json 2>/dev/null || cat \"${CLAUDE_PLUGIN_ROOT}/hooks/caveman.md\""
           }
         ]
       }

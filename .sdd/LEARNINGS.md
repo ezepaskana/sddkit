@@ -15,6 +15,8 @@
 - **Acortar una respuesta no la hace legible**: 150 palabras llenas de códigos propios del agente (`Z3`, `BR-004`) son ilegibles igual. Traducir la jerga es parte de resumir. _(tarea 018)_
 - **Triggers de skills por lista cerrada de keywords son frágiles en español**: incluí siempre un fallback de "preguntar al dev" cuando el clasificador no esté seguro. _(tarea 002)_
 
+- **Agregar una fila a `components.md` suele pasar el tope de 45 líneas**: colapsá aristas del Mermaid con `&` (`a & b --> c`) antes de recortar contenido. _(tarea 023)_
+
 ## Sobre el flujo de trabajo
 
 - **El PR (o artefacto "cerrable") debe ser el ÚLTIMO paso**: crearlo antes de commitear los aprendizajes deja artefactos de cierre huérfanos tras el merge. _(tarea 007)_
@@ -32,3 +34,5 @@
 - **Persistí también la respuesta negativa**: un ofrecimiento que solo recuerda el "sí" vuelve a molestar en cada sesión. _(tarea 021)_
 - **Versionar configuración desde el inicio**: un histórico `{versions:[...], active: idx}` desde v1 es más fácil que agregarlo después. Ver `.sdd/branching.md`. _(tarea 010)_
 - **Sin exit codes, el gate es el agente**: al eliminar una verificación automática, escribí explícitamente quién la sostiene ahora y bajo qué condición se revierte. _(tarea 020)_
+- **Una skill no se carga sola**: para un comportamiento siempre activo hace falta un hook `SessionStart` que inyecte la instrucción; la `description` del SKILL.md no lo garantiza. _(tarea 023)_
+- **Un `_nota` de `config.json` que cita el flag que un hook grepea puede autosilenciarlo**: probá el one-liner contra el archivo real, no solo contra un fixture. _(tarea 023)_

@@ -7,6 +7,15 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased]
 
+### Added
+
+- **Skill `caveman`**: estilo de respuesta comprimido en español para el chat con el
+  dev, con la sustancia técnica intacta. **Activo por default** vía un tercer hook
+  `SessionStart`; nunca toca artefactos, docs, commits ni PR, y las reglas de
+  brevedad existentes (BR-064/066/067/068) mandan por encima. Se apaga por turno
+  diciendo `basta caveman`, o para siempre con `ui.caveman: "no"` en
+  `.sdd/config.json` (BR-091).
+
 ### Changed
 
 - **sddkit se distribuye solo como plugin de Claude Code.** Se instala con

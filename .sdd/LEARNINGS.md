@@ -13,6 +13,8 @@
 - **Si una tarea modifica una skill usada en la misma sesión, tenés la versión vieja cargada**: seguí el flujo ya conocido en vez de depender de que recargue. _(tareas 006, 021)_
 - **El bloque gestionado de `CLAUDE.md` vive cerca de su tope práctico (~450 palabras)**: agregar una instrucción obliga a reescribir otra, no a sumar. _(tarea 018)_
 - **Acortar una respuesta no la hace legible**: 150 palabras llenas de códigos propios del agente (`Z3`, `BR-004`) son ilegibles igual. Traducir la jerga es parte de resumir. _(tarea 018)_
+- **Un doc que se declara `PLACEHOLDER` queda inerte**: el agente lo lee como instrucciones incompletas y sigue de largo. Si el contrato ya está fijado, escribí el texto. _(tarea 024)_
+- **Un ofrecimiento sin momento fijado se difiere hasta el final y el dev no lo ve**: en una instrucción al agente, el *cuándo* pesa tanto como el *qué*. _(tarea 024)_
 - **Triggers de skills por lista cerrada de keywords son frágiles en español**: incluí siempre un fallback de "preguntar al dev" cuando el clasificador no esté seguro. _(tarea 002)_
 
 - **Agregar una fila a `components.md` suele pasar el tope de 45 líneas**: colapsá aristas del Mermaid con `&` (`a & b --> c`) antes de recortar contenido. _(tarea 023)_

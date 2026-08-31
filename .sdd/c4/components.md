@@ -9,9 +9,10 @@
 | Manifiesto | `.claude-plugin/plugin.json` | Identidad del plugin. **No declara `skills` ni `hooks`**: se cargan por convención y declararlos los duplica |
 | Marketplace | `.claude-plugin/marketplace.json` | Hace el repo instalable por terceros (`source: "./"`) |
 | Arranque | `hooks/hooks.json` | Tres hooks `SessionStart`: los dos primeros mutuamente excluyentes, el tercero independiente |
-| ↳ repo sin configurar | `hooks/bootstrap.md` | Se vuelca si falta `.sdd/config.json` (BR-080) |
+| ↳ repo sin configurar | `hooks/bootstrap.md` | Se vuelca si falta `.sdd/config.json`: ofrece configurar e invoca `sdd-bootstrap` (BR-080) |
 | ↳ termaid ausente | `hooks/termaid.md` | Se vuelca si el repo YA está configurado y no hay respuesta en `ui.termaid` (BR-087) |
 | ↳ estilo caveman | `hooks/caveman.md` | Se vuelca SIEMPRE salvo `ui.caveman` en `'no'`: activo por default (BR-091) |
+| Configuración del repo | `skills/sdd-bootstrap/` | Investiga, pregunta y escribe `.sdd/` la primera vez. Fuera del flujo de tareas: la invoca el hook (BR-092) |
 | Router del flujo | `skills/sdd-task/SKILL.md` | Captura, clasifica y decide profundidad por riesgo (BR-057, BR-058) |
 | ↳ formato de artefactos | `skills/sdd-task/references/artefactos.md` | **Fuente única**: índice, estados, gates, volcado en terminal, termaid |
 | ↳ estructura del C4 | `skills/sdd-task/references/estructura-c4.md` | Formato máquina, índice vs detalle, frontera capa/módulo (BR-088 a BR-090) |

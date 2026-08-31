@@ -1,5 +1,5 @@
 {
-  "nextId": 24,
+  "nextId": 25,
   "tasks": [
     {
       "id": "010",
@@ -136,6 +136,16 @@
       "updatedAt": "2026-08-16",
       "tipo": "feature",
       "riesgo": "bajo"
+    },
+    {
+      "id": "024",
+      "dir": "024-dale-con-la-1-redacta-bootstrap",
+      "title": "Dale con la 1, redactá bootstrap.md en serio",
+      "status": "in-progress",
+      "createdAt": "2026-08-17",
+      "updatedAt": "2026-08-17",
+      "tipo": "feature",
+      "riesgo": "alto"
     }
   ]
 }

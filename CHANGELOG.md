@@ -7,8 +7,29 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [Unreleased]
 
+### Added
+
+- **Skill `sdd-bootstrap`**: el procedimiento completo para configurar un repo por
+  primera vez — investigar (stack, módulos, capas, entidades, documentación
+  existente), preguntar solo lo que no se deduce del código, y escribir `.sdd/`
+  con el C4, el dominio, el catálogo y el bloque de `CLAUDE.md`. Incluye el caso
+  del repo todavía sin código. La invoca el hook de arranque, no `sdd-task`
+  (tarea 024, BR-092).
+- **Skill `caveman`**: estilo de respuesta comprimido en español para el chat con el
+  dev, con la sustancia técnica intacta. **Activo por default** vía un tercer hook
+  `SessionStart`; nunca toca artefactos, docs, commits ni PR, y las reglas de
+  brevedad existentes (BR-064/066/067/068) mandan por encima. Se apaga por turno
+  diciendo `basta caveman`, o para siempre con `ui.caveman: "no"` en
+  `.sdd/config.json` (BR-091).
+
 ### Changed
 
+- **`hooks/bootstrap.md` dejó de ser un placeholder** (tarea 024). Ahora instruye al
+  agente a ofrecer la configuración en una línea **como primer acto del turno**,
+  antes de atender el pedido del dev, e invocar `sdd-bootstrap` si acepta. Si el dev
+  dice que no, no se escribe nada y el ofrecimiento vuelve en la próxima sesión.
+  Antes el texto se anunciaba como incompleto y el agente lo ignoraba: el repo
+  quedaba sin configurar sesión tras sesión (BR-080 reescrita).
 - **sddkit se distribuye solo como plugin de Claude Code.** Se instala con
   `/plugin marketplace add` + `/plugin install`: no hay paquete npm, ni comando
   `sdd`, ni pasos de instalación en el repo. Un repo sin configurar lo detecta un

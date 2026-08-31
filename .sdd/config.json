@@ -2,18 +2,13 @@
   "version": "0.0.1",
   "createdAt": "2026-06-12",
   "detectedAgents": [],
-  "hooks": {
-    "preCommit": true,
-    "autoPublish": true
-  },
   "models": {
     "rapido": "haiku",
     "medio": "sonnet",
     "fuerte": "opus",
     "_nota": "Aliases de Claude Code para delegar pasos del plan via subagentes (Task tool). El agente debe verificar en su primer arranque que estos modelos existan en su runtime y ajustarlos si no."
   },
-  "skills": "local",
   "ui": {
-    "_nota": "El campo `opener` quedó obsoleto en la tarea 021 (BR-063): los artefactos se vuelcan en la terminal, nunca se abren en una app externa. El campo `termaid` (\"si\" | \"no\") guarda la respuesta del dev al ofrecimiento de instalarlo; mientras no exista, el hook de arranque lo ofrece una vez (BR-087)."
+    "_nota": "El campo `opener` quedó obsoleto en la tarea 021 (BR-063): los artefactos se vuelcan en la terminal, nunca se abren en una app externa. El campo `termaid` (\"si\" | \"no\") guarda la respuesta del dev al ofrecimiento de instalarlo; mientras no exista, el hook de arranque lo ofrece una vez (BR-087). El campo `caveman` apaga el modo caveman de forma permanente: es el ÚNICO valor que silencia el tercer hook de arranque, que si no se vuelca en toda sesión (BR-091). Poné el string 'no' para apagarlo; cualquier otro valor, o su ausencia, lo deja activo."
   }
 }

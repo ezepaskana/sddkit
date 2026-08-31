@@ -1,5 +1,5 @@
 {
-  "nextId": 23,
+  "nextId": 25,
   "tasks": [
     {
       "id": "010",
@@ -124,6 +124,26 @@
       "status": "specified",
       "createdAt": "2026-08-14",
       "updatedAt": "2026-08-14",
+      "tipo": "feature",
+      "riesgo": "alto"
+    },
+    {
+      "id": "023",
+      "dir": "023-necesito-que-como-parte-del-pluging",
+      "title": "Necesito que como parte del pluging de sdd se agregue una sk…",
+      "status": "done",
+      "createdAt": "2026-08-16",
+      "updatedAt": "2026-08-16",
+      "tipo": "feature",
+      "riesgo": "bajo"
+    },
+    {
+      "id": "024",
+      "dir": "024-dale-con-la-1-redacta-bootstrap",
+      "title": "Dale con la 1, redactá bootstrap.md en serio",
+      "status": "done",
+      "createdAt": "2026-08-17",
+      "updatedAt": "2026-08-30",
       "tipo": "feature",
       "riesgo": "alto"
     }

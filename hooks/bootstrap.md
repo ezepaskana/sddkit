@@ -1,23 +1,19 @@
-# sddkit — este repo todavía no está configurado
+# sddkit — este repo no está configurado
 
-> ⚠️ **PLACEHOLDER — redactar en una tarea posterior.** El contrato del hook ya está fijado (tarea 020, BR-080): este archivo se vuelca al contexto del agente cuando el repo NO tiene `.sdd/config.json`. Lo que falta es el texto real de las instrucciones.
+El plugin está instalado, pero este repositorio no tiene `.sdd/config.json`: el framework **no está operativo acá**. Sin él no hay documentación C4 viva, ni catálogo de convenciones, ni flujo SDD — el agente trabaja como si sddkit no existiera.
 
-El plugin sddkit está instalado pero este repositorio no tiene `.sdd/config.json`, así que el framework no está operativo acá.
+## Qué hacer, en este orden
 
-**Qué hacer:** investigá el repo y generá la configuración de sddkit, preguntándole al dev únicamente lo que no puedas deducir del código.
+**1. Ofrecelo AHORA, antes de atender el pedido del dev.** Tu primera respuesta de esta sesión arranca con una línea, y solo una:
 
-## Al escribir `.sdd/config.json`: ofrecé termaid (BR-087, ADR-0017)
+> _"Este repo no tiene sddkit configurado — ¿lo configuro antes de arrancar? Documento la arquitectura y fijo las convenciones para los agentes; te pregunto solo lo que no pueda deducir del código."_
 
-Este es el **único momento** en que corresponde ofrecerlo durante el bootstrap: el hook que lo ofrece en repos ya configurados no dispara acá, porque cuando arrancó la sesión el config todavía no existía. Si no lo hacés ahora, el dev recién lo va a ver en la próxima sesión.
+Ahí **frená y esperá la respuesta**: no arranques la tarea, no investigues el repo, no escribas nada.
 
-sddkit vuelca los artefactos en la terminal y sus diagramas Mermaid son ilegibles como texto crudo. [termaid](https://github.com/fasouto/termaid) los renderiza. Ofrecéselo **en una línea**, junto con el resto de lo que estés confirmando:
+Diferir el ofrecimiento al final de una respuesta larga **equivale a no hacerlo** — el dev no lo ve, y el repo se queda sin configurar sesión tras sesión. Es el error que esta instrucción existe para evitar.
 
-> _"¿Instalás termaid para que los diagramas se vean en la terminal? `pip install termaid` (o lo corro con `uvx termaid`, sin instalar nada)."_
+**2. Si acepta** → invocá la skill `sdd-bootstrap` y seguí su procedimiento de punta a punta. Al terminar, retomá el pedido original del dev con sus palabras.
 
-Escribí su respuesta en `.sdd/config.json → ui.termaid`: `"si"` o `"no"`. **Con cualquiera de los dos valores no se vuelve a ofrecer nunca** — un "no" vale tanto como un "sí" para callar el ofrecimiento. Si el dev no contesta, dejá el campo sin escribir: el hook lo ofrecerá en la próxima sesión.
+**3. Si dice que no, o "después"** → atendé el pedido normalmente y **no lo vuelvas a mencionar en esta sesión**. No escribas nada en el repo: la respuesta negativa no se persiste —no hay dónde— y el ofrecimiento vuelve en la próxima sesión, en una línea.
 
-No instales nada por tu cuenta: la instalación la ejecuta el dev, o vos con su ok explícito en ese momento.
-
----
-
-_(El detalle de qué investigar, en qué orden, qué preguntar y con qué formato escribir el resto de `.sdd/` se redacta en una tarea siguiente.)_
+Nunca configures el repo sin el sí explícito del dev.

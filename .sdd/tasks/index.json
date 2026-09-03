@@ -121,9 +121,9 @@
       "id": "022",
       "dir": "022-como-podemos-mejorar-la-documentacion",
       "title": "Como podemos mejorar la documentacion de C4 teniendo en cu…",
-      "status": "specified",
+      "status": "done",
       "createdAt": "2026-08-14",
-      "updatedAt": "2026-08-14",
+      "updatedAt": "2026-09-03",
       "tipo": "feature",
       "riesgo": "alto"
     },

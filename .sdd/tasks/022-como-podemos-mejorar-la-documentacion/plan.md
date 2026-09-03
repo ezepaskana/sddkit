@@ -10,7 +10,7 @@
 - [x] **6. `context.md` y `containers.md` dentro del tope** `[P]` — que los tres niveles entren en 45 líneas (CA-9). `cmd: test $(wc -l < .sdd/c4/context.md) -le 45 && test $(wc -l < .sdd/c4/containers.md) -le 45`
 - [x] **7. README: progressive disclosure al día** — índice + detalle por módulo, y la frontera con las rules de capa. Depende de 5. `cmd: grep -q 'índice de módulos' README.md`
 - [x] **9. Enlazar `estructura-c4.md` desde donde se usa** — `sdd-task` lo lista en sus recursos y el bloque de `CLAUDE.md` declara la frontera capa/módulo. _(paso agregado: un reference que ninguna skill nombra no se lee nunca)_ `cmd: grep -q 'estructura-c4.md' skills/sdd-task/SKILL.md && grep -q 'cómo se escribe' CLAUDE.md`
-- [ ] **8. Prueba en el repo Java** — abrir sesión en el monorepo y confirmar que al tocar un controller se carga la rule de capa + el `CLAUDE.md` de su módulo, y que `components.md` alcanzó como índice. _Verificación manual del dev._
+- [x] **8. Prueba en el repo Java** — abrir sesión en el monorepo y confirmar que al tocar un controller se carga la rule de capa + el `CLAUDE.md` de su módulo, y que `components.md` alcanzó como índice. _Verificación manual del dev: confirmada 2026-09-03._
 
 ---
 _Aprobación del dev: aprobada 2026-08-14_

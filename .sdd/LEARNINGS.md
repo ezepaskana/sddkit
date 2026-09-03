@@ -17,6 +17,7 @@
 - **Un ofrecimiento sin momento fijado se difiere hasta el final y el dev no lo ve**: en una instrucción al agente, el *cuándo* pesa tanto como el *qué*. _(tarea 024)_
 - **Triggers de skills por lista cerrada de keywords son frágiles en español**: incluí siempre un fallback de "preguntar al dev" cuando el clasificador no esté seguro. _(tarea 002)_
 
+- **Un `reference` que ninguna skill nombra no se lee nunca**: al sumar un archivo a `references/`, enlazalo desde el SKILL.md que lo usa en el mismo cambio. _(tarea 022)_
 - **Agregar una fila a `components.md` suele pasar el tope de 45 líneas**: colapsá aristas del Mermaid con `&` (`a & b --> c`) antes de recortar contenido. _(tarea 023)_
 
 ## Sobre el flujo de trabajo

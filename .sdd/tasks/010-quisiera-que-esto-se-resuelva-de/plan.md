@@ -246,3 +246,11 @@ Estructura de cada paso — el checkbox de la **primera línea** es lo que `sdd 
 ---
 
 _Aprobación del dev: Parte A aprobada 2026-07-27. Parte B aprobada 2026-07-29._
+
+---
+
+## Cancelación (2026-09-03)
+
+Esta tarea queda `cancelled`. Todos sus pasos estaban marcados como hechos, pero el trabajo que describen ya no existe: el plan opera sobre el CLI de sddkit (`src/lib/llmDetect.js`, `src/commands/publish.js --ci`, el storage sqlite/mysql), y la tarea 020 eliminó todo el código del repo al convertir sddkit en un plugin de Claude (ADR-0016 — `.sdd/decisions/0016-sddkit-como-plugin-de-claude.md`).
+
+No hay nada pendiente que completar ni que revertir: se cancela para que el índice no la muestre como trabajo en pausa. Las reglas de negocio y los ADRs que la tarea dejó en `.sdd/` siguen vigentes salvo donde ADR-0016 los reemplace.

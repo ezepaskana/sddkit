@@ -1,0 +1,5 @@
+# Requisito original — tarea 025
+
+> Capturado verbatim el 2026-09-03. **No editar este archivo**: el refinamiento va en los artefactos siguientes.
+
+Estamos con un problema, actualmente las tareas generadas con este framework están consumiendo muchos tokens, por lo que vamos a realizar algunas modificaciones. Actualmente cuando generamos una tarea tambien generamos documentacion sobre el pedido original, el plan, etc. y las tareas que se ejecutan se mandan a subagentes, cada una utiliza un modelo diferente dependiendo de la complejidad de la misma. Entonces vamos a generar un par de archivos por cada agente que se ejecuta, estos archivos (que seran de debug) tienen que tener la informacion de como está compuesto su contexto, es decir, lo que devuelve el comando /context, y son dos archivos porque uno se tiene que ejecutar al inicio, bien le enviamos la informacion, y otro al finalizar. Esto que se hace en cada subagente tambien se tiene que hacer el agente principal. Pero estos dos archivos no se van a generar siempre, la condicion es que exista una variable llamada "debug_log" o algo similar en el archivo de configuracion y tiene que estar en true.

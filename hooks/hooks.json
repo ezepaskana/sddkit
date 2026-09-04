@@ -14,6 +14,41 @@
           {
             "type": "command",
             "command": "grep -q '\"caveman\"[[:space:]]*:[[:space:]]*\"no\"' .sdd/config.json 2>/dev/null || cat \"${CLAUDE_PLUGIN_ROOT}/hooks/caveman.md\""
+          },
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/debug-context.sh\" SessionStart"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/debug-context.sh\" PreToolUse"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/debug-context.sh\" SubagentStop"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/debug-context.sh\" SessionEnd"
           }
         ]
       }

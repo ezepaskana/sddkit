@@ -1,4 +1,11 @@
 {
   "version": 1,
-  "decisions": []
+  "decisions": [
+    {
+      "topic": "lenguaje de scripts de hooks",
+      "variant": "POSIX sh + grep/sed/awk",
+      "note": "Sin jq, Node ni Python (BR-079). Inaugurado por hooks/debug-context.sh, ADR-0018.",
+      "since": "0018"
+    }
+  ]
 }

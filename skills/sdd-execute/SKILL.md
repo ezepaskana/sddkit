@@ -18,7 +18,7 @@ Antes de lanzar ningún subagente, ejecutá el Paso 1 auto-generado (`git checko
 ## Ciclo por paso (desde el Paso 2)
 
 1. **Armá el brief del paso vos** — el recorte mínimo (paso + spec + BR citadas + catálogo); composición exacta en `references/protocolo-subagentes.md`. **No le digas al worker "leé spec.md y plan.md completos"**: el brief reemplaza esas lecturas y se paga una vez por paso.
-2. Lanzá un subagente con el modelo del nivel del paso (`.sdd/config.json → models`) y el brief como prompt.
+2. Lanzá un subagente con el modelo del nivel del paso (`.sdd/config.json → models`) y el brief como prompt. Con `debug_log: true`, cada brief y el tamaño del contexto quedan en los archivos de debug — medible, sin estimar a ojo.
 3. **Verificá VOS**: corré el `cmd:` del paso y mirá su exit code (sin `cmd:` la verificación es manual, ahí juzgá vos). El reporte del worker es un claim, no una prueba. Solo con verde marcás el checkbox en plan.md.
 4. Worker bloqueado → te devuelve la pregunta: resolvela con el dev, registrala como hueco en `analysis.md` y relanzá con el brief actualizado.
 5. Pasos `[P]` sin dependencias cruzadas: subagentes en paralelo.

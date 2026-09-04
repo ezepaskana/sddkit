@@ -9,6 +9,16 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- **Instrumentación de contexto por agente** (tarea 025, BR-093, ADR-0018): con
+  `debug_log: true` en `.sdd/config.json`, `hooks/debug-context.sh` escribe dos
+  archivos de debug por agente —el principal y cada subagente— con el tamaño
+  **exacto** de su contexto de arranque y de cierre (leído del transcript), el
+  modelo que efectivamente corrió, el nivel pedido por el plan y un desglose
+  **estimado** de las piezas que compone sddkit (brief, archivos nombrados,
+  artefactos) más el overhead fijo por resta. Se cablea en `SessionStart`,
+  `PreToolUse`/`Task`, `SubagentStop` y `SessionEnd`. Con el flag apagado o
+  ausente no escribe nada ni emite salida. Primer archivo ejecutable del plugin
+  desde que se eliminó el CLI, en POSIX `sh` y sin runtime nueva (BR-079).
 - **Skill `sdd-bootstrap`**: el procedimiento completo para configurar un repo por
   primera vez — investigar (stack, módulos, capas, entidades, documentación
   existente), preguntar solo lo que no se deduce del código, y escribir `.sdd/`

@@ -9,6 +9,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- **El directorio de debug se auto-ignora** (tarea 025, CA-10): al crearlo, el
+  script deja adentro un `.gitignore` con `*`, así los archivos de instrumentación
+  no aparecen en el `git status` de ningún repo que instale el plugin, sin que el
+  dev tenga que editar su propio `.gitignore`.
 - **Correcciones de la instrumentación tras la primera corrida real** (tarea 025):
   los archivos de debug van **siempre** dentro de la carpeta de la tarea (la que
   está `in-progress`, o la última actualizada del índice); el archivo de inicio del

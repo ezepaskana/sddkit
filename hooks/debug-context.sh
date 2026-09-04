@@ -32,6 +32,20 @@
     printf '%s' "$1" | sed 's/[^A-Za-z0-9_-]/_/g' | cut -c1-64
   }
 
+  # --- destino: crear + auto-ignorar (CA-10) ---------------------------------
+  # El plugin corre en CUALQUIER repo que lo instale, no solo en sddkit: no
+  # podemos tocarle el .gitignore raíz a cada uno. En vez de eso, el propio
+  # directorio de debug se excluye a sí mismo: un .gitignore con "*" adentro
+  # hace que git ignore todo lo que haya ahí, incluido ese mismo archivo, sin
+  # que el dev toque nada. Es el único punto que crea el directorio de debug
+  # (tarea o fallback): centralizarlo acá cubre las dos ubicaciones posibles.
+  # Idempotente: si el .gitignore ya existe no se reescribe ni se duplica.
+  crear_destino() { # $1=directorio de debug -> lo crea y le deja su .gitignore
+    mkdir -p "$1" 2>/dev/null || return 1
+    test -f "$1/.gitignore" || printf '%s\n' '*' > "$1/.gitignore" 2>/dev/null
+    return 0
+  }
+
   # --- gate: debug_log en true (CA-7) ----------------------------------------
   config=".sdd/config.json"
   test -f "$config" || exit 0
@@ -860,7 +874,7 @@
   }
 
   # --- escritura -------------------------------------------------------------
-  mkdir -p "$base" || exit 0
+  crear_destino "$base" || exit 0
 
   # printf con formato '%s\n': un formato que arranca con '-' lo toman algunos
   # shells como opción propia.

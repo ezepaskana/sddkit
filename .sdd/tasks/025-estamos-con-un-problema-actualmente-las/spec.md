@@ -24,7 +24,7 @@
 - **CA-7** — SI `debug_log` falta, no es `true` o `.sdd/config.json` no existe, EL SISTEMA DEBE no escribir ningún archivo y no emitir ninguna salida.
 - **CA-8** — SI el transcript no existe, está vacío o no tiene el formato esperado, EL SISTEMA DEBE terminar en silencio con éxito, sin interrumpir la sesión ni el paso en curso.
 - **CA-9** — EL SISTEMA DEBE no escribir nada en la salida estándar del hook: la instrumentación no puede sumar tokens al contexto que mide.
-- **CA-10** — EL SISTEMA DEBE excluir el directorio de debug del control de versiones.
+- **CA-10** — EL SISTEMA DEBE excluir el directorio de debug del control de versiones en CUALQUIER repo que instale el plugin, sin depender de que el dev edite su `.gitignore`.
 
 ## Reglas de negocio afectadas
 

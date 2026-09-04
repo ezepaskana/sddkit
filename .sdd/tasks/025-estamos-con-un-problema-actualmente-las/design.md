@@ -26,6 +26,8 @@
 - **Aislar al subagente puede no ser posible**: si los mensajes del worker viven en el mismo JSONL que la sesión (entradas `isSidechain`), hay que filtrarlos por esa marca y por ventana temporal. Si no se los puede aislar de forma confiable, el archivo de fin del worker degrada a "delta de la sesión durante ese paso" y se declara como tal en el archivo, sin bloquear la tarea.
 - **Alias vs id real del modelo**: el plan pide un nivel (`medio` → `sonnet`, de `.sdd/config.json → models`) pero el transcript guarda el id que corrió (`claude-sonnet-5`). Se registran los dos sin traducir uno al otro: la discrepancia entre lo pedido y lo ejecutado es justamente el dato.
 
+- **Inicios huérfanos por el matcher `Skill`** (decisión del dev, 2026-09-04): toda invocación de skill escribe su archivo de inicio, dispare o no un subagente, así que las que no lanzan worker quedan sin fin. Se acepta el ruido a cambio de no perder ningún worker: en la corrida real de tinku el subagente vino por `Skill`, no por `Agent`/`Task`.
+
 - **Portabilidad**: `sh`, `grep`, `sed` y `awk` están en macOS y Linux; en Windows nativo sin shell POSIX el script no corre y degrada a no escribir nada (CA-8).
 - **Falso ahorro**: la instrumentación no puede volverse cara. El script no lee el transcript entero en memoria ni escribe a stdout (CA-9).
 

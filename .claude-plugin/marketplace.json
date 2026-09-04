@@ -13,7 +13,7 @@
       "name": "sddkit",
       "source": "./",
       "description": "Spec-driven development para Claude: documentación C4 viva, catálogo de convenciones validadas y flujo SDD auto-disparado.",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "author": {
         "name": "Eze Paskana",
         "email": "eze.paskana@gmail.com"

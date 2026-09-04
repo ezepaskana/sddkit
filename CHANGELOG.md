@@ -9,6 +9,15 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- **Correcciones de la instrumentación tras la primera corrida real** (tarea 025):
+  los archivos de debug van **siempre** dentro de la carpeta de la tarea (la que
+  está `in-progress`, o la última actualizada del índice); el archivo de inicio del
+  agente principal se completa con su total exacto y su modelo en la corrida
+  siguiente, porque en `SessionStart` el transcript todavía no tiene registros de
+  uso; el matcher de `PreToolUse` pasa a `Agent|Task|Skill`, ya que un subagente
+  puede lanzarse desde la tool `Skill`; y el archivo de fin de un worker declara
+  siempre la base de sus números (transcript propio, entradas sidechain, o el de la
+  sesión que lo lanzó) en vez de atribuir al subagente un número que no es suyo.
 - **Instrumentación de contexto por agente** (tarea 025, BR-093, ADR-0018): con
   `debug_log: true` en `.sdd/config.json`, `hooks/debug-context.sh` escribe dos
   archivos de debug por agente —el principal y cada subagente— con el tamaño

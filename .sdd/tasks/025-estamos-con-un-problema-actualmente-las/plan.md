@@ -14,6 +14,9 @@
 - [x] **10. ADR-0018 y C4** `[P]` — el ADR de scripts de hook en el plugin, las filas nuevas en `.sdd/c4/components.md` y el topic de scripts en `.sdd/catalog.json`. `cmd: test -f .sdd/decisions/0018-scripts-de-hook-en-el-plugin.md && grep -q debug-context .sdd/c4/components.md`
 - [x] **11. sdd-execute** `[P]` (rapido) — una línea: con `debug_log` en `true`, el brief de cada worker queda registrado en su archivo de debug. `cmd: grep -q debug_log skills/sdd-execute/SKILL.md`
 - [ ] **12. Prueba end-to-end** — el dev pone `debug_log: true`, abre sesión nueva y corre una tarea con un subagente: 4 archivos escritos, totales coherentes. Depende de 8. _Verificación manual del dev._
+- [x] **13. Destino y arranque del principal** (fuerte) — el debug va SIEMPRE en la carpeta de la tarea, y el inicio del principal se completa con el total exacto y el modelo en la corrida siguiente (CA-4, CA-11, CA-12). `cmd: sh .sdd/tasks/025-*/fixtures/check-destino-principal.sh`
+- [x] **14. Subagente real** (fuerte) — matcher `Agent|Task|Skill` en `hooks/hooks.json`, inicio del worker con brief y modelo pedido, y base del transcript declarada según lo que se pueda aislar (CA-2, CA-3, S-2). Depende de 13. `cmd: sh .sdd/tasks/025-*/fixtures/check-subagente.sh`
+- [ ] **15. Prueba real en tinku** — el dev reinstala, corre una tarea y confirma los cuatro archivos con números coherentes. Depende de 14. _Verificación manual del dev._
 
 ---
 _Aprobación del dev: aprobado 2026-09-03._

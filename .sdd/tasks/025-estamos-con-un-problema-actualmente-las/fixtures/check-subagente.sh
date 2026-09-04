@@ -8,10 +8,16 @@
 #     tipo de subagente, el alias de modelo (`sonnet`) y el nivel al que ese
 #     alias mapea en `.sdd/config.json → models` (`medio`), sin pisar ni
 #     traducir el renglón del modelo que EFECTIVAMENTE corrió (CA-3, CA-11);
-#   - que el archivo de FIN registre el crecimiento del worker y declare sobre
-#     qué base lo calculó: `transcript propio del subagente` cuando el
-#     transcript no tiene entradas sidechain, `entradas sidechain de la sesión`
-#     cuando sí las tiene (CA-2);
+#   - que el archivo de INICIO de un worker lanzado por la tool `Skill` (el
+#     camino real de la corrida en tinku) registre la skill y sus args, sin
+#     inventar un brief ni un alias de modelo que ese payload no trae (CA-3);
+#   - que un `PreToolUse` de una tool que no lanza subagentes no escriba nada;
+#   - que el archivo de FIN registre el crecimiento y declare SIEMPRE sobre qué
+#     base lo calculó, con los tres caminos posibles: `transcript propio del
+#     subagente` cuando se lo pudo aislar, `entradas sidechain de la sesión`
+#     cuando el transcript de la sesión las trae, y —cuando no hay ninguna de
+#     las dos— los números de la SESIÓN declarados como tales, nunca atribuidos
+#     al worker (CA-2, S-2);
 #   - que inicio y fin del MISMO worker se apareen: por nombre de archivo si el
 #     tool_use_id se pudo resolver desde el transcript, y si no, con los dos
 #     identificadores adentro más la línea explícita de que el apareo es por
@@ -68,8 +74,14 @@ mkdir -p "$repo_sin/.sdd" || exit 1
 printf '%s\n' '{"debug_log": true}' > "$repo_sin/.sdd/config.json"
 
 # Corre el hook desde el repo $1 con el payload $2; stdout+stderr a salida.txt.
+# $3 (opcional) es el TMPDIR con el que corre: es donde el hook busca el
+# transcript propio del worker, así que sirve para plantarle uno.
 correr() {
-  ( cd "$1" && sh "$script" < "$2" ) > "$tmp/salida.txt" 2>&1
+  if test -n "${3:-}"; then
+    ( cd "$1" && TMPDIR="$3" sh "$script" < "$2" ) > "$tmp/salida.txt" 2>&1
+  else
+    ( cd "$1" && sh "$script" < "$2" ) > "$tmp/salida.txt" 2>&1
+  fi
 }
 
 # Payload de PreToolUse/Task. $1=transcript $2=destino $3=vacío para un
@@ -185,24 +197,45 @@ else
   falla "caso 3: no se escribió $fin (¿el apareo por tool_use_id no salió?)"
 fi
 
-# --- caso 4: fin con transcript propio del worker ----------------------------
-# `transcript.jsonl` no tiene entradas sidechain ni tool_use de Task: la base es
-# el transcript propio y el apareo degrada a orden y marca temporal.
+# --- caso 4: no se pudo aislar al worker -> números de la SESIÓN (S-2) -------
+# `transcript.jsonl` no tiene entradas sidechain ni tool_use de subagente, y no
+# hay transcript propio del worker por ningún lado. Este es exactamente el
+# defecto de la corrida real: antes el archivo decía "base: transcript propio
+# del subagente" y le atribuía al worker los números del principal. Ahora los
+# números se reportan como de la sesión y se dice que no son atribuibles a él.
 rm -rf "$repo/.sdd/debug"
+vacio_tmp="$tmp/tmp-vacio"
+mkdir -p "$vacio_tmp" || exit 1
 payload_stop "$transcript" "$tmp/payload.json"
-correr "$repo" "$tmp/payload.json"
+correr "$repo" "$tmp/payload.json" "$vacio_tmp"
 silencioso "caso 4" $?
 
 fin4="$repo/.sdd/debug/subagente-agent_xyz789-fin.md"
 if test -f "$fin4"; then
-  grep -q '^- Crecimiento del subagente: 29497 tokens (base: transcript propio del subagente)$' "$fin4" ||
-    falla "caso 4: el delta propio no es 29497 con su base declarada: $(grep -i 'del subagente' "$fin4")"
-  grep -q 'entradas sidechain' "$fin4" &&
-    falla "caso 4: declara base sidechain en un transcript que no tiene sidechain"
+  grep -q '^- Base de los números: transcript de la sesión que lo lanzó (no fue posible aislar al subagente)$' "$fin4" ||
+    falla "caso 4: no declara que la base es la sesión: $(grep -i 'base de los' "$fin4")"
+  # El defecto que este paso arregla: NADA se le atribuye al worker.
+  grep -q 'Crecimiento del subagente' "$fin4" &&
+    falla "caso 4: le atribuye al worker un crecimiento que no pudo aislar"
+  grep -q 'del subagente: [0-9]' "$fin4" &&
+    falla "caso 4: hay números atribuidos al subagente sin haberlo aislado: $(grep 'del subagente: [0-9]' "$fin4")"
+  grep -q 'base: transcript propio del subagente' "$fin4" &&
+    falla "caso 4: etiqueta como propio del subagente un número que no aisló"
+  # Los números sí se reportan, pero como lo que son: los de la sesión.
+  grep -q '^- Crecimiento de la sesión: 29497 tokens (base: transcript de la sesión que lo lanzó (no fue posible aislar al subagente))$' "$fin4" ||
+    falla "caso 4: el crecimiento de la sesión no es 29497 con su base declarada: $(grep -i 'de la sesión' "$fin4")"
+  grep -q '^- Contexto de arranque de la sesión: 61005 tokens' "$fin4" ||
+    falla "caso 4: el arranque de la sesión no es 61005"
+  grep -q '^- Contexto de cierre de la sesión: 90502 tokens' "$fin4" ||
+    falla "caso 4: el cierre de la sesión no es 90502"
+  grep -q 'NO son atribuibles al subagente' "$fin4" ||
+    falla "caso 4: no aclara que los números no son atribuibles al worker"
   grep -q '^- Agent id: agent_xyz789$' "$fin4" ||
     falla "caso 4: el fin no lleva adentro el agent_id"
   grep -q '^- Apareo con el archivo de inicio: por orden y marca temporal' "$fin4" ||
     falla "caso 4: no declara que el apareo quedó por orden y marca temporal"
+  # Copia para las mutaciones del caso 14: los casos siguientes borran el debug.
+  cp "$fin4" "$tmp/fin4.md" || exit 1
 else
   falla "caso 4: no se escribió $fin4"
 fi
@@ -288,6 +321,190 @@ if test -f "$repo/.sdd/debug/principal-inicio.md"; then
 else
   falla "caso 9: no se escribió el inicio del principal"
 fi
+
+# ============================================================================
+# El worker no siempre lo lanza una tool llamada `Task` (defecto real)
+# ============================================================================
+# En la corrida de tinku el `PreToolUse` nunca disparó: el matcher era `Task` y
+# en todo el transcript no había un solo tool_use con ese nombre. El subagente
+# había salido por la tool `Skill`. Las tres formas se aceptan; el resto, no.
+
+# --- caso 10: PreToolUse de `Agent` -> inicio con brief y modelo pedido -------
+rm -rf "$repo/.sdd/debug"
+printf '{"session_id":"abc","transcript_path":"%s","hook_event_name":"PreToolUse","tool_name":"Agent","tool_input":{"description":"Paso 14: subagente real","subagent_type":"general-purpose","model":"opus","prompt":"Trabajas en el repo. Ejecuta SOLO este paso y tocá hooks/debug-context.sh."},"tool_use_id":"toolu_01AGENT"}\n' \
+  "$side" > "$tmp/payload.json"
+correr "$repo" "$tmp/payload.json"
+silencioso "caso 10" $?
+
+ini10="$repo/.sdd/debug/subagente-toolu_01AGENT-inicio.md"
+if test -f "$ini10"; then
+  grep -q '^- Tipo de subagente pedido: general-purpose$' "$ini10" ||
+    falla "caso 10: con tool_name Agent no registra el subagent_type pedido"
+  grep -q '^- Alias de modelo pedido: opus$' "$ini10" ||
+    falla "caso 10: con tool_name Agent no registra el alias de modelo pedido"
+  grep -q '^- Nivel del plan: fuerte ' "$ini10" ||
+    falla "caso 10: no mapea opus al nivel fuerte de config.json"
+  # CA-3: el brief mandado queda registrado (medido, no volcado).
+  grep -q '^- Brief del paso (estimado): [0-9][0-9]* bytes, aprox\. [0-9][0-9]* tokens$' "$ini10" ||
+    falla "caso 10: no registra el brief que se le mandó al worker: $(grep -i brief "$ini10")"
+  grep -q 'Ejecuta SOLO este paso' "$ini10" &&
+    falla "caso 10: volcó el brief en vez de medirlo"
+else
+  falla "caso 10: un PreToolUse de Agent no escribió $ini10"
+fi
+
+# --- caso 11: PreToolUse de `Skill` -> skill y args, sin inventar modelo ------
+# El tool_input de Skill tiene otra forma: `skill` y `args`, sin prompt ni
+# model. El payload trae además un `model` de nivel superior, que NO es el
+# modelo pedido para el worker y no se puede reportar como tal.
+rm -rf "$repo/.sdd/debug"
+printf '{"session_id":"abc","transcript_path":"%s","model":"claude-opus-5","hook_event_name":"PreToolUse","tool_name":"Skill","tool_input":{"skill":"sddkit:sdd-analyze","args":"revisa el flujo de hooks"},"tool_use_id":"toolu_01SKILL"}\n' \
+  "$side" > "$tmp/payload.json"
+correr "$repo" "$tmp/payload.json"
+silencioso "caso 11" $?
+
+ini11="$repo/.sdd/debug/subagente-toolu_01SKILL-inicio.md"
+if test -f "$ini11"; then
+  grep -q '^- Skill que lanzó al subagente: sddkit:sdd-analyze$' "$ini11" ||
+    falla "caso 11: no registra la skill que lanzó al subagente: $(grep -i skill "$ini11")"
+  grep -q '^- Args de la skill (recortados): revisa el flujo de hooks$' "$ini11" ||
+    falla "caso 11: no registra los args de la skill: $(grep -i args "$ini11")"
+  grep -q '^- Tool use id: toolu_01SKILL$' "$ini11" ||
+    falla "caso 11: el inicio no lleva adentro su tool_use_id"
+  # Nada de inventar lo que el payload de Skill no trae.
+  grep -q 'Alias de modelo pedido' "$ini11" &&
+    falla "caso 11: inventó un alias de modelo pedido que el payload de Skill no trae"
+  grep -q 'Nivel del plan' "$ini11" &&
+    falla "caso 11: inventó un nivel del plan sin alias de modelo"
+  grep -q 'Tipo de subagente pedido' "$ini11" &&
+    falla "caso 11: inventó un subagent_type que el payload de Skill no trae"
+  grep -q 'Brief del paso' "$ini11" &&
+    falla "caso 11: inventó un brief que el payload de Skill no trae"
+  # El modelo que EFECTIVAMENTE corrió sí se reporta, y es el del transcript.
+  grep -q '^- Modelo: claude-opus-5$' "$ini11" ||
+    falla "caso 11: se perdió el modelo que efectivamente corrió"
+  test "$(grep -c '^- Modelo' "$ini11")" -eq 1 ||
+    falla "caso 11: hay más de un renglón '- Modelo'"
+  # Copia para las mutaciones del caso 14: los casos siguientes borran el debug.
+  cp "$ini11" "$tmp/ini11.md" || exit 1
+else
+  falla "caso 11: un PreToolUse de Skill no escribió $ini11"
+fi
+
+# --- caso 12: PreToolUse de otra tool -> no escribe nada, sale 0 -------------
+rm -rf "$repo/.sdd/debug"
+printf '{"session_id":"abc","transcript_path":"%s","hook_event_name":"PreToolUse","tool_name":"Bash","tool_input":{"command":"ls -la","description":"listar"},"tool_use_id":"toolu_01BASH"}\n' \
+  "$side" > "$tmp/payload.json"
+correr "$repo" "$tmp/payload.json"
+silencioso "caso 12" $?
+
+test -e "$repo/.sdd/debug/subagente-toolu_01BASH-inicio.md" &&
+  falla "caso 12: un PreToolUse de Bash escribió un archivo de subagente"
+test -e "$repo/.sdd/debug" &&
+  falla "caso 12: un PreToolUse de Bash creó el directorio de debug"
+
+# ============================================================================
+# CA-2 + S-2: la base de los números, los tres caminos
+# ============================================================================
+# Camino 1 (transcript propio del worker) acá; el 2 (sidechain) es el caso 3 y
+# el 3 (números de la sesión, no atribuidos) es el caso 4.
+#
+# Mientras la sesión corre puede existir un archivo por agente bajo
+# `<tmp>/<slug del proyecto>/<session_id>/tasks/<agent_id>*`. Se lo planta con
+# TMPDIR y sus números tienen que ganarle a los de la sesión.
+#
+#   worker sintético: 7000 -> 12345, 3 llamadas, crecimiento 5345
+#   sesión ($side):  40010 -> 45020, sidechain 20000 -> 30203
+
+worker_jsonl() { # $1=destino
+  {
+    printf '%s\n' '{"type":"assistant","message":{"model":"claude-sonnet-5","usage":{"input_tokens":0,"cache_creation_input_tokens":0,"cache_read_input_tokens":7000,"output_tokens":10}}}'
+    printf '%s\n' '{"type":"assistant","message":{"model":"claude-sonnet-5","usage":{"input_tokens":0,"cache_creation_input_tokens":0,"cache_read_input_tokens":9000,"output_tokens":10}}}'
+    printf '%s\n' '{"type":"assistant","message":{"model":"claude-sonnet-5","usage":{"input_tokens":45,"cache_creation_input_tokens":300,"cache_read_input_tokens":12000,"output_tokens":10}}}'
+  } > "$1"
+}
+
+# --- caso 13: transcript propio del worker -> gana sobre la sesión -----------
+rm -rf "$repo/.sdd/debug"
+falso_tmp="$tmp/tmp-worker"
+mkdir -p "$falso_tmp/-Users-eze-proyecto/abc/tasks" || exit 1
+worker_jsonl "$falso_tmp/-Users-eze-proyecto/abc/tasks/agent_xyz789.jsonl"
+
+payload_stop "$side" "$tmp/payload.json"
+correr "$repo" "$tmp/payload.json" "$falso_tmp"
+silencioso "caso 13" $?
+
+fin13="$repo/.sdd/debug/subagente-toolu_01ABC123-fin.md"
+if test -f "$fin13"; then
+  grep -q '^- Base de los números: transcript propio del subagente$' "$fin13" ||
+    falla "caso 13: no declara la base del transcript propio: $(grep -i 'base de los' "$fin13")"
+  grep -q '^- Crecimiento del subagente: 5345 tokens (base: transcript propio del subagente)$' "$fin13" ||
+    falla "caso 13: el delta propio no es 5345: $(grep -i 'del subagente' "$fin13")"
+  grep -q '^- Contexto de arranque del subagente: 7000 tokens' "$fin13" ||
+    falla "caso 13: el arranque propio no es 7000"
+  grep -q '^- Contexto de cierre del subagente: 12345 tokens' "$fin13" ||
+    falla "caso 13: el cierre propio no es 12345"
+  grep -q '^- Llamadas del subagente: 3$' "$fin13" ||
+    falla "caso 13: no cuenta las 3 llamadas del worker"
+  grep -q '^- Transcript propio del subagente: .*agent_xyz789' "$fin13" ||
+    falla "caso 13: no dice de qué archivo salieron los números"
+  # El transcript propio le gana a las entradas sidechain de la sesión. Los
+  # números de la sesión siguen estando en `## Contexto medido`, que es de la
+  # sesión y está bien; lo que no puede pasar es que se los atribuya al worker.
+  grep -q 'entradas sidechain de la sesión' "$fin13" &&
+    falla "caso 13: se quedó con los números sidechain teniendo el transcript propio"
+  grep 'del subagente' "$fin13" | grep -qE '10203|5010|20000|30203' &&
+    falla "caso 13: le atribuye al worker números de la sesión teniendo su transcript propio"
+else
+  falla "caso 13: no se escribió $fin13"
+fi
+
+# El mismo archivo, adentro de un directorio por agente y un nivel más abajo.
+rm -rf "$repo/.sdd/debug"
+falso_tmp2="$tmp/tmp-worker-dir"
+mkdir -p "$falso_tmp2/claude-501/-Users-eze-proyecto/abc/tasks/agent_xyz789" || exit 1
+worker_jsonl "$falso_tmp2/claude-501/-Users-eze-proyecto/abc/tasks/agent_xyz789/transcript.jsonl"
+
+payload_stop "$side" "$tmp/payload.json"
+correr "$repo" "$tmp/payload.json" "$falso_tmp2"
+silencioso "caso 13 (directorio)" $?
+
+if test -f "$fin13"; then
+  grep -q '^- Crecimiento del subagente: 5345 tokens (base: transcript propio del subagente)$' "$fin13" ||
+    falla "caso 13 (directorio): no encontró el transcript del worker dentro del directorio por agente"
+else
+  falla "caso 13 (directorio): no se escribió $fin13"
+fi
+
+# ============================================================================
+# caso 14: el verificador tiene que fallar de verdad
+# ============================================================================
+# Se muta el archivo generado (no el script) y se comprueba que las mismas
+# aserciones de arriba den ≠ 0 sobre la mutación.
+mut="$tmp/mutado.md"
+
+# Mutación A: el defecto original — la base de la sesión etiquetada como propia.
+sed 's/^- Base de los números: transcript de la sesión.*/- Base de los números: transcript propio del subagente/; s/^- Crecimiento de la sesión: /- Crecimiento del subagente: /' \
+  "$tmp/fin4.md" > "$mut"
+grep -q 'Crecimiento del subagente' "$mut" ||
+  falla "caso 14: la aserción de la atribución al worker no ve la mutación"
+grep -q '^- Base de los números: transcript de la sesión que lo lanzó (no fue posible aislar al subagente)$' "$mut" &&
+  falla "caso 14: la aserción de la base de la sesión no ve la mutación"
+
+# Mutación B: desaparece la aclaración de que no son atribuibles al worker.
+grep -v "NO son atribuibles al subagente" "$tmp/fin4.md" > "$mut"
+grep -q 'NO son atribuibles al subagente' "$mut" &&
+  falla "caso 14: la aserción de la aclaración no ve que el renglón falta"
+
+# Mutación C: el inicio de la Skill inventa un alias de modelo.
+{ cat "$tmp/ini11.md"; printf '%s\n' "- Alias de modelo pedido: opus"; } > "$mut"
+grep -q 'Alias de modelo pedido' "$mut" ||
+  falla "caso 14: la aserción del alias inventado no ve la mutación"
+
+# Mutación D: el archivo del worker pierde su base propia.
+sed 's/(base: transcript propio del subagente)//' "$fin13" > "$mut"
+grep -q '^- Crecimiento del subagente: 5345 tokens (base: transcript propio del subagente)$' "$mut" &&
+  falla "caso 14: la aserción de la base propia no ve la mutación"
 
 test "$fallas" -eq 0 || exit 1
 exit 0

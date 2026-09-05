@@ -9,6 +9,14 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- **Tope de tamaño por paso en `sdd-plan`** (tarea 025, BR-094): cada paso apunta a
+  15-25 llamadas al modelo del worker, con un proxy observable (dos o tres archivos,
+  una sola verificación `cmd:`, exploración y cambio en pasos separados) y un límite
+  inferior explícito. El motivo está medido: el modelo no recuerda nada entre llamadas,
+  así que cada una re-envía el contexto acumulado del paso y el costo de un worker crece
+  con el **cuadrado** de sus llamadas. En la primera tarea instrumentada, los siete pasos
+  más largos (55-69 llamadas) se llevaron el 40 % del gasto, y partir uno de 60 en tres
+  de 20 ahorra 59 % ya descontado lo que el orquestador paga por los pasos extra.
 - **El directorio de debug se auto-ignora** (tarea 025, CA-10): al crearlo, el
   script deja adentro un `.gitignore` con `*`, así los archivos de instrumentación
   no aparecen en el `git status` de ningún repo que instale el plugin, sin que el

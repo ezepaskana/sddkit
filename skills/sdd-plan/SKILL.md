@@ -13,7 +13,7 @@ Aplica a **todas** las tareas (BR-058): después de la spec si el riesgo es `alt
 
 ## Reglas de descomposición
 
-1. **Chico**: verificable por sí solo y completable en una sesión corta. Si no podés escribir su verificación en una línea, partilo.
+1. **Chico, con tope de llamadas**: cada paso apunta a **15-25 llamadas al modelo** del worker que lo ejecuta (BR-094) — el costo crece con el cuadrado de las llamadas, no partir cuesta caro. No se cuentan de antemano: el proxy es observable — a lo sumo dos o tres archivos, verificación en un solo `cmd:`, y si hace falta explorar para saber qué tocar, separá exploración y cambio en dos pasos. Tampoco lo hagas mini: por debajo de ~15 llamadas, el arranque del worker (~34.000 tokens) se paga sin trabajo útil.
 2. **Verificación ejecutable siempre que se pueda**: `Verificación: cmd: <comando>` (`cmd: npm test -- facturas`, `cmd: grep -q "X" src/archivo.js`). El orquestador la corre **literal** antes de marcar el checkbox — exit code = verdad, cero razonamiento. Prosa solo si requiere juicio humano o visual.
 3. **Tests primero**: el paso que escribe los tests de un comportamiento va ANTES del que lo implementa (rojo → verde). En `bug`, el test rojo que reproduce el defecto es un paso propio. En `refactor`, el primer paso deja registrada la corrida verde de baseline.
 4. **Archivos**: nombralos en la línea del paso si son uno o dos; si son más, van en `design.md`. Un solo writer por archivo.

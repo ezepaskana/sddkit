@@ -18,6 +18,7 @@
 - [x] **14. Subagente real** (fuerte) — matcher `Agent|Task|Skill` en `hooks/hooks.json`, inicio del worker con brief y modelo pedido, y base del transcript declarada según lo que se pueda aislar (CA-2, CA-3, S-2). Depende de 13. `cmd: sh .sdd/tasks/025-*/fixtures/check-subagente.sh`
 - [ ] **15. Prueba real en tinku** — el dev reinstala, corre una tarea y confirma los cuatro archivos con números coherentes. Depende de 14. _Verificación manual del dev._
 - [x] **16. Debug auto-ignorado** (medio) — al crear el directorio de debug, dejar adentro un `.gitignore` con `*` para que no ensucie el `git status` de ningún repo (CA-10). `cmd: sh .sdd/tasks/025-*/fixtures/check-gitignore.sh`
+- [x] **17. Tope de tamaño por paso en sdd-plan** (medio) — la regla de descomposición pasa a apuntar a 15-25 llamadas por paso, con su proxy observable y el motivo medido (BR-094). `cmd: grep -q "BR-094" skills/sdd-plan/SKILL.md`
 
 ---
 _Aprobación del dev: aprobado 2026-09-03._

@@ -1,6 +1,8 @@
 {
   "version": "0.0.1",
   "createdAt": "2026-06-12",
+  "debug_log": false,
+  "_nota_debug_log": "Cuando debug_log está prendido (en verdadero), cada agente deja dos archivos de debug con el tamaño y composición de su contexto, en .sdd/tasks/<id>/debug/ si hay tarea en curso o en .sdd/debug/ si no; apagado o ausente, no se escribe nada.",
   "detectedAgents": [],
   "models": {
     "rapido": "haiku",

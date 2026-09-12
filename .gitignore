@@ -23,3 +23,7 @@ Thumbs.db
 # Temporales
 *.tmp
 /tmp/
+
+# Debug context tracing (sddkit instrumentación)
+.sdd/debug/
+.sdd/tasks/*/debug/

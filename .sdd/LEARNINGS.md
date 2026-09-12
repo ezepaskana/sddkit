@@ -12,15 +12,16 @@
 - **Strings citados literalmente en `domain.md` son contrato**: verificalos carácter por carácter, no solo "misma idea" — una variante equivalente puede romper el contrato. _(tarea 002)_
 - **Si una tarea modifica una skill usada en la misma sesión, tenés la versión vieja cargada**: seguí el flujo ya conocido en vez de depender de que recargue. _(tareas 006, 021)_
 - **El bloque gestionado de `CLAUDE.md` vive cerca de su tope práctico (~450 palabras)**: agregar una instrucción obliga a reescribir otra, no a sumar. _(tarea 018)_
-- **Acortar una respuesta no la hace legible**: 150 palabras llenas de códigos propios del agente (`Z3`, `BR-004`) son ilegibles igual. Traducir la jerga es parte de resumir. _(tarea 018)_
 - **Un doc que se declara `PLACEHOLDER` queda inerte**: el agente lo lee como instrucciones incompletas y sigue de largo. Si el contrato ya está fijado, escribí el texto. _(tarea 024)_
 - **Un ofrecimiento sin momento fijado se difiere hasta el final y el dev no lo ve**: en una instrucción al agente, el *cuándo* pesa tanto como el *qué*. _(tarea 024)_
-- **Triggers de skills por lista cerrada de keywords son frágiles en español**: incluí siempre un fallback de "preguntar al dev" cuando el clasificador no esté seguro. _(tarea 002)_
 
 - **Un `reference` que ninguna skill nombra no se lee nunca**: al sumar un archivo a `references/`, enlazalo desde el SKILL.md que lo usa en el mismo cambio. _(tarea 022)_
 - **Agregar una fila a `components.md` suele pasar el tope de 45 líneas**: colapsá aristas del Mermaid con `&` (`a & b --> c`) antes de recortar contenido. _(tarea 023)_
 
 ## Sobre el flujo de trabajo
+
+- **`/context` no lo puede correr un agente**: es UI de la CLI. El equivalente exacto sale del transcript: primera llamada = `input + cache_creation + cache_read`. _(tarea 025)_
+- **Antes de concluir sobre archivos generados, chequeá que el regex apunte al renglón correcto**: leer el de la sesión en vez del del subagente dio una conclusión falsa y publicada. _(tarea 025)_
 
 - **El PR (o artefacto "cerrable") debe ser el ÚLTIMO paso**: crearlo antes de commitear los aprendizajes deja artefactos de cierre huérfanos tras el merge. _(tarea 007)_
 - **Al escribir el plan, recalculá los conteos que después son una verificación exacta**: un valor "razonable" a ojo puede no coincidir con el real. _(tarea 003)_
@@ -32,10 +33,14 @@
 - **No declares `skills` ni `hooks` en `plugin.json`**: `skills/` y `hooks/hooks.json` se cargan por convención y declararlos los duplica ("Duplicate hooks file detected"). _(tarea 021)_
 - **`claude plugin validate <dir>` valida el marketplace si hay ambos manifiestos**: para validar el plugin, copiá `plugin.json` solo a otro directorio. _(tarea 021)_
 - **En hooks, la variable va como `"${CLAUDE_PLUGIN_ROOT}"`** — con llaves y entre comillas. Sin llaves puede no sustituirse. _(tarea 021)_
-- **Un plugin de Claude Code no puede instalar dependencias**: es markdown y JSON, y su único punto de ejecución es el one-liner de un hook. Todo lo demás lo ejecuta el dev. _(tarea 021)_
+- **Un plugin de Claude Code no puede instalar dependencias**: markdown, JSON y a lo sumo un script POSIX que invoque un hook (ADR-0018). Nada que el dev tenga que instalar. _(tareas 021, 025)_
 - **Degradación elegante > error bloqueante**: para herramientas externas opcionales (`gh`/`glab`/`az`, `termaid`), detectá disponibilidad, usá si existe, degradá si no. _(tareas 010, 021)_
 - **Persistí también la respuesta negativa**: un ofrecimiento que solo recuerda el "sí" vuelve a molestar en cada sesión. _(tarea 021)_
-- **Versionar configuración desde el inicio**: un histórico `{versions:[...], active: idx}` desde v1 es más fácil que agregarlo después. Ver `.sdd/branching.md`. _(tarea 010)_
-- **Sin exit codes, el gate es el agente**: al eliminar una verificación automática, escribí explícitamente quién la sostiene ahora y bajo qué condición se revierte. _(tarea 020)_
 - **Una skill no se carga sola**: para un comportamiento siempre activo hace falta un hook `SessionStart` que inyecte la instrucción; la `description` del SKILL.md no lo garantiza. _(tarea 023)_
 - **Un `_nota` de `config.json` que cita el flag que un hook grepea puede autosilenciarlo**: probá el one-liner contra el archivo real, no solo contra un fixture. _(tarea 023)_
+- **El plugin que corre es la copia en `~/.claude/plugins/cache/<nombre>/<versión>/`**: tocar el repo no cambia nada hasta reinstalar, y el cache se guarda por versión — subila. _(tarea 025)_
+- **Un subagente puede venir de la tool `Skill`, no solo de `Agent`/`Task`**: un matcher de hook por nombre de tool se escribe contra una captura real, nunca contra la documentación. _(tarea 025)_
+- **`transcript_path` de `SubagentStop` es el de la sesión, no el del worker**: el del worker vive en `<tmp>/<session_id>/tasks/<agent_id>.output` y desaparece al terminar. _(tarea 025)_
+- **Un hook que escribe en stdout contamina el contexto del agente**: si el hook mide ese contexto, se mide a sí mismo. Silencio total y `exit 0` siempre. _(tarea 025)_
+- **El `awk` de macOS rechaza `-v var=` con saltos de línea** y dentro de un hook silenciado falla sin rastro: pasá texto multilínea por archivo temporal + `getline`. _(tarea 025)_
+- **`printf '- Texto: %s\n'` no imprime nada**: el shell lee como opción propia el formato que arranca con `-`. Usá `printf '%s\n' "- …"`. _(tarea 025)_

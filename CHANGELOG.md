@@ -9,6 +9,37 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ### Added
 
+- **Tope de tamaño por paso en `sdd-plan`** (tarea 025, BR-094): cada paso apunta a
+  15-25 llamadas al modelo del worker, con un proxy observable (dos o tres archivos,
+  una sola verificación `cmd:`, exploración y cambio en pasos separados) y un límite
+  inferior explícito. El motivo está medido: el modelo no recuerda nada entre llamadas,
+  así que cada una re-envía el contexto acumulado del paso y el costo de un worker crece
+  con el **cuadrado** de sus llamadas. En la primera tarea instrumentada, los siete pasos
+  más largos (55-69 llamadas) se llevaron el 40 % del gasto, y partir uno de 60 en tres
+  de 20 ahorra 59 % ya descontado lo que el orquestador paga por los pasos extra.
+- **El directorio de debug se auto-ignora** (tarea 025, CA-10): al crearlo, el
+  script deja adentro un `.gitignore` con `*`, así los archivos de instrumentación
+  no aparecen en el `git status` de ningún repo que instale el plugin, sin que el
+  dev tenga que editar su propio `.gitignore`.
+- **Correcciones de la instrumentación tras la primera corrida real** (tarea 025):
+  los archivos de debug van **siempre** dentro de la carpeta de la tarea (la que
+  está `in-progress`, o la última actualizada del índice); el archivo de inicio del
+  agente principal se completa con su total exacto y su modelo en la corrida
+  siguiente, porque en `SessionStart` el transcript todavía no tiene registros de
+  uso; el matcher de `PreToolUse` pasa a `Agent|Task|Skill`, ya que un subagente
+  puede lanzarse desde la tool `Skill`; y el archivo de fin de un worker declara
+  siempre la base de sus números (transcript propio, entradas sidechain, o el de la
+  sesión que lo lanzó) en vez de atribuir al subagente un número que no es suyo.
+- **Instrumentación de contexto por agente** (tarea 025, BR-093, ADR-0018): con
+  `debug_log: true` en `.sdd/config.json`, `hooks/debug-context.sh` escribe dos
+  archivos de debug por agente —el principal y cada subagente— con el tamaño
+  **exacto** de su contexto de arranque y de cierre (leído del transcript), el
+  modelo que efectivamente corrió, el nivel pedido por el plan y un desglose
+  **estimado** de las piezas que compone sddkit (brief, archivos nombrados,
+  artefactos) más el overhead fijo por resta. Se cablea en `SessionStart`,
+  `PreToolUse`/`Task`, `SubagentStop` y `SessionEnd`. Con el flag apagado o
+  ausente no escribe nada ni emite salida. Primer archivo ejecutable del plugin
+  desde que se eliminó el CLI, en POSIX `sh` y sin runtime nueva (BR-079).
 - **Skill `sdd-bootstrap`**: el procedimiento completo para configurar un repo por
   primera vez — investigar (stack, módulos, capas, entidades, documentación
   existente), preguntar solo lo que no se deduce del código, y escribir `.sdd/`

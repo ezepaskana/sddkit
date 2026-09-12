@@ -1,5 +1,5 @@
 {
-  "nextId": 25,
+  "nextId": 26,
   "tasks": [
     {
       "id": "010",
@@ -144,6 +144,16 @@
       "status": "done",
       "createdAt": "2026-08-17",
       "updatedAt": "2026-08-30",
+      "tipo": "feature",
+      "riesgo": "alto"
+    },
+    {
+      "id": "025",
+      "dir": "025-estamos-con-un-problema-actualmente-las",
+      "title": "Estamos con un problema, actualmente las tareas generadas co…",
+      "status": "in-progress",
+      "createdAt": "2026-09-03",
+      "updatedAt": "2026-09-03",
       "tipo": "feature",
       "riesgo": "alto"
     }
